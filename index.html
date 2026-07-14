@@ -59,6 +59,57 @@
             color: #999;
         }
 
+        /* Barra Gov (azul-marinho) */
+        .gov-bar {
+            background: #071d41;
+            color: white;
+            padding: 8px 30px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gov-bar strong {
+            font-weight: 700;
+        }
+
+        .gov-bar .gov-divider {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Faixa branca do cabeçalho */
+        .top-header {
+            background: white;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-bottom: 3px solid #0052cc;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .top-header-titles h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #071d41;
+            margin-bottom: 2px;
+        }
+
+        .top-header-titles p {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .top-header-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
         .update-info {
             text-align: right;
             font-size: 12px;
@@ -70,6 +121,66 @@
             color: #0052cc;
             font-size: 13px;
             font-weight: 600;
+        }
+
+        /* Botão Exportar com dropdown */
+        .export-dropdown {
+            position: relative;
+        }
+
+        .btn-export {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: #0052cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-export:hover {
+            background: #0041a3;
+            box-shadow: 0 4px 12px rgba(0, 82, 204, 0.3);
+        }
+
+        .export-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            min-width: 180px;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        .export-menu.open {
+            display: block;
+        }
+
+        .export-menu button {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 13px;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .export-menu button:hover {
+            background: #f0f4ff;
+            color: #0052cc;
         }
 
         /* Title Section */
@@ -416,30 +527,36 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <div class="header-top">
-                <div class="header-info">
-                    <h1>Secretaria Nacional de Mobilidade</h1>
-                    <p>Ministério das Cidades</p>
-                </div>
-                <div class="update-info">
-                    <strong>Atualizado 13/07/2026</strong>
-                    <span>Às 10:30</span>
+    <!-- Barra Gov -->
+    <div class="gov-bar">
+        <strong>Brasil</strong>
+        <span class="gov-divider">|</span>
+        <span>Ministério das Cidades</span>
+    </div>
+
+    <!-- Faixa branca do cabeçalho -->
+    <div class="top-header">
+        <div class="top-header-titles">
+            <h1>PAINEL DE MONITORAMENTO — REFROTA</h1>
+            <p>Secretaria Nacional de Mobilidade — SEMOB</p>
+        </div>
+        <div class="top-header-right">
+            <div class="update-info">
+                <strong>Atualizado em 13/07/2026 às 21:55</strong>
+            </div>
+            <div class="export-dropdown">
+                <button class="btn-export" onclick="toggleExportMenu(event)">
+                    📤 Exportar ▾
+                </button>
+                <div class="export-menu" id="exportMenu">
+                    <button onclick="closeExportMenu(); downloadAsImage()">🖼️ Baixar Imagem</button>
+                    <button onclick="closeExportMenu(); downloadAsPDF()">📄 Gerar PDF</button>
                 </div>
             </div>
-        </header>
-
-        <!-- Download Buttons -->
-        <div class="download-buttons">
-            <button class="btn-download" onclick="downloadAsImage()">
-                📥 Baixar Imagem
-            </button>
-            <button class="btn-download secondary" onclick="downloadAsPDF()">
-                📄 Gerar PDF
-            </button>
         </div>
+    </div>
+
+    <div class="container">
 
         <!-- Title Section -->
         <div class="title-section">
@@ -934,6 +1051,20 @@
         });
 
         // Funções de Download
+        // Menu Exportar
+        function toggleExportMenu(event) {
+            event.stopPropagation();
+            document.getElementById('exportMenu').classList.toggle('open');
+        }
+
+        function closeExportMenu() {
+            document.getElementById('exportMenu').classList.remove('open');
+        }
+
+        document.addEventListener('click', function() {
+            closeExportMenu();
+        });
+
         async function downloadAsImage() {
             try {
                 const button = event.target;
@@ -941,7 +1072,7 @@
                 button.textContent = '⏳ Gerando...';
                 button.disabled = true;
 
-                const element = document.querySelector('.container');
+                const element = document.body;
                 const canvas = await html2canvas(element, {
                     backgroundColor: '#f5f7fa',
                     scale: 2,
@@ -971,7 +1102,7 @@
                 button.textContent = '⏳ Gerando...';
                 button.disabled = true;
 
-                const element = document.querySelector('.container');
+                const element = document.body;
                 const canvas = await html2canvas(element, {
                     backgroundColor: '#f5f7fa',
                     scale: 2,
