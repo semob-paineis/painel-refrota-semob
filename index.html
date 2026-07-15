@@ -714,26 +714,9 @@
             <div class="selection-slider"></div>
         </div>
 
-        <!-- Key Metrics -->
-        <h3 class="chart-title" style="margin-bottom: 20px;">Projetos Contratados</h3>
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-value">R$ 5,18 bi</div>
-                <div class="metric-label">VALOR TOTAL</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">R$ 1,95 bi</div>
-                <div class="metric-label">REFROTA PÚBLICO</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-value">R$ 3,23 bi</div>
-                <div class="metric-label">REFROTA PRIVADO</div>
-            </div>
-        </div>
-
-        <!-- Donut Charts Row -->
+        <!-- Donut Charts Row - Projetos Selecionados e Contratados -->
         <div class="charts-row">
-            <!-- Donut Chart - Distribuição de Projetos -->
+            <!-- Donut Chart - Distribuição de Projetos Selecionados -->
             <div class="chart-item">
                 <h3 class="chart-title">Distribuição dos Projetos Selecionados</h3>
                 <div class="donut-wrapper">
@@ -759,6 +742,35 @@
                 </div>
             </div>
 
+            <!-- Donut Chart - Distribuição de Projetos Contratados -->
+            <div class="chart-item">
+                <h3 class="chart-title">Distribuição dos Projetos Contratados</h3>
+                <div class="donut-wrapper">
+                    <div class="donut-chart">
+                        <canvas id="contractedProjectsChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #0052cc;"></div>
+                        <div>
+                            <div style="font-weight: 600;">Refrota Público</div>
+                            <div style="font-size: 12px; color: #666;">R$ 1,95 bi · 12 projetos</div>
+                        </div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #6366f1;"></div>
+                        <div>
+                            <div style="font-weight: 600;">Refrota Privado</div>
+                            <div style="font-size: 12px; color: #666;">R$ 3,23 bi · 179 projetos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donut Charts Row - Veículos Contratados -->
+        <div class="charts-row">
             <!-- Main Donut Chart - Distribuição de Veículos -->
             <div class="chart-item">
                 <h3 class="chart-title">Distribuição de Veículos Contratados</h3>
@@ -783,8 +795,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Tables Section -->
         <div class="table-section">
             <!-- Regional Table -->
             <div class="table-container">
@@ -1141,6 +1151,34 @@
             }
         };
 
+        // Plugin para adicionar texto no centro do doughnut (gráfico de projetos contratados)
+        const contractedProjectsCenterTextPlugin = {
+            id: 'contractedProjectsCenterText',
+            afterDatasetsDraw(chart) {
+                const {ctx, chartArea: {left, top, width, height}} = chart;
+                ctx.save();
+
+                const centerX = left + width / 2;
+                const centerY = top + height / 2;
+
+                // Primeira linha - valor
+                ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#0052cc';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('R$ 5,18 bi', centerX, centerY - 15);
+
+                // Segunda linha - quantidade
+                ctx.font = '14px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('191 projetos', centerX, centerY + 20);
+
+                ctx.restore();
+            }
+        };
+
         // Main Donut Chart - Distribuição de Veículos
         const mainDonutCtx = document.getElementById('mainDonutChart').getContext('2d');
         new Chart(mainDonutCtx, {
@@ -1225,6 +1263,67 @@
                                 const percentages = ['45,5%', '54,5%'];
                                 const projects = ['32', '245'];
                                 const projectPercentages = ['11,6%', '88,4%'];
+
+                                const lines = [
+                                    investments[index],
+                                    'Participação dos recursos: ' + percentages[index],
+                                    'Projetos: ' + projects[index],
+                                    'Participação dos projetos: ' + projectPercentages[index]
+                                ];
+
+                                return lines;
+                            },
+                            labelTextColor: function() {
+                                return '#ffffff';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Donut Chart - Distribuição de Projetos Contratados
+        const contractedProjectsCtx = document.getElementById('contractedProjectsChart').getContext('2d');
+        new Chart(contractedProjectsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Refrota Público', 'Refrota Privado'],
+                datasets: [{
+                    data: [1.95, 3.23],
+                    backgroundColor: ['#0052cc', '#6366f1'],
+                    borderColor: ['#ffffff', '#ffffff'],
+                    borderWidth: 3,
+                    hoverOffset: 8
+                }]
+            },
+            plugins: [contractedProjectsCenterTextPlugin],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        padding: 16,
+                        displayColors: false,
+                        borderRadius: 8,
+                        callbacks: {
+                            title: function(context) {
+                                return context[0].label;
+                            },
+                            label: function(context) {
+                                const index = context.dataIndex;
+                                const labels = ['Refrota Público', 'Refrota Privado'];
+                                const investments = ['R$ 1.952.462.230', 'R$ 3.225.235.572'];
+                                const percentages = ['37,7%', '62,3%'];
+                                const projects = ['12', '179'];
+                                const projectPercentages = ['6,3%', '93,7%'];
 
                                 const lines = [
                                     investments[index],
