@@ -584,6 +584,85 @@
         .btn-download.secondary:hover {
             background: #4b5563;
         }
+
+        /* Segmented Control - Filtro Refrota */
+        .segmented-control {
+            position: relative;
+            display: flex;
+            background-color: #e3e3e6;
+            padding: 3px;
+            border-radius: 9px;
+            width: 100%;
+            max-width: 450px;
+            height: 32px;
+            user-select: none;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+            margin: 20px auto 25px auto;
+        }
+
+        .segmented-control input[type="radio"] {
+            display: none;
+        }
+
+        .segmented-control label {
+            flex: 1;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 500;
+            color: #636366;
+            cursor: pointer;
+            transition: color 0.25s ease;
+            text-align: center;
+        }
+
+        .segmented-control input[type="radio"]:checked + label {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .segmented-control .selection-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            bottom: 3px;
+            width: calc(33.333% - 4px);
+            background-color: #007aff;
+            border-radius: 7px;
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            z-index: 1;
+        }
+
+        #option-1:checked ~ .selection-slider {
+            transform: translateX(0);
+        }
+
+        #option-2:checked ~ .selection-slider {
+            transform: translateX(100%);
+            width: calc(33.333% - 2px);
+            margin-left: 1px;
+        }
+
+        #option-3:checked ~ .selection-slider {
+            transform: translateX(200%);
+            width: calc(33.333% - 4px);
+            margin-left: 2px;
+        }
+
+        /* Responsividade para mobile */
+        @media (max-width: 640px) {
+            .segmented-control {
+                max-width: 100%;
+                margin: 15px 0 20px 0;
+            }
+
+            .segmented-control label {
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -622,6 +701,17 @@
         <div class="title-section">
             <h2 class="main-title">RENOVAÇÃO DE FROTA</h2>
             <p class="subtitle">Financiamentos com recursos do FGTS</p>
+        </div>
+
+        <!-- Segmented Control - Filtro Refrota -->
+        <div class="segmented-control">
+            <input type="radio" name="refrota-group" id="option-1" checked>
+            <label for="option-1">Consolidado</label>
+            <input type="radio" name="refrota-group" id="option-2">
+            <label for="option-2">Refrota Público</label>
+            <input type="radio" name="refrota-group" id="option-3">
+            <label for="option-3">Refrota Privado</label>
+            <div class="selection-slider"></div>
         </div>
 
         <!-- Key Metrics -->
