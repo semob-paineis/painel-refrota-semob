@@ -780,8 +780,32 @@
             </div>
         </div>
 
-        <!-- Donut Charts Row - Veículos Contratados -->
+        <!-- Donut Charts Row - Veículos Selecionados | Veículos Contratados -->
         <div class="charts-row">
+            <!-- Donut Chart - Distribuição de Veículos Selecionados -->
+            <div class="chart-item">
+                <h3 class="chart-title">Distribuição de Veículos Selecionados</h3>
+                <div class="donut-wrapper">
+                    <div class="donut-chart">
+                        <canvas id="selectedVehiclesChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span><strong>Ônibus Elétricos:</strong> <span id="legSelEletricos">3.089 (23,1%)</span></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f59e0b;"></div>
+                        <span><strong>Ônibus Euro 6:</strong> <span id="legSelEuro6">10.252 (76,6%)</span></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #8b5cf6;"></div>
+                        <span><strong>Veículos sobre Trilhos:</strong> <span id="legSelTrilhos">47 (0,4%)</span></span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Main Donut Chart - Distribuição de Veículos -->
             <div class="chart-item">
                 <h3 class="chart-title">Distribuição de Veículos Contratados</h3>
@@ -915,6 +939,9 @@
             rotulo: 'Consolidado',
             destaque: null,
             veiculos: { eletricos: 420, euro6: 4246, trilhos: 47 },
+            // Veículos SELECIONADOS — bloco "SELECIONADOS" da aba '13-07-2026' (colunas AG/AH/AI)
+            // Consolidado = Público + Privado → 3.089 + 10.252 + 47 = 13.388
+            veiculosSelecionados: { eletricos: 3089, euro6: 10252, trilhos: 47 },
             regioes: [
                 { nome: 'Norte', propostas: 7, veiculos: 174, investimento: 163227189.09 },
                 { nome: 'Nordeste', propostas: 26, veiculos: 920, investimento: 1662527970.52 },
@@ -943,6 +970,9 @@
             rotulo: 'Refrota Público',
             destaque: 0,
             veiculos: { eletricos: 252, euro6: 514, trilhos: 47 },
+            // Selecionados: Tipo = "Refrota" e Situação ∈ {*Contra*, *em ação preparatória*, Cancelada, Desistência}
+            // 2.372 + 3.060 + 47 = 5.479 (confere com a legenda de 78 projetos selecionados)
+            veiculosSelecionados: { eletricos: 2372, euro6: 3060, trilhos: 47 },
             regioes: [
                 { nome: 'Norte', propostas: 1, veiculos: 51, investimento: 67000000.0 },
                 { nome: 'Nordeste', propostas: 5, veiculos: 487, investimento: 1333145413.21 },
@@ -971,6 +1001,9 @@
             rotulo: 'Refrota Privado',
             destaque: 1,
             veiculos: { eletricos: 168, euro6: 3732, trilhos: 0 },
+            // Selecionados: Tipo = "*privado*" (sem filtro de situação, conforme fórmula C83/E83)
+            // 717 + 7.192 + 0 = 7.909 (confere com a legenda de 245 projetos selecionados)
+            veiculosSelecionados: { eletricos: 717, euro6: 7192, trilhos: 0 },
             regioes: [
                 { nome: 'Norte', propostas: 6, veiculos: 123, investimento: 96227189.09 },
                 { nome: 'Nordeste', propostas: 21, veiculos: 433, investimento: 329382557.31 },
@@ -1018,6 +1051,7 @@
         // ---------- Agregações derivadas do cenário ----------
         function estado() { return DADOS[cenarioAtual]; }
         function totalVeiculos(e) { return e.veiculos.eletricos + e.veiculos.euro6 + e.veiculos.trilhos; }
+        function totalVeiculosSelecionados(e) { return e.veiculosSelecionados.eletricos + e.veiculosSelecionados.euro6 + e.veiculosSelecionados.trilhos; }
         function somaRegioes(e, campo) { return e.regioes.reduce((a, r) => a + r[campo], 0); }
         function somaAnos(e, campo) { return e.anos.reduce((a, r) => a + r[campo], 0); }
 
@@ -1037,6 +1071,27 @@
                 ctx.textBaseline = 'middle';
                 // Total do cenário ativo (Consolidado / Público / Privado)
                 ctx.fillText(fmtInt(totalVeiculos(estado())), centerX, centerY);
+
+                ctx.restore();
+            }
+        };
+
+        // Plugin para adicionar texto no centro do doughnut (gráfico de veículos selecionados)
+        const selectedVehiclesCenterTextPlugin = {
+            id: 'selectedVehiclesCenterText',
+            afterDatasetsDraw(chart) {
+                const {ctx, chartArea: {left, top, width, height}} = chart;
+                ctx.save();
+
+                const centerX = left + width / 2;
+                const centerY = top + height / 2;
+
+                ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#0052cc';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                // Total do cenário ativo (Consolidado / Público / Privado)
+                ctx.fillText(fmtInt(totalVeiculosSelecionados(estado())), centerX, centerY);
 
                 ctx.restore();
             }
@@ -1096,6 +1151,48 @@
                 ctx.restore();
             }
         };
+
+        // Donut Chart - Distribuição de Veículos Selecionados
+        const selectedVehiclesCtx = document.getElementById('selectedVehiclesChart').getContext('2d');
+        const chartVeiculosSelecionados = new Chart(selectedVehiclesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ônibus Elétricos', 'Ônibus Euro 6', 'Veículos sobre Trilhos'],
+                datasets: [{
+                    data: [3089, 10252, 47],
+                    backgroundColor: ['#10b981', '#f59e0b', '#8b5cf6'],
+                    borderColor: ['#ffffff', '#ffffff', '#ffffff'],
+                    borderWidth: 3,
+                    hoverOffset: 8
+                }]
+            },
+            plugins: [selectedVehiclesCenterTextPlugin],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        padding: 12,
+                        displayColors: true,
+                        borderRadius: 8
+                    }
+                }
+            }
+        });
 
         // Main Donut Chart - Distribuição de Veículos
         const mainDonutCtx = document.getElementById('mainDonutChart').getContext('2d');
@@ -1357,6 +1454,21 @@
             document.getElementById('legTrilhos').textContent = rotulo(v[2]);
         }
 
+        // --- Donut de veículos selecionados: fatias, legenda e total central ---
+        function renderDonutVeiculosSelecionados() {
+            const e = estado();
+            const total = totalVeiculosSelecionados(e) || 1;
+            const v = [e.veiculosSelecionados.eletricos, e.veiculosSelecionados.euro6, e.veiculosSelecionados.trilhos];
+
+            chartVeiculosSelecionados.data.datasets[0].data = v;
+            chartVeiculosSelecionados.update();
+
+            const rotulo = qtd => fmtInt(qtd) + ' (' + fmtPct(qtd / total * 100) + '%)';
+            document.getElementById('legSelEletricos').textContent = rotulo(v[0]);
+            document.getElementById('legSelEuro6').textContent = rotulo(v[1]);
+            document.getElementById('legSelTrilhos').textContent = rotulo(v[2]);
+        }
+
         // --- Donuts de projetos: destaque/esmaecimento conforme o cenário ---
         // Os valores permanecem constantes; muda apenas a evidência visual.
         function aplicarDestaqueDonut(chart) {
@@ -1466,6 +1578,7 @@
         // Exceção: o "Resumo Executivo" permanece estático em todos os cenários.
         function aplicarCenario(cenario) {
             cenarioAtual = cenario;
+            renderDonutVeiculosSelecionados();
             renderDonutVeiculos();
             aplicarDestaqueDonut(chartSelecionados);
             aplicarDestaqueDonut(chartContratados);
