@@ -691,7 +691,7 @@
         </div>
         <div class="top-header-right">
             <div class="update-info">
-                <strong>Atualizado em 15/07/2026 às 09:37</strong>
+                <strong id="dataHoraAtualizacao">Atualizado em: --/--/---- às --:--</strong>
             </div>
             <div class="export-dropdown">
                 <button class="btn-export" onclick="toggleExportMenu(event)">
@@ -739,7 +739,7 @@
                         <div class="legend-color" style="background: #0052cc;"></div>
                         <div>
                             <div style="font-weight: 600;">Refrota Público</div>
-                            <div style="font-size: 12px; color: #666;">R$ 6,12 bi · 32 projetos</div>
+                            <div style="font-size: 12px; color: #666;">R$ 10,90 bi · 78 projetos</div>
                         </div>
                     </div>
                     <div class="legend-item" data-serie="privado">
@@ -750,7 +750,7 @@
                         </div>
                     </div>
                 </div>
-                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">Dados da Carteira ativa - desconsiderando os projetos cancelados.</p>
+                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">*Considerando todos os projetos já selecionados pela SEMOB.</p>
             </div>
 
             <!-- Donut Chart - Distribuição de Projetos Contratados -->
@@ -889,10 +889,10 @@
             </div>
             <div class="summary-highlight">
                 <strong>Números Principais:</strong>
-                <div>✓ 191 propostas contratadas em 150+ municípios e 22 UFs;</div>
-                <div>✓ 4.713 veículos contratados (420 elétricos, 4.246 Euro 6, 47 sobre trilhos);</div>
+                <div>✓ 191 propostas contratadas em múltiplos municípios e UFs;</div>
+                <div>✓ 4.713 veículos contratados (420 elétricos, 4.246 Euro VI, 47 sobre trilhos);</div>
                 <div>✓ R$ 5,18 bilhões em investimentos contratados;</div>
-                <div>✓ Aumento progressivo: de 22 veículos em 2023 para 4.713 acumulados até 2026.</div>
+                <div>✓ Distribuição por região: Sudeste (2.636), Nordeste (920), Sul (500), Centro-Oeste (483) e Norte (174) veículos.</div>
             </div>
             <div class="summary-text" style="margin-top: 20px;">
                 A distribuição regional privilegia a região Sudeste (2.636 veículos), seguida pelo Nordeste (920 veículos) e Sul (500 veículos). O foco em ônibus Euro 6 (90,1% da frota) demonstra o compromisso com tecnologias acessíveis e comprovadas de redução de emissões, enquanto a expansão de ônibus elétricos (8,9%) sinaliza a transição para energia limpa nos próximos anos.
@@ -914,7 +914,7 @@
            ========================================================================= */
 
         const DADOS = {
-            // Cenário 'Consolidado' — reflete o painel publicado (soma de ambas as frentes)
+            // Cenário 'Consolidado' — equivale a B3 = "Consolidado" (soma de ambas as frentes)
             consolidado: {
             rotulo: 'Consolidado',
             destaque: null,
@@ -928,9 +928,9 @@
             ],
             anos: [
                 { ano: 2023, propostas: 1, veiculos: 22, investimento: 13806350.0 },
-                { ano: 2024, propostas: 39, veiculos: 1493, investimento: 2316832405.23 },
+                { ano: 2024, propostas: 39, veiculos: 1487, investimento: 2316832405.23 },
                 { ano: 2025, propostas: 118, veiculos: 2623, investimento: 2116382376.84 },
-                { ano: 2026, propostas: 33, veiculos: 575, investimento: 730676670.24 }
+                { ano: 2026, propostas: 33, veiculos: 581, investimento: 730676670.24 }
             ],
             ufs: {
                 'AC': 67000000.0, 'AL': 22909060.0, 'AP': 0, 'AM': 44855750.0,
@@ -942,13 +942,13 @@
                 'SP': 994146778.66, 'SE': 54189107.31, 'TO': 0
             }
         },
-            // Cenário 'Refrota Público' (aba '13-07-2026', coluna Tipo = 'Refrota')
+            // Cenário 'Refrota Público' — equivale a B3 = "Refrota" (aba '13-07-2026', Tipo = 'Refrota')
             publico: {
             rotulo: 'Refrota Público',
             destaque: 0,
-            veiculos: { eletricos: 252, euro6: 520, trilhos: 47 },
+            veiculos: { eletricos: 252, euro6: 514, trilhos: 47 },
             regioes: [
-                { nome: 'Norte', propostas: 1, veiculos: 57, investimento: 67000000.0 },
+                { nome: 'Norte', propostas: 1, veiculos: 51, investimento: 67000000.0 },
                 { nome: 'Nordeste', propostas: 5, veiculos: 487, investimento: 1333145413.21 },
                 { nome: 'Centro-Oeste', propostas: 0, veiculos: 0, investimento: 0 },
                 { nome: 'Sudeste', propostas: 5, veiculos: 271, investimento: 536716817.0 },
@@ -956,7 +956,7 @@
             ],
             anos: [
                 { ano: 2023, propostas: 0, veiculos: 0, investimento: 0 },
-                { ano: 2024, propostas: 11, veiculos: 719, investimento: 1632462230.21 },
+                { ano: 2024, propostas: 11, veiculos: 713, investimento: 1632462230.21 },
                 { ano: 2025, propostas: 0, veiculos: 0, investimento: 0 },
                 { ano: 2026, propostas: 1, veiculos: 100, investimento: 320000000.0 }
             ],
@@ -970,7 +970,7 @@
                 'SP': 29000000.0, 'SE': 36000000.0, 'TO': 0
             }
         },
-            // Cenário 'Refrota Privado' (aba '13-07-2026', coluna Tipo = 'Refrota Privado')
+            // Cenário 'Refrota Privado' — equivale a B3 = "Refrota Privado"
             privado: {
             rotulo: 'Refrota Privado',
             destaque: 1,
@@ -1060,14 +1060,14 @@
                 ctx.fillStyle = '#0052cc';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('R$ 13,46 bi', centerX, centerY - 15);
+                ctx.fillText('R$ 18,24 bi', centerX, centerY - 15);
 
                 // Segunda linha - quantidade
                 ctx.font = '14px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#666';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('277 projetos', centerX, centerY + 20);
+                ctx.fillText('323 projetos', centerX, centerY + 20);
 
                 ctx.restore();
             }
@@ -1150,7 +1150,7 @@
             data: {
                 labels: ['Refrota Público', 'Refrota Privado'],
                 datasets: [{
-                    data: [6.12, 7.34],
+                    data: [10.90, 7.34],
                     backgroundColor: ['#0052cc', '#6366f1'],
                     borderColor: ['#ffffff', '#ffffff'],
                     borderWidth: 3,
@@ -1181,10 +1181,10 @@
                             label: function(context) {
                                 const index = context.dataIndex;
                                 const labels = ['Refrota Público', 'Refrota Privado'];
-                                const investments = ['R$ 6,12 bilhões', 'R$ 7,34 bilhões'];
-                                const percentages = ['45,5%', '54,5%'];
-                                const projects = ['32', '245'];
-                                const projectPercentages = ['11,6%', '88,4%'];
+                                const investments = ['R$ 10,90 bilhões', 'R$ 7,34 bilhões'];
+                                const percentages = ['59,7%', '40,3%'];
+                                const projects = ['78', '245'];
+                                const projectPercentages = ['24,1%', '75,9%'];
 
                                 const lines = [
                                     investments[index],
@@ -1692,5 +1692,26 @@
             resizeTimer = setTimeout(drawBrazilMap, 250);
         });
     </script>
+
+    <script>
+        function atualizarDataHora() {
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+            
+            const formato = `Atualizado em: ${dia}/${mes}/${ano} às ${horas}:${minutos}`;
+            const elemento = document.getElementById('dataHoraAtualizacao');
+            if (elemento) {
+                elemento.textContent = formato;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', atualizarDataHora);
+        setInterval(atualizarDataHora, 60000);
+    </script>
+
 </body>
 </html>
