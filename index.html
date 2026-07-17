@@ -735,11 +735,22 @@
                     </div>
                 </div>
                 <div class="chart-legend">
-                    <div class="legend-item" data-serie="publico">
-                        <div class="legend-color" style="background: #0052cc;"></div>
-                        <div>
-                            <div style="font-weight: 600;">Refrota Público</div>
-                            <div style="font-size: 12px; color: #666;">R$ 10,90 bi · 78 projetos · 5.479 veículos</div>
+                    <div class="legend-item" data-serie="publico" style="border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">Refrota Público</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">R$ 10,90 bi · 78 projetos</div>
+                            </div>
+                        </div>
+                        <div style="margin-left: 0; display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; align-items: center;">
+                                <div class="legend-color" style="background: #d1d5db; width: 12px; height: 12px; border-radius: 2px; margin-right: 8px;"></div>
+                                <div style="font-size: 12px; color: #666;">Desistências - R$ 7,22 bi</div>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <div class="legend-color" style="background: #0052cc; width: 12px; height: 12px; border-radius: 2px; margin-right: 8px;"></div>
+                                <div style="font-size: 12px; color: #666;">Selecionados - R$ 3,68 bi</div>
+                            </div>
                         </div>
                     </div>
                     <div class="legend-item" data-serie="privado">
@@ -826,6 +837,26 @@
                     <div class="legend-item">
                         <div class="legend-color" style="background: #8b5cf6;"></div>
                         <span><strong>Veículos sobre Trilhos:</strong> <span id="legTrilhos">47 (1,0%)</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nova coluna: Indicador de Metas de Veículos Selecionados 2026 -->
+            <div class="chart-item">
+                <h3 class="chart-title">📈 Metas Quantidade de Veículos Selecionados - Ano 2026</h3>
+                <div class="donut-wrapper">
+                    <div class="donut-chart">
+                        <canvas id="metasProgressChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-legend">
+                    <div style="text-align: center; margin-top: 15px;">
+                        <div style="font-size: 14px; color: #666; margin-bottom: 8px;">
+                            <strong>Meta Total:</strong> 5.000 unidades
+                        </div>
+                        <div style="font-size: 14px; color: #0052cc; font-weight: 600;">
+                            Conclusão: 40,10%
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1097,6 +1128,34 @@
             }
         };
 
+        // Plugin para exibir valor central no indicador de metas
+        const metasProgressCenterTextPlugin = {
+            id: 'metasProgressCenterText',
+            afterDatasetsDraw(chart) {
+                const {ctx, chartArea: {left, top, width, height}} = chart;
+                ctx.save();
+
+                const centerX = left + width / 2;
+                const centerY = top + height / 2;
+
+                // Primeira linha: número de unidades
+                ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#0052cc';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('2.005', centerX, centerY - 12);
+
+                // Segunda linha: rótulo "unidades"
+                ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#666';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('unidades', centerX, centerY + 12);
+
+                ctx.restore();
+            }
+        };
+
         const resourcesCenterTextPlugin = {
             id: 'resourcesCenterText',
             afterDatasetsDraw(chart) {
@@ -1194,6 +1253,48 @@
             }
         });
 
+        // Donut Chart - Indicador de Metas (Progresso 2026)
+        const metasProgressCtx = document.getElementById('metasProgressChart').getContext('2d');
+        const chartMetasProgress = new Chart(metasProgressCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Concluído', 'Restante'],
+                datasets: [{
+                    data: [40.1, 59.9],
+                    backgroundColor: ['#0052cc', '#e5e7eb'],
+                    borderColor: ['#ffffff', '#ffffff'],
+                    borderWidth: 2,
+                    hoverOffset: 8
+                }]
+            },
+            plugins: [metasProgressCenterTextPlugin],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const labels = ['Concluído', 'Restante'];
+                                const valores = [2005, 2995];
+                                return labels[context.dataIndex] + ': ' + valores[context.dataIndex] + ' unidades';
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        padding: 12,
+                        displayColors: true,
+                        borderRadius: 8
+                    }
+                }
+            }
+        });
+
         // Main Donut Chart - Distribuição de Veículos
         const mainDonutCtx = document.getElementById('mainDonutChart').getContext('2d');
         const chartVeiculos = new Chart(mainDonutCtx, {
@@ -1241,11 +1342,11 @@
         const chartSelecionados = new Chart(resourcesDonutCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Refrota Público', 'Refrota Privado'],
+                labels: ['Desistências', 'Selecionados', 'Refrota Privado'],
                 datasets: [{
-                    data: [10.90, 7.34],
-                    backgroundColor: ['#0052cc', '#6366f1'],
-                    borderColor: ['#ffffff', '#ffffff'],
+                    data: [7.22, 3.68, 7.34],
+                    backgroundColor: ['#d1d5db', '#0052cc', '#6366f1'],
+                    borderColor: ['#ffffff', '#ffffff', '#ffffff'],
                     borderWidth: 3,
                     hoverOffset: 8
                 }]
@@ -1273,12 +1374,30 @@
                             },
                             label: function(context) {
                                 const index = context.dataIndex;
-                                const labels = ['Refrota Público', 'Refrota Privado'];
-                                const investments = ['R$ 10,90 bilhões', 'R$ 7,34 bilhões'];
-                                const percentages = ['59,7%', '40,3%'];
-                                const projects = ['78', '245'];
-                                const projectPercentages = ['24,1%', '75,9%'];
+                                const labels = ['Desistências', 'Selecionados', 'Refrota Privado'];
+                                const investments = ['R$ 7,22 bilhões', 'R$ 3,68 bilhões', 'R$ 7,34 bilhões'];
+                                const percentages = ['39,5%', '20,1%', '40,3%'];
+                                const projects = ['Desagregado', '78', '245'];
+                                const projectPercentages = ['A Cancelar (2,44 bi) · Cancelados (4,78 bi)', '24,1%', '75,9%'];
 
+                                // Tooltip especial para Desistências
+                                if (index === 0) {
+                                    const lines = [
+                                        'Desistências (7,22 bi)',
+                                        'A Cancelar (2,44 bi) · Cancelados (4,78 bi)'
+                                    ];
+                                    return lines;
+                                }
+
+                                // Tooltip simples para Selecionados
+                                if (index === 1) {
+                                    const lines = [
+                                        'Selecionados (3,68 bi)'
+                                    ];
+                                    return lines;
+                                }
+
+                                // Tooltip original para Refrota Privado
                                 const lines = [
                                     investments[index],
                                     'Participação dos recursos: ' + percentages[index],
@@ -1481,15 +1600,57 @@
             chart.update();
         }
 
+        function aplicarDestaqueDountSelecionados(chart) {
+            // Versão customizada para Selecionados com 3 segmentos
+            // destaque: null = todos ativos | 0 = Público (Desistências + Selecionados) | 1 = Privado
+            const destaque = estado().destaque;
+            const ds = chart.data.datasets[0];
+            
+            // Cores: [Desistências #d1d5db, Selecionados #0052cc, Refrota Privado #6366f1]
+            const cores = ['#d1d5db', '#0052cc', '#6366f1'];
+            
+            // Desistências e Selecionados são parte do Público (índice 0)
+            // Refrota Privado é índice 1
+            ds.backgroundColor = cores.map((cor, i) => {
+                if (destaque === null) return cor; // Todos ativos
+                if (i === 2) {
+                    return (destaque === 1) ? cor : '#ffffff'; // Privado (índice 1 mapeado para índice 2)
+                } else {
+                    return (destaque === 0) ? cor : '#ffffff'; // Público (índices 0 e 1 mapeados para 0)
+                }
+            });
+            
+            ds.borderColor = cores.map((cor, i) => {
+                if (destaque === null) return '#ffffff';
+                if (i === 2) {
+                    return (destaque === 1) ? '#ffffff' : '#d8dee9';
+                } else {
+                    return (destaque === 0) ? '#ffffff' : '#d8dee9';
+                }
+            });
+            
+            chart.update();
+        }
+
         function renderLegendasProjetos() {
             const destaque = estado().destaque;
-            document.querySelectorAll('.legend-item[data-serie]').forEach(item => {
-                const idx = item.dataset.serie === 'publico' ? 0 : 1;
-                const ativo = (destaque === null || destaque === idx);
-                item.classList.toggle('legend-dim', !ativo);
-                const swatch = item.querySelector('.legend-color');
-                swatch.style.background = ativo ? CORES_DONUT_PROJETOS[idx] : '#ffffff';
-                swatch.style.border = ativo ? 'none' : '1px solid #d8dee9';
+            // Aplicar destaque/esmaecimento aos itens Público e Privado em AMBOS os painéis
+            
+            // Itens Refrota Público (pode haver múltiplos em painéis diferentes)
+            const itensPublico = document.querySelectorAll('.legend-item[data-serie="publico"]');
+            itensPublico.forEach(itemPublico => {
+                const ativoPublico = (destaque === null || destaque === 0); // ativo em Consolidado e Público
+                itemPublico.classList.toggle('legend-dim', !ativoPublico);
+            });
+            
+            // Itens Refrota Privado (pode haver múltiplos em painéis diferentes)
+            const itensPrivado = document.querySelectorAll('.legend-item[data-serie="privado"]');
+            itensPrivado.forEach(itemPrivado => {
+                const ativoPrivado = (destaque === null || destaque === 1); // ativo em Consolidado e Privado
+                itemPrivado.classList.toggle('legend-dim', !ativoPrivado);
+                const swatch = itemPrivado.querySelector('.legend-color');
+                swatch.style.background = ativoPrivado ? '#6366f1' : '#ffffff';
+                swatch.style.border = ativoPrivado ? 'none' : '1px solid #d8dee9';
             });
         }
 
@@ -1580,7 +1741,7 @@
             cenarioAtual = cenario;
             renderDonutVeiculosSelecionados();
             renderDonutVeiculos();
-            aplicarDestaqueDonut(chartSelecionados);
+            aplicarDestaqueDountSelecionados(chartSelecionados);
             aplicarDestaqueDonut(chartContratados);
             renderLegendasProjetos();
             renderRegioes();
