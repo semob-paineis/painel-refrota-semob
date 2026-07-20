@@ -1008,7 +1008,7 @@
                         <div style="display: flex; align-items: flex-start;">
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">Refrota Público</div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">R$ 10,90 bi · 78 projetos</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">R$ 12,05 bi · 80 projetos</div>
                             </div>
                         </div>
                         <div style="margin-left: 0; display: flex; flex-direction: column; gap: 6px;">
@@ -1018,7 +1018,7 @@
                             </div>
                             <div style="display: flex; align-items: center;">
                                 <div class="legend-color" style="background: #0052cc; width: 12px; height: 12px; border-radius: 2px; margin-right: 8px;"></div>
-                                <div style="font-size: 12px; color: #666;">Selecionados - R$ 3,68 bi</div>
+                                <div style="font-size: 12px; color: #666;">Selecionados - R$ 4,83 bi</div>
                             </div>
                         </div>
                     </div>
@@ -1046,7 +1046,7 @@
                         <div class="legend-color" style="background: #0052cc;"></div>
                         <div>
                             <div style="font-weight: 600;">Refrota Público</div>
-                            <div style="font-size: 12px; color: #666;">R$ 1,95 bi · 12 projetos · 813 veículos</div>
+                            <div style="font-size: 12px; color: #666;">R$ 2,97 bi · 14 projetos · 1.332 veículos</div>
                         </div>
                     </div>
                     <div class="legend-item" data-serie="privado">
@@ -1073,15 +1073,15 @@
                 <div class="chart-legend">
                     <div class="legend-item">
                         <div class="legend-color" style="background: #10b981;"></div>
-                        <span><strong>Ônibus Elétricos:</strong> <span id="legEletricos">420 (8,9%)</span></span>
+                        <span><strong>Ônibus Elétricos:</strong> <span id="legEletricos">460 (8,8%)</span></span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #f59e0b;"></div>
-                        <span><strong>Ônibus Euro 6:</strong> <span id="legEuro6">4.246 (90,1%)</span></span>
+                        <span><strong>Ônibus Euro 6:</strong> <span id="legEuro6">4.725 (90,3%)</span></span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #8b5cf6;"></div>
-                        <span><strong>Veículos sobre Trilhos:</strong> <span id="legTrilhos">47 (1,0%)</span></span>
+                        <span><strong>Veículos sobre Trilhos:</strong> <span id="legTrilhos">47 (0,9%)</span></span>
                     </div>
                 </div>
             </div>
@@ -1095,6 +1095,7 @@
                         <div id="metasProgressTooltip" class="canvas-tooltip">Meta: 5.000 veículos</div>
                     </div>
                 </div>
+                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">*Meta: 5.000 unidades</p>
             </div>
         </div>
         <div class="table-section">
@@ -1191,10 +1192,10 @@
                 O programa REFROTA (Renovação de Frota) representa um investimento estratégico do Ministério das Cidades na modernização do transporte público urbano, com foco em sustentabilidade ambiental e qualidade dos deslocamentos. O programa apoia a renovação da frota por meio de linhas de financiamento com recursos do FGTS (via programa Pró-Transporte), disponíveis para operadores públicos e privados, priorizando veículos de menor emissão de poluentes (como tecnologias Euro VI e tração elétrica).
             </div>
             <div class="summary-highlight">
-                <strong>Números Principais:</strong> No recorte atualizado, a soma das seleções ultrapassa R$ 18,24 bilhões, das quais, foram contratadas 191 propostas, beneficiando mais de 150 municípios em 22 estados e no Distrito Federal. O investimento contratado soma R$ 5,18 bilhões para a aquisição de 4.713 veículos: 4.246 ônibus Euro VI, 420 ônibus elétricos e 47 veículos sobre trilhos.
+                <strong>Números Principais:</strong> No recorte atualizado, a soma das seleções ultrapassa R$ 19,4 bilhões, das quais, foram contratadas 193 propostas, beneficiando mais de 150 municípios em 22 estados e no Distrito Federal. O investimento contratado soma R$ 6,19 bilhões para a aquisição de 5.232 veículos: 4.725 ônibus Euro VI, 460 ônibus elétricos e 47 veículos sobre trilhos.
             </div>
             <div class="summary-text" style="margin-top: 20px;">
-                A distribuição regional privilegia a região Sudeste (2.636 veículos), seguida pelo Nordeste (920 veículos) e Sul (500 veículos). O foco em ônibus Euro 6 (90,1% da frota) demonstra o compromisso com tecnologias acessíveis e comprovadas de redução de emissões, enquanto a expansão de ônibus elétricos (8,9%) sinaliza a transição para energia limpa nos próximos anos.
+                A distribuição regional privilegia a região Sudeste (2.890 veículos), seguida pelo Nordeste (920 veículos) e Sul (500 veículos). O foco em ônibus Euro 6 (90,3% da frota) demonstra o compromisso com tecnologias acessíveis e comprovadas de redução de emissões, enquanto a expansão de ônibus elétricos (8,8%) sinaliza a transição para energia limpa nos próximos anos.
             </div>
         </div>
 
@@ -1213,75 +1214,69 @@
            ========================================================================= */
 
         const DADOS = {
-            // Cenário 'Consolidado' — equivale a B3 = "Consolidado" (soma de ambas as frentes)
+            // Cenário 'Consolidado' — B3 = "Consolidado" (aba "Dados para Painel", soma de ambas as frentes)
             consolidado: {
             rotulo: 'Consolidado',
             destaque: null,
-            veiculos: { eletricos: 420, euro6: 4246, trilhos: 47 },
-            // Veículos SELECIONADOS — bloco "SELECIONADOS" da aba '13-07-2026' (colunas AG/AH/AI)
-            // Consolidado = Público + Privado → 3.089 + 10.252 + 47 = 13.388
-            veiculosSelecionados: { eletricos: 3089, euro6: 10252, trilhos: 47 },
+            veiculos: { eletricos: 460, euro6: 4725, trilhos: 47 },
+            veiculosSelecionados: { eletricos: 3129, euro6: 10731, trilhos: 47 },
             regioes: [
-                { nome: 'Norte', propostas: 7, veiculos: 174, investimento: 163227189.09 },
+                { nome: 'Norte', propostas: 8, veiculos: 439, investimento: 531922189.09 },
                 { nome: 'Nordeste', propostas: 26, veiculos: 920, investimento: 1662527970.52 },
                 { nome: 'Centro-Oeste', propostas: 10, veiculos: 483, investimento: 352344744.23 },
-                { nome: 'Sudeste', propostas: 110, veiculos: 2636, investimento: 2485804732.37 },
+                { nome: 'Sudeste', propostas: 111, veiculos: 2890, investimento: 3131735732.37 },
                 { nome: 'Sul', propostas: 38, veiculos: 500, investimento: 513793166.1 }
             ],
             anos: [
-                { ano: 2023, propostas: 1, veiculos: 22, investimento: 13806350.0 },
+                { ano: 2023, propostas: 3, veiculos: 541, investimento: 1028432350 },
                 { ano: 2024, propostas: 39, veiculos: 1487, investimento: 2316832405.23 },
                 { ano: 2025, propostas: 118, veiculos: 2623, investimento: 2116382376.84 },
                 { ano: 2026, propostas: 33, veiculos: 581, investimento: 730676670.24 }
             ],
             ufs: {
-                'AC': 67000000.0, 'AL': 22909060.0, 'AP': 0, 'AM': 44855750.0,
-                'BA': 965251950.0, 'CE': 25153300.0, 'DF': 201123449.18, 'ES': 117809358.45,
-                'GO': 104977545.05, 'MA': 22467500.0, 'MT': 46243750.0, 'MS': 0,
-                'MG': 851011078.26, 'PA': 0, 'PB': 47798300.0, 'PR': 308125123.7,
-                'PE': 427613340.0, 'PI': 97145413.21, 'RJ': 522837517.0, 'RN': 0,
-                'RS': 170415917.4, 'RO': 41358282.09, 'RR': 10013157.0, 'SC': 35252125.0,
+                'AC': 67000000, 'AL': 22909060, 'AP': 0, 'AM': 44855750,
+                'BA': 965251950, 'CE': 25153300, 'DF': 201123449.18, 'ES': 117809358.45,
+                'GO': 104977545.05, 'MA': 22467500, 'MT': 46243750, 'MS': 0,
+                'MG': 851011078.26, 'PA': 368695000, 'PB': 47798300, 'PR': 308125123.7,
+                'PE': 427613340, 'PI': 97145413.21, 'RJ': 1168768517, 'RN': 0,
+                'RS': 170415917.4, 'RO': 41358282.09, 'RR': 10013157, 'SC': 35252125,
                 'SP': 994146778.66, 'SE': 54189107.31, 'TO': 0
             }
         },
-            // Cenário 'Refrota Público' — equivale a B3 = "Refrota" (aba '13-07-2026', Tipo = 'Refrota')
+            // Cenário 'Refrota Público' — B3 = "Refrota"
             publico: {
             rotulo: 'Refrota Público',
             destaque: 0,
-            veiculos: { eletricos: 252, euro6: 514, trilhos: 47 },
-            // Selecionados: Tipo = "Refrota" e Situação ∈ {*Contra*, *em ação preparatória*, Cancelada, Desistência}
-            // 2.372 + 3.060 + 47 = 5.479 (confere com a legenda de 78 projetos selecionados)
-            veiculosSelecionados: { eletricos: 2372, euro6: 3060, trilhos: 47 },
+            veiculos: { eletricos: 292, euro6: 993, trilhos: 47 },
+            veiculosSelecionados: { eletricos: 2412, euro6: 3539, trilhos: 47 },
             regioes: [
-                { nome: 'Norte', propostas: 1, veiculos: 51, investimento: 67000000.0 },
+                { nome: 'Norte', propostas: 2, veiculos: 316, investimento: 435695000 },
                 { nome: 'Nordeste', propostas: 5, veiculos: 487, investimento: 1333145413.21 },
                 { nome: 'Centro-Oeste', propostas: 0, veiculos: 0, investimento: 0 },
-                { nome: 'Sudeste', propostas: 5, veiculos: 271, investimento: 536716817.0 },
-                { nome: 'Sul', propostas: 1, veiculos: 4, investimento: 15600000.0 }
+                { nome: 'Sudeste', propostas: 6, veiculos: 525, investimento: 1182647817 },
+                { nome: 'Sul', propostas: 1, veiculos: 4, investimento: 15600000 }
             ],
             anos: [
-                { ano: 2023, propostas: 0, veiculos: 0, investimento: 0 },
+                { ano: 2023, propostas: 2, veiculos: 519, investimento: 1014626000 },
                 { ano: 2024, propostas: 11, veiculos: 713, investimento: 1632462230.21 },
                 { ano: 2025, propostas: 0, veiculos: 0, investimento: 0 },
-                { ano: 2026, propostas: 1, veiculos: 100, investimento: 320000000.0 }
+                { ano: 2026, propostas: 1, veiculos: 100, investimento: 320000000 }
             ],
             ufs: {
-                'AC': 67000000.0, 'AL': 0, 'AP': 0, 'AM': 0,
-                'BA': 880000000.0, 'CE': 0, 'DF': 0, 'ES': 0,
+                'AC': 67000000, 'AL': 0, 'AP': 0, 'AM': 0,
+                'BA': 880000000, 'CE': 0, 'DF': 0, 'ES': 0,
                 'GO': 0, 'MA': 0, 'MT': 0, 'MS': 0,
-                'MG': 412376817.0, 'PA': 0, 'PB': 0, 'PR': 0,
-                'PE': 320000000.0, 'PI': 97145413.21, 'RJ': 95340000.0, 'RN': 0,
-                'RS': 15600000.0, 'RO': 0, 'RR': 0, 'SC': 0,
-                'SP': 29000000.0, 'SE': 36000000.0, 'TO': 0
+                'MG': 412376817, 'PA': 368695000, 'PB': 0, 'PR': 0,
+                'PE': 320000000, 'PI': 97145413.21, 'RJ': 741271000, 'RN': 0,
+                'RS': 15600000, 'RO': 0, 'RR': 0, 'SC': 0,
+                'SP': 29000000, 'SE': 36000000, 'TO': 0
             }
         },
-            // Cenário 'Refrota Privado' — equivale a B3 = "Refrota Privado"
+            // Cenário 'Refrota Privado' — B3 = "Refrota Privado"
             privado: {
             rotulo: 'Refrota Privado',
             destaque: 1,
             veiculos: { eletricos: 168, euro6: 3732, trilhos: 0 },
-            // Selecionados: Tipo = "*privado*" (sem filtro de situação, conforme fórmula C83/E83)
-            // 717 + 7.192 + 0 = 7.909 (confere com a legenda de 245 projetos selecionados)
             veiculosSelecionados: { eletricos: 717, euro6: 7192, trilhos: 0 },
             regioes: [
                 { nome: 'Norte', propostas: 6, veiculos: 123, investimento: 96227189.09 },
@@ -1291,18 +1286,18 @@
                 { nome: 'Sul', propostas: 37, veiculos: 496, investimento: 498193166.1 }
             ],
             anos: [
-                { ano: 2023, propostas: 1, veiculos: 22, investimento: 13806350.0 },
+                { ano: 2023, propostas: 1, veiculos: 22, investimento: 13806350 },
                 { ano: 2024, propostas: 28, veiculos: 774, investimento: 684370175.02 },
                 { ano: 2025, propostas: 118, veiculos: 2623, investimento: 2116382376.84 },
                 { ano: 2026, propostas: 32, veiculos: 481, investimento: 410676670.24 }
             ],
             ufs: {
-                'AC': 0, 'AL': 22909060.0, 'AP': 0, 'AM': 44855750.0,
-                'BA': 85251950.0, 'CE': 25153300.0, 'DF': 201123449.18, 'ES': 117809358.45,
-                'GO': 104977545.05, 'MA': 22467500.0, 'MT': 46243750.0, 'MS': 0,
-                'MG': 438634261.26, 'PA': 0, 'PB': 47798300.0, 'PR': 308125123.7,
-                'PE': 107613340.0, 'PI': 0, 'RJ': 427497517.0, 'RN': 0,
-                'RS': 154815917.4, 'RO': 41358282.09, 'RR': 10013157.0, 'SC': 35252125.0,
+                'AC': 0, 'AL': 22909060, 'AP': 0, 'AM': 44855750,
+                'BA': 85251950, 'CE': 25153300, 'DF': 201123449.18, 'ES': 117809358.45,
+                'GO': 104977545.05, 'MA': 22467500, 'MT': 46243750, 'MS': 0,
+                'MG': 438634261.26, 'PA': 0, 'PB': 47798300, 'PR': 308125123.7,
+                'PE': 107613340, 'PI': 0, 'RJ': 427497517, 'RN': 0,
+                'RS': 154815917.4, 'RO': 41358282.09, 'RR': 10013157, 'SC': 35252125,
                 'SP': 965146778.66, 'SE': 18189107.31, 'TO': 0
             }
         }
@@ -1426,21 +1421,21 @@
                 ctx.fillStyle = '#0052cc';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('R$ 18,24 bi', centerX, centerY - 15);
+                ctx.fillText('R$ 19,40 bi', centerX, centerY - 15);
 
                 // Segunda linha - quantidade
                 ctx.font = '14px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#666';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('323 projetos', centerX, centerY + 20);
+                ctx.fillText('325 projetos', centerX, centerY + 20);
 
                 // Terceira linha - total de veículos
                 ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#999';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('13.388 veículos', centerX, centerY + 40);
+                ctx.fillText('13.907 veículos', centerX, centerY + 40);
 
                 ctx.restore();
             }
@@ -1461,21 +1456,21 @@
                 ctx.fillStyle = '#0052cc';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('R$ 5,18 bi', centerX, centerY - 15);
+                ctx.fillText('R$ 6,19 bi', centerX, centerY - 15);
 
                 // Segunda linha - quantidade
                 ctx.font = '14px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#666';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('191 projetos', centerX, centerY + 20);
+                ctx.fillText('193 projetos', centerX, centerY + 20);
 
                 // Terceira linha - total de veículos
                 ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#999';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('4.713 veículos', centerX, centerY + 40);
+                ctx.fillText('5.232 veículos', centerX, centerY + 40);
 
                 ctx.restore();
             }
@@ -1531,7 +1526,7 @@
             data: {
                 labels: ['Ônibus Elétricos', 'Ônibus Euro 6', 'Veículos sobre Trilhos'],
                 datasets: [{
-                    data: [420, 4246, 47],
+                    data: [460, 4725, 47],
                     backgroundColor: ['#10b981', '#f59e0b', '#8b5cf6'],
                     borderColor: ['#ffffff', '#ffffff', '#ffffff'],
                     borderWidth: 3,
@@ -1574,7 +1569,7 @@
             data: {
                 labels: ['Desistências', 'Selecionados', 'Refrota Privado'],
                 datasets: [{
-                    data: [7.22, 3.68, 7.34],
+                    data: [7.22, 4.83, 7.34],
                     backgroundColor: ['#7a9fd9', '#0052cc', '#6366f1'],
                     borderColor: ['#ffffff', '#ffffff', '#ffffff'],
                     borderWidth: 3,
@@ -1606,16 +1601,16 @@
                             label: function(context) {
                                 const index = context.dataIndex;
                                 const labels = ['Desistências', 'Selecionados', 'Refrota Privado'];
-                                const investments = ['R$ 7,22 bilhões', 'R$ 3,68 bilhões', 'R$ 7,34 bilhões'];
-                                const percentages = ['39,5%', '20,1%', '40,3%'];
-                                const projects = ['Desagregado', '78', '245'];
-                                const projectPercentages = ['A Cancelar (2,44 bi) · Cancelados (4,78 bi)', '24,1%', '75,9%'];
+                                const investments = ['R$ 7,22 bilhões', 'R$ 4,83 bilhões', 'R$ 7,34 bilhões'];
+                                const percentages = ['37,2%', '24,9%', '37,9%'];
+                                const projects = ['Desagregado', '80', '245'];
+                                const projectPercentages = ['A Cancelar (2,45 bi) · Cancelados (4,77 bi)', '24,6%', '75,4%'];
 
                                 // Tooltip especial para Desistências
                                 if (index === 0) {
                                     const lines = [
                                         'Desistências (7,22 bi)',
-                                        'A Cancelar (2,44 bi) · Cancelados (4,78 bi)'
+                                        'A Cancelar (2,45 bi) · Cancelados (4,77 bi)'
                                     ];
                                     return lines;
                                 }
@@ -1623,7 +1618,7 @@
                                 // Tooltip simples para Selecionados
                                 if (index === 1) {
                                     const lines = [
-                                        'Selecionados (3,68 bi)'
+                                        'Selecionados (4,83 bi)'
                                     ];
                                     return lines;
                                 }
@@ -1654,7 +1649,7 @@
             data: {
                 labels: ['Refrota Público', 'Refrota Privado'],
                 datasets: [{
-                    data: [1.95, 3.23],
+                    data: [2.97, 3.23],
                     backgroundColor: ['#0052cc', '#6366f1'],
                     borderColor: ['#ffffff', '#ffffff'],
                     borderWidth: 3,
@@ -1686,10 +1681,10 @@
                             label: function(context) {
                                 const index = context.dataIndex;
                                 const labels = ['Refrota Público', 'Refrota Privado'];
-                                const investments = ['R$ 1.952.462.230', 'R$ 3.225.235.572'];
-                                const percentages = ['37,7%', '62,3%'];
-                                const projects = ['12', '179'];
-                                const projectPercentages = ['6,3%', '93,7%'];
+                                const investments = ['R$ 2.967.088.230', 'R$ 3.225.235.572'];
+                                const percentages = ['47,9%', '52,1%'];
+                                const projects = ['14', '179'];
+                                const projectPercentages = ['7,3%', '92,7%'];
 
                                 const lines = [
                                     investments[index],
@@ -2360,9 +2355,9 @@
             static adicionarAriaLabels() {
                 try {
                     const graficos = [
-                        {id: 'resourcesDonutChart', label: 'Gráfico de distribuição de projetos selecionados. Total de 323 projetos, 13.388 veículos, com R$ 18,24 bilhões de investimento.'},
-                        {id: 'contractedProjectsChart', label: 'Gráfico de distribuição de projetos contratados. Total de 191 projetos, 4.713 veículos, com R$ 5,18 bilhões de investimento.'},
-                        {id: 'mainDonutChart', label: 'Gráfico de distribuição de veículos contratados. Total de 4.713 veículos.'},
+                        {id: 'resourcesDonutChart', label: 'Gráfico de distribuição de projetos selecionados. Total de 325 projetos, 13.907 veículos, com R$ 19,40 bilhões de investimento.'},
+                        {id: 'contractedProjectsChart', label: 'Gráfico de distribuição de projetos contratados. Total de 193 projetos, 5.232 veículos, com R$ 6,19 bilhões de investimento.'},
+                        {id: 'mainDonutChart', label: 'Gráfico de distribuição de veículos contratados. Total de 5.232 veículos.'},
                         {id: 'metasProgressChart', label: 'Indicador de progresso de metas 2026. Meta total 5.000 unidades, concluído 2.005 unidades.'}
                     ];
                     
