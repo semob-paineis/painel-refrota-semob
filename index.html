@@ -1026,7 +1026,7 @@
                         <div class="legend-color" style="background: #6366f1;"></div>
                         <div>
                             <div style="font-weight: 600;">Refrota Privado</div>
-                            <div style="font-size: 12px; color: #666;">R$ 7,34 bi · 245 projetos · 7.909 veículos</div>
+                            <div style="font-size: 12px; color: #666;">R$ 7,34 bi · 245 projetos</div>
                         </div>
                     </div>
                 </div>
@@ -1435,6 +1435,13 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText('323 projetos', centerX, centerY + 20);
 
+                // Terceira linha - total de veículos
+                ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#999';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('13.388 veículos', centerX, centerY + 40);
+
                 ctx.restore();
             }
         };
@@ -1462,6 +1469,13 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('191 projetos', centerX, centerY + 20);
+
+                // Terceira linha - total de veículos
+                ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#999';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('4.713 veículos', centerX, centerY + 40);
 
                 ctx.restore();
             }
@@ -2346,8 +2360,8 @@
             static adicionarAriaLabels() {
                 try {
                     const graficos = [
-                        {id: 'resourcesDonutChart', label: 'Gráfico de distribuição de projetos selecionados. Total de 323 projetos com R$ 18,24 bilhões de investimento.'},
-                        {id: 'contractedProjectsChart', label: 'Gráfico de distribuição de projetos contratados. Total de 191 projetos com R$ 5,18 bilhões de investimento.'},
+                        {id: 'resourcesDonutChart', label: 'Gráfico de distribuição de projetos selecionados. Total de 323 projetos, 13.388 veículos, com R$ 18,24 bilhões de investimento.'},
+                        {id: 'contractedProjectsChart', label: 'Gráfico de distribuição de projetos contratados. Total de 191 projetos, 4.713 veículos, com R$ 5,18 bilhões de investimento.'},
                         {id: 'mainDonutChart', label: 'Gráfico de distribuição de veículos contratados. Total de 4.713 veículos.'},
                         {id: 'metasProgressChart', label: 'Indicador de progresso de metas 2026. Meta total 5.000 unidades, concluído 2.005 unidades.'}
                     ];
