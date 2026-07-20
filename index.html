@@ -146,21 +146,44 @@
         .top-header-right {
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
-        .update-info {
-            text-align: right;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .update-info strong {
-            display: block;
-            color: #0052cc;
+        /* ===== Estilo base compartilhado: botões/chips em formato pílula ===== */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 40px;
+            padding: 0 18px;
+            border-radius: 999px;
             font-size: 13px;
             font-weight: 600;
+            line-height: 1;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+
+        /* Pílula informativa (data de atualização) — não clicável */
+        .pill-info {
+            background: #eaf1fb;
+            color: #0052cc;
+            border: 1px solid #cfe0f5;
+        }
+
+        .pill-info .pill-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4a90e2;
+            flex-shrink: 0;
+        }
+
+        .pill-info .pill-label {
+            font-weight: 600;
+            color: #0052cc;
         }
 
         /* Botão Exportar com dropdown */
@@ -172,14 +195,17 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 18px;
+            height: 40px;
+            padding: 0 18px;
             background: #0052cc;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 999px;
             cursor: pointer;
             font-size: 13px;
             font-weight: 600;
+            line-height: 1;
+            box-sizing: border-box;
             transition: all 0.3s ease;
         }
 
@@ -814,27 +840,25 @@
 
         /* ========== BOTÃO DE DARK MODE ========== */
         .theme-toggle {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: var(--bg-secondary);
-            border: 2px solid var(--border-color);
-            font-size: 24px;
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            color: #0052cc;
             cursor: pointer;
-            z-index: 1000;
             transition: all 0.3s ease;
-            box-shadow: var(--shadow-md);
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            box-sizing: border-box;
         }
 
         .theme-toggle:hover {
+            background: var(--bg-secondary, #eef2f7);
             transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(0,82,204,0.2);
         }
 
         .theme-toggle:focus {
@@ -956,15 +980,19 @@
             .table-search input {
                 max-width: 100%;
             }
+            .top-header {
+                padding: 14px 18px;
+            }
+            .top-header-right {
+                width: 100%;
+                justify-content: flex-start;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Skip Link (Acessibilidade) -->
     <a href="#main-content" class="skip-link">Pular para conteúdo principal</a>
-
-    <!-- Botão de Dark Mode -->
-    <button id="theme-toggle" class="theme-toggle" aria-label="Alternar tema escuro/claro" title="Alternar tema"></button>
 
     <!-- Barra Gov -->
     <div class="gov-bar">
@@ -980,18 +1008,21 @@
             <p>Secretaria Nacional de Mobilidade — SEMOB</p>
         </div>
         <div class="top-header-right">
-            <div class="update-info">
-                <strong id="dataHoraAtualizacao">Atualizado em: --/--/---- às --:--</strong>
+            <div class="pill pill-info" title="Data da última atualização dos dados">
+                <span class="pill-dot"></span>
+                <span id="dataHoraAtualizacao" class="pill-label">Atualizado --/--/---- às --:--</span>
             </div>
             <div class="export-dropdown">
                 <button class="btn-export" onclick="toggleExportMenu(event)">
-                    📤 Exportar ▾
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+                    Exportar
                 </button>
                 <div class="export-menu" id="exportMenu">
                     <button onclick="closeExportMenu(); downloadAsImage()">🖼️ Baixar Imagem</button>
                     <button onclick="closeExportMenu(); downloadAsPDF()">📄 Gerar PDF</button>
                 </div>
             </div>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Alternar tema escuro/claro" title="Alternar tema"></button>
         </div>
     </div>
 
@@ -2052,25 +2083,67 @@
             closeExportMenu();
         });
 
+        // Calcula o ponto de corte (em px do canvas) imediatamente antes do
+        // painel "Investimento Total por Estado", garantindo que ele inicie a 2ª página.
+        function calcularCorteMapa(scale) {
+            const mapa = document.querySelector('.map-section');
+            if (!mapa) return null;
+            const bodyTop = document.body.getBoundingClientRect().top;
+            const mapaTop = mapa.getBoundingClientRect().top;
+            // Offset do topo do mapa em relação ao topo do body, convertido para px do canvas
+            return Math.round((mapaTop - bodyTop) * scale);
+        }
+
         async function downloadAsImage() {
+            const button = event.target;
+            const originalText = button.textContent;
             try {
-                const button = event.target;
-                const originalText = button.textContent;
                 button.textContent = '⏳ Gerando...';
                 button.disabled = true;
 
+                const scale = 2;
                 const element = document.body;
                 const canvas = await html2canvas(element, {
                     backgroundColor: '#f5f7fa',
-                    scale: 2,
+                    scale: scale,
                     allowTaint: true,
                     useCORS: true
                 });
 
-                const link = document.createElement('a');
-                link.href = canvas.toDataURL('image/png');
-                link.download = `Painel_Refrota_${new Date().toLocaleDateString('pt-BR')}.png`;
-                link.click();
+                const corte = calcularCorteMapa(scale);
+                const dataStr = new Date().toLocaleDateString('pt-BR');
+
+                // Sem ponto de corte válido: mantém comportamento de página única
+                if (corte === null || corte <= 0 || corte >= canvas.height) {
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    link.download = `Painel_Refrota_${dataStr}.png`;
+                    link.click();
+                    button.textContent = originalText;
+                    button.disabled = false;
+                    return;
+                }
+
+                // Gera as duas páginas como imagens separadas a partir do mesmo canvas
+                const paginas = [
+                    { yInicio: 0, altura: corte, sufixo: 'pagina1' },
+                    { yInicio: corte, altura: canvas.height - corte, sufixo: 'pagina2' }
+                ];
+
+                paginas.forEach(pag => {
+                    const parte = document.createElement('canvas');
+                    parte.width = canvas.width;
+                    parte.height = pag.altura;
+                    const ctx = parte.getContext('2d');
+                    ctx.fillStyle = '#f5f7fa';
+                    ctx.fillRect(0, 0, parte.width, parte.height);
+                    ctx.drawImage(canvas, 0, pag.yInicio, canvas.width, pag.altura, 0, 0, canvas.width, pag.altura);
+
+                    const link = document.createElement('a');
+                    link.href = parte.toDataURL('image/png');
+                    link.download = `Painel_Refrota_${dataStr}_${pag.sufixo}.png`;
+                    link.click();
+                });
 
                 button.textContent = originalText;
                 button.disabled = false;
@@ -2083,21 +2156,21 @@
         }
 
         async function downloadAsPDF() {
+            const button = event.target;
+            const originalText = button.textContent;
             try {
-                const button = event.target;
-                const originalText = button.textContent;
                 button.textContent = '⏳ Gerando...';
                 button.disabled = true;
 
+                const scale = 2;
                 const element = document.body;
                 const canvas = await html2canvas(element, {
                     backgroundColor: '#f5f7fa',
-                    scale: 2,
+                    scale: scale,
                     allowTaint: true,
                     useCORS: true
                 });
 
-                const imgData = canvas.toDataURL('image/png');
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({
                     orientation: 'portrait',
@@ -2107,23 +2180,57 @@
 
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
-                const imgWidth = pdfWidth - 20;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const margem = 10;
+                const imgWidth = pdfWidth - margem * 2;
+                const dataStr = new Date().toLocaleDateString('pt-BR');
 
-                let heightLeft = imgHeight;
-                let position = 10;
+                const corte = calcularCorteMapa(scale);
 
-                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                heightLeft -= pdfHeight - 20;
-
-                while (heightLeft > 0) {
-                    position = heightLeft - imgHeight + 10;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-                    heightLeft -= pdfHeight - 20;
+                // Fatia o canvas em blocos e distribui em páginas do PDF.
+                // 'blocos' define os limites verticais (px do canvas) de cada seção lógica;
+                // cada bloco sempre inicia em uma nova página, evitando cortar o mapa.
+                let blocos;
+                if (corte === null || corte <= 0 || corte >= canvas.height) {
+                    blocos = [{ yInicio: 0, altura: canvas.height }];
+                } else {
+                    blocos = [
+                        { yInicio: 0, altura: corte },
+                        { yInicio: corte, altura: canvas.height - corte }
+                    ];
                 }
 
-                pdf.save(`Painel_Refrota_${new Date().toLocaleDateString('pt-BR')}.pdf`);
+                blocos.forEach((bloco, indice) => {
+                    if (indice > 0) pdf.addPage();
+
+                    // Cada bloco pode ser mais alto que uma página A4; nesse caso,
+                    // subdividimos o bloco em páginas adicionais mantendo a continuidade.
+                    const blocoCanvas = document.createElement('canvas');
+                    blocoCanvas.width = canvas.width;
+                    blocoCanvas.height = bloco.altura;
+                    const bctx = blocoCanvas.getContext('2d');
+                    bctx.fillStyle = '#f5f7fa';
+                    bctx.fillRect(0, 0, blocoCanvas.width, blocoCanvas.height);
+                    bctx.drawImage(canvas, 0, bloco.yInicio, canvas.width, bloco.altura, 0, 0, canvas.width, bloco.altura);
+
+                    const imgData = blocoCanvas.toDataURL('image/png');
+                    const imgHeight = (blocoCanvas.height * imgWidth) / blocoCanvas.width;
+
+                    const alturaUtil = pdfHeight - margem * 2;
+                    let heightLeft = imgHeight;
+                    let position = margem;
+
+                    pdf.addImage(imgData, 'PNG', margem, position, imgWidth, imgHeight);
+                    heightLeft -= alturaUtil;
+
+                    while (heightLeft > 0) {
+                        position = heightLeft - imgHeight + margem;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', margem, position, imgWidth, imgHeight);
+                        heightLeft -= alturaUtil;
+                    }
+                });
+
+                pdf.save(`Painel_Refrota_${dataStr}.pdf`);
 
                 button.textContent = originalText;
                 button.disabled = false;
@@ -2252,7 +2359,7 @@
             const horas = String(agora.getHours()).padStart(2, '0');
             const minutos = String(agora.getMinutes()).padStart(2, '0');
             
-            const formato = `Atualizado em: ${dia}/${mes}/${ano} às ${horas}:${minutos}`;
+            const formato = `Atualizado ${dia}/${mes}/${ano} às ${horas}:${minutos}`;
             const elemento = document.getElementById('dataHoraAtualizacao');
             if (elemento) {
                 elemento.textContent = formato;
