@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "gerado_em": "2026-07-24T12:41:15-03:00",
+    "gerado_em": "2026-07-31T09:52:47-03:00",
     "planilha_origem": "Dados_Refrota_Contratações.xlsx",
     "gerado_por": "gerar_dados.py",
     "versao_estrutura": 1
@@ -9,13 +9,13 @@
     "rotulo": "Consolidado",
     "destaque": null,
     "veiculos": {
-      "eletricos": 460,
-      "euro6": 4865,
+      "eletricos": 560,
+      "euro6": 4861,
       "trilhos": 47
     },
     "veiculosSelecionados": {
       "eletricos": 3129,
-      "euro6": 10890,
+      "euro6": 10889,
       "trilhos": 47
     },
     "regioes": [
@@ -34,20 +34,20 @@
       {
         "nome": "Centro-Oeste",
         "propostas": 10,
-        "veiculos": 483,
-        "investimento": 352344744.23
+        "veiculos": 501,
+        "investimento": 363791390.18
       },
       {
         "nome": "Sudeste",
         "propostas": 112,
-        "veiculos": 2901,
+        "veiculos": 2879,
         "investimento": 3145779462.37
       },
       {
         "nome": "Sul",
-        "propostas": 38,
-        "veiculos": 500,
-        "investimento": 513354266.1
+        "propostas": 39,
+        "veiculos": 600,
+        "investimento": 963455753.1
       }
     ],
     "anos": [
@@ -59,21 +59,21 @@
       },
       {
         "ano": 2024,
-        "propostas": 39,
-        "veiculos": 1487,
-        "investimento": 2316832405.23
+        "propostas": 40,
+        "veiculos": 1587,
+        "investimento": 2764629892.23
       },
       {
         "ano": 2025,
         "propostas": 118,
-        "veiculos": 2623,
-        "investimento": 2116285476.84
+        "veiculos": 2627,
+        "investimento": 2127732122.79
       },
       {
         "ano": 2026,
         "propostas": 36,
-        "veiculos": 721,
-        "investimento": 850876250.24
+        "veiculos": 713,
+        "investimento": 853180250.24
       }
     ],
     "ufsContratados": {
@@ -85,19 +85,19 @@
       "CE": 25153300,
       "DF": 201123449.18,
       "ES": 117809358.45,
-      "GO": 104977545.05,
+      "GO": 116424191,
       "MA": 22467500,
       "MT": 46243750,
       "MS": 0,
       "MG": 863200808.26,
       "PA": 368695000,
       "PB": 47798300,
-      "PR": 307686223.7,
+      "PR": 309990223.7,
       "PE": 534111190,
       "PI": 97145413.21,
       "RJ": 1170622517,
       "RN": 0,
-      "RS": 170415917.4,
+      "RS": 618213404.4,
       "RO": 41358282.09,
       "RR": 10013157,
       "SC": 35252125,
@@ -137,22 +137,22 @@
     "projetos": {
       "selecionados": {
         "propostas": 333,
-        "veiculos": 14066,
+        "veiculos": 14065,
         "investimento": 19558295778.62
       },
       "contratados": {
-        "propostas": 196,
-        "veiculos": 5372,
-        "investimento": 6312426482.31
+        "propostas": 197,
+        "veiculos": 5468,
+        "investimento": 6773974615.26
       },
       "status": {
         "contratados": {
-          "qtd": 196,
-          "valor": 7818082482.13
+          "qtd": 197,
+          "valor": 8265879969.13
         },
         "emPreparacao": {
-          "qtd": 79,
-          "valor": 4522875457.03
+          "qtd": 78,
+          "valor": 4075077970.03
         },
         "aCancelar": {
           "qtd": 12,
@@ -182,7 +182,7 @@
     "rotulo": "Refrota Público",
     "destaque": 0,
     "veiculos": {
-      "eletricos": 292,
+      "eletricos": 392,
       "euro6": 993,
       "trilhos": 47
     },
@@ -218,9 +218,9 @@
       },
       {
         "nome": "Sul",
-        "propostas": 1,
-        "veiculos": 4,
-        "investimento": 15600000
+        "propostas": 2,
+        "veiculos": 104,
+        "investimento": 463397487
       }
     ],
     "anos": [
@@ -232,9 +232,9 @@
       },
       {
         "ano": 2024,
-        "propostas": 11,
-        "veiculos": 713,
-        "investimento": 1632462230.21
+        "propostas": 12,
+        "veiculos": 813,
+        "investimento": 2080259717.21
       },
       {
         "ano": 2025,
@@ -270,7 +270,7 @@
       "PI": 97145413.21,
       "RJ": 741271000,
       "RN": 0,
-      "RS": 15600000,
+      "RS": 463397487,
       "RO": 0,
       "RR": 0,
       "SC": 0,
@@ -314,18 +314,18 @@
         "investimento": 12052306456.67
       },
       "contratados": {
-        "propostas": 14,
-        "veiculos": 1332,
-        "investimento": 2967088230.21
+        "propostas": 15,
+        "veiculos": 1432,
+        "investimento": 3414885717.21
       },
       "status": {
         "contratados": {
-          "qtd": 14,
-          "valor": 3131519130.21
+          "qtd": 15,
+          "valor": 3579316617.21
         },
         "emPreparacao": {
-          "qtd": 8,
-          "valor": 1703449487
+          "qtd": 7,
+          "valor": 1255652000
         },
         "aCancelar": {
           "qtd": 12,
@@ -356,12 +356,12 @@
     "destaque": 1,
     "veiculos": {
       "eletricos": 168,
-      "euro6": 3872,
+      "euro6": 3868,
       "trilhos": 0
     },
     "veiculosSelecionados": {
       "eletricos": 717,
-      "euro6": 7351,
+      "euro6": 7350,
       "trilhos": 0
     },
     "regioes": [
@@ -380,20 +380,20 @@
       {
         "nome": "Centro-Oeste",
         "propostas": 10,
-        "veiculos": 483,
-        "investimento": 352344744.23
+        "veiculos": 501,
+        "investimento": 363791390.18
       },
       {
         "nome": "Sudeste",
         "propostas": 106,
-        "veiculos": 2376,
+        "veiculos": 2354,
         "investimento": 1963131645.37
       },
       {
         "nome": "Sul",
         "propostas": 37,
         "veiculos": 496,
-        "investimento": 497754266.1
+        "investimento": 500058266.1
       }
     ],
     "anos": [
@@ -412,14 +412,14 @@
       {
         "ano": 2025,
         "propostas": 118,
-        "veiculos": 2623,
-        "investimento": 2116285476.84
+        "veiculos": 2627,
+        "investimento": 2127732122.79
       },
       {
         "ano": 2026,
         "propostas": 35,
-        "veiculos": 621,
-        "investimento": 530876250.24
+        "veiculos": 613,
+        "investimento": 533180250.24
       }
     ],
     "ufsContratados": {
@@ -431,14 +431,14 @@
       "CE": 25153300,
       "DF": 201123449.18,
       "ES": 117809358.45,
-      "GO": 104977545.05,
+      "GO": 116424191,
       "MA": 22467500,
       "MT": 46243750,
       "MS": 0,
       "MG": 450823991.26,
       "PA": 0,
       "PB": 47798300,
-      "PR": 307686223.7,
+      "PR": 309990223.7,
       "PE": 214111190,
       "PI": 0,
       "RJ": 429351517,
@@ -483,13 +483,13 @@
     "projetos": {
       "selecionados": {
         "propostas": 253,
-        "veiculos": 8068,
+        "veiculos": 8067,
         "investimento": 7505989321.95
       },
       "contratados": {
         "propostas": 182,
-        "veiculos": 4040,
-        "investimento": 3345338252.1
+        "veiculos": 4036,
+        "investimento": 3359088898.05
       },
       "status": {
         "contratados": {
