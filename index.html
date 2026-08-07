@@ -522,6 +522,77 @@
             margin-top: 20px;
         }
 
+        /* ===== Painéis de Evolução (comparativo entre atualizações) ===== */
+        .evolucao-periodo {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+
+        .tabela-comparativa td.num,
+        .tabela-comparativa th.num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .tabela-comparativa td.metrica {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .tabela-comparativa td.anterior {
+            color: #888;
+        }
+
+        .tabela-comparativa td.atual {
+            font-weight: 600;
+            color: #0052cc;
+        }
+
+        .var-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .var-pos { background: #e6f4ec; color: #0f7a3d; }
+        .var-neg { background: #fdecec; color: #c0392b; }
+        .var-zero { background: #f1f3f5; color: #868e96; }
+
+        .destaques-lista {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .destaques-lista li {
+            position: relative;
+            padding: 12px 0 12px 30px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .destaques-lista li:last-child { border-bottom: none; }
+
+        .destaques-lista li::before {
+            content: '▸';
+            position: absolute;
+            left: 8px;
+            top: 12px;
+            color: #0052cc;
+            font-weight: 700;
+        }
+
+        @media (max-width: 640px) {
+            .tabela-comparativa { font-size: 12px; }
+            .tabela-comparativa td, .tabela-comparativa th { padding: 8px 6px; }
+        }
+
         .summary-highlight strong {
             color: #0052cc;
             display: block;
@@ -1235,6 +1306,29 @@
             </table>
         </div>
 
+        <!-- Evolução entre atualizações (comparativo + destaques) -->
+        <!-- Ambos os blocos ficam ocultos se não houver snapshot anterior. -->
+        <div class="summary-section" id="secaoComparativo" style="display: none;">
+            <h3 class="summary-title">📊 Evolução desde a Última Atualização</h3>
+            <div class="evolucao-periodo" id="comparativoPeriodo"></div>
+            <table class="tabela-comparativa">
+                <thead>
+                    <tr>
+                        <th>Indicador</th>
+                        <th class="num">Anterior</th>
+                        <th class="num">Atual</th>
+                        <th class="num" style="width: 130px;">Variação</th>
+                    </tr>
+                </thead>
+                <tbody id="comparativoBody"></tbody>
+            </table>
+        </div>
+
+        <div class="summary-section" id="secaoDestaques" style="display: none;">
+            <h3 class="summary-title">🔎 Destaques do Período</h3>
+            <ul class="destaques-lista" id="destaquesLista"></ul>
+        </div>
+
         <!-- Summary Section -->
         <div class="summary-section">
             <h3 class="summary-title">📋 Resumo Executivo</h3>
@@ -1274,75 +1368,75 @@
             consolidado: {
                 rotulo: 'Consolidado',
                 destaque: null,
-                veiculos: { eletricos: 560, euro6: 4861, trilhos: 47 },
-                veiculosSelecionados: { eletricos: 3129, euro6: 10889, trilhos: 47 },
+                veiculos: { eletricos: 638, euro6: 5337, trilhos: 47 },
+                veiculosSelecionados: { eletricos: 3129, euro6: 10918, trilhos: 47 },
                 regioes: [
                     { nome: 'Norte', propostas: 8, veiculos: 439, investimento: 531922189.09 },
-                    { nome: 'Nordeste', propostas: 28, veiculos: 1049, investimento: 1769025820.52 },
-                    { nome: 'Centro-Oeste', propostas: 10, veiculos: 501, investimento: 363791390.18 },
-                    { nome: 'Sudeste', propostas: 112, veiculos: 2879, investimento: 3145779462.37 },
-                    { nome: 'Sul', propostas: 39, veiculos: 600, investimento: 963455753.1 }
+                    { nome: 'Nordeste', propostas: 29, veiculos: 1147, investimento: 1804031420.52 },
+                    { nome: 'Centro-Oeste', propostas: 11, veiculos: 649, investimento: 453682312.98 },
+                    { nome: 'Sudeste', propostas: 119, veiculos: 3184, investimento: 3476833181.27 },
+                    { nome: 'Sul', propostas: 40, veiculos: 603, investimento: 970733063.1 }
                 ],
                 anos: [
                     { ano: 2023, propostas: 3, veiculos: 541, investimento: 1028432350 },
-                    { ano: 2024, propostas: 40, veiculos: 1587, investimento: 2764629892.23 },
+                    { ano: 2024, propostas: 42, veiculos: 1735, investimento: 2949635492.23 },
                     { ano: 2025, propostas: 118, veiculos: 2627, investimento: 2127732122.79 },
-                    { ano: 2026, propostas: 36, veiculos: 713, investimento: 853180250.24 }
+                    { ano: 2026, propostas: 44, veiculos: 1119, investimento: 1131402201.94 }
                 ],
                 ufsContratados: {
                     'AC': 67000000, 'AL': 22909060, 'AP': 0, 'AM': 44855750,
-                    'BA': 965251950, 'CE': 25153300, 'DF': 201123449.18, 'ES': 117809358.45,
+                    'BA': 1000257550, 'CE': 25153300, 'DF': 291014371.98, 'ES': 267809358.45,
                     'GO': 116424191, 'MA': 22467500, 'MT': 46243750, 'MS': 0,
-                    'MG': 863200808.26, 'PA': 368695000, 'PB': 47798300, 'PR': 309990223.7,
+                    'MG': 877385258.26, 'PA': 368695000, 'PB': 47798300, 'PR': 317267533.7,
                     'PE': 534111190, 'PI': 97145413.21, 'RJ': 1170622517, 'RN': 0,
                     'RS': 618213404.4, 'RO': 41358282.09, 'RR': 10013157, 'SC': 35252125,
-                    'SP': 994146778.66, 'SE': 54189107.31, 'TO': 0
+                    'SP': 1161016047.56, 'SE': 54189107.31, 'TO': 0
                 },
                 ufsSelecionados: {
                     'AC': 90000000, 'AL': 370990000, 'AP': 271764454.4, 'AM': 70540350,
                     'BA': 2199042730.6, 'CE': 341600000, 'DF': 618034276.79, 'ES': 306284500,
                     'GO': 401354046.66, 'MA': 22467500, 'MT': 95500000, 'MS': 0,
-                    'MG': 2195762852.1, 'PA': 634715991.52, 'PB': 331603105.01, 'PR': 1250013631.94,
+                    'MG': 2212397352.1, 'PA': 634715991.52, 'PB': 331603105.01, 'PR': 1270059602.41,
                     'PE': 674282190, 'PI': 192485413.21, 'RJ': 3110366087, 'RN': 0,
                     'RS': 1410719343.5, 'RO': 47025000, 'RR': 12226500, 'SC': 313747162.75,
                     'SP': 4064701535.83, 'SE': 341961107.31, 'TO': 191108000
                 },
                 projetos: {
-                    selecionados: { propostas: 333, veiculos: 14065, investimento: 19558295778.62 },
-                    contratados: { propostas: 197, veiculos: 5468, investimento: 6773974615.26 },
+                    selecionados: { propostas: 335, veiculos: 14094, investimento: 19594976249.09 },
+                    contratados: { propostas: 207, veiculos: 6022, investimento: 7237202166.96 },
                     status: {
-                        contratados: { qtd: 197, valor: 8265879969.13 },
-                        emPreparacao: { qtd: 78, valor: 4075077970.03 },
+                        contratados: { qtd: 207, valor: 8775043877.83 },
+                        emPreparacao: { qtd: 70, valor: 3602594531.8 },
                         aCancelar: { qtd: 12, valor: 2445914861.6 },
                         cancelados: { qtd: 46, valor: 4771422977.86 }
                     },
                     frentePublico: { propostas: 80, investimento: 12052306456.67 },
-                    frentePrivado: { propostas: 253, investimento: 7505989321.95 }
+                    frentePrivado: { propostas: 255, investimento: 7542669792.42 }
                 },
-                meta2026: { meta: 5000, realizado: 2164, percentual: 0.4328 }
+                meta2026: { meta: 5000, realizado: 2193, percentual: 0.4386 }
             },
             // Cenário 'Refrota Público' — B3 = "Refrota"
             publico: {
                 rotulo: 'Refrota Público',
                 destaque: 0,
-                veiculos: { eletricos: 392, euro6: 993, trilhos: 47 },
+                veiculos: { eletricos: 442, euro6: 993, trilhos: 47 },
                 veiculosSelecionados: { eletricos: 2412, euro6: 3539, trilhos: 47 },
                 regioes: [
                     { nome: 'Norte', propostas: 2, veiculos: 316, investimento: 435695000 },
                     { nome: 'Nordeste', propostas: 5, veiculos: 487, investimento: 1333145413.21 },
                     { nome: 'Centro-Oeste', propostas: 0, veiculos: 0, investimento: 0 },
-                    { nome: 'Sudeste', propostas: 6, veiculos: 525, investimento: 1182647817 },
+                    { nome: 'Sudeste', propostas: 7, veiculos: 575, investimento: 1332647817 },
                     { nome: 'Sul', propostas: 2, veiculos: 104, investimento: 463397487 }
                 ],
                 anos: [
                     { ano: 2023, propostas: 2, veiculos: 519, investimento: 1014626000 },
-                    { ano: 2024, propostas: 12, veiculos: 813, investimento: 2080259717.21 },
+                    { ano: 2024, propostas: 13, veiculos: 863, investimento: 2230259717.21 },
                     { ano: 2025, propostas: 0, veiculos: 0, investimento: 0 },
                     { ano: 2026, propostas: 1, veiculos: 100, investimento: 320000000 }
                 ],
                 ufsContratados: {
                     'AC': 67000000, 'AL': 0, 'AP': 0, 'AM': 0,
-                    'BA': 880000000, 'CE': 0, 'DF': 0, 'ES': 0,
+                    'BA': 880000000, 'CE': 0, 'DF': 0, 'ES': 150000000,
                     'GO': 0, 'MA': 0, 'MT': 0, 'MS': 0,
                     'MG': 412376817, 'PA': 368695000, 'PB': 0, 'PR': 0,
                     'PE': 320000000, 'PI': 97145413.21, 'RJ': 741271000, 'RN': 0,
@@ -1360,15 +1454,15 @@
                 },
                 projetos: {
                     selecionados: { propostas: 80, veiculos: 5998, investimento: 12052306456.67 },
-                    contratados: { propostas: 15, veiculos: 1432, investimento: 3414885717.21 },
+                    contratados: { propostas: 16, veiculos: 1482, investimento: 3564885717.21 },
                     status: {
-                        contratados: { qtd: 15, valor: 3579316617.21 },
-                        emPreparacao: { qtd: 7, valor: 1255652000 },
+                        contratados: { qtd: 16, valor: 3729316617.21 },
+                        emPreparacao: { qtd: 6, valor: 1105652000 },
                         aCancelar: { qtd: 12, valor: 2445914861.6 },
                         cancelados: { qtd: 46, valor: 4771422977.86 }
                     },
                     frentePublico: { propostas: 80, investimento: 12052306456.67 },
-                    frentePrivado: { propostas: 253, investimento: 7505989321.95 }
+                    frentePrivado: { propostas: 255, investimento: 7542669792.42 }
                 },
                 meta2026: { meta: 5000, realizado: 100, percentual: 0.02 }
             },
@@ -1376,52 +1470,52 @@
             privado: {
                 rotulo: 'Refrota Privado',
                 destaque: 1,
-                veiculos: { eletricos: 168, euro6: 3868, trilhos: 0 },
-                veiculosSelecionados: { eletricos: 717, euro6: 7350, trilhos: 0 },
+                veiculos: { eletricos: 196, euro6: 4344, trilhos: 0 },
+                veiculosSelecionados: { eletricos: 717, euro6: 7379, trilhos: 0 },
                 regioes: [
                     { nome: 'Norte', propostas: 6, veiculos: 123, investimento: 96227189.09 },
-                    { nome: 'Nordeste', propostas: 23, veiculos: 562, investimento: 435880407.31 },
-                    { nome: 'Centro-Oeste', propostas: 10, veiculos: 501, investimento: 363791390.18 },
-                    { nome: 'Sudeste', propostas: 106, veiculos: 2354, investimento: 1963131645.37 },
-                    { nome: 'Sul', propostas: 37, veiculos: 496, investimento: 500058266.1 }
+                    { nome: 'Nordeste', propostas: 24, veiculos: 660, investimento: 470886007.31 },
+                    { nome: 'Centro-Oeste', propostas: 11, veiculos: 649, investimento: 453682312.98 },
+                    { nome: 'Sudeste', propostas: 112, veiculos: 2609, investimento: 2144185364.27 },
+                    { nome: 'Sul', propostas: 38, veiculos: 499, investimento: 507335576.1 }
                 ],
                 anos: [
                     { ano: 2023, propostas: 1, veiculos: 22, investimento: 13806350 },
-                    { ano: 2024, propostas: 28, veiculos: 774, investimento: 684370175.02 },
+                    { ano: 2024, propostas: 29, veiculos: 872, investimento: 719375775.02 },
                     { ano: 2025, propostas: 118, veiculos: 2627, investimento: 2127732122.79 },
-                    { ano: 2026, propostas: 35, veiculos: 613, investimento: 533180250.24 }
+                    { ano: 2026, propostas: 43, veiculos: 1019, investimento: 811402201.94 }
                 ],
                 ufsContratados: {
                     'AC': 0, 'AL': 22909060, 'AP': 0, 'AM': 44855750,
-                    'BA': 85251950, 'CE': 25153300, 'DF': 201123449.18, 'ES': 117809358.45,
+                    'BA': 120257550, 'CE': 25153300, 'DF': 291014371.98, 'ES': 117809358.45,
                     'GO': 116424191, 'MA': 22467500, 'MT': 46243750, 'MS': 0,
-                    'MG': 450823991.26, 'PA': 0, 'PB': 47798300, 'PR': 309990223.7,
+                    'MG': 465008441.26, 'PA': 0, 'PB': 47798300, 'PR': 317267533.7,
                     'PE': 214111190, 'PI': 0, 'RJ': 429351517, 'RN': 0,
                     'RS': 154815917.4, 'RO': 41358282.09, 'RR': 10013157, 'SC': 35252125,
-                    'SP': 965146778.66, 'SE': 18189107.31, 'TO': 0
+                    'SP': 1132016047.56, 'SE': 18189107.31, 'TO': 0
                 },
                 ufsSelecionados: {
                     'AC': 0, 'AL': 25650000, 'AP': 0, 'AM': 70540350,
                     'BA': 210054730.6, 'CE': 121600000, 'DF': 618034276.79, 'ES': 156284500,
                     'GO': 321234046.66, 'MA': 22467500, 'MT': 57000000, 'MS': 0,
-                    'MG': 951146035.1, 'PA': 0, 'PB': 79190050, 'PR': 488951692.94,
+                    'MG': 967780535.1, 'PA': 0, 'PB': 79190050, 'PR': 508997663.41,
                     'PE': 214282190, 'PI': 0, 'RJ': 916964263.25, 'RN': 0,
                     'RS': 326439772.5, 'RO': 47025000, 'RR': 12226500, 'SC': 85324162.75,
                     'SP': 2570953144.05, 'SE': 210621107.31, 'TO': 0
                 },
                 projetos: {
-                    selecionados: { propostas: 253, veiculos: 8067, investimento: 7505989321.95 },
-                    contratados: { propostas: 182, veiculos: 4036, investimento: 3359088898.05 },
+                    selecionados: { propostas: 255, veiculos: 8096, investimento: 7542669792.42 },
+                    contratados: { propostas: 191, veiculos: 4540, investimento: 3672316449.75 },
                     status: {
-                        contratados: { qtd: 182, valor: 4686563351.92 },
-                        emPreparacao: { qtd: 71, valor: 2819425970.03 },
+                        contratados: { qtd: 191, valor: 5045727260.62 },
+                        emPreparacao: { qtd: 64, valor: 2496942531.8 },
                         aCancelar: { qtd: 0, valor: 0 },
                         cancelados: { qtd: 0, valor: 0 }
                     },
                     frentePublico: { propostas: 80, investimento: 12052306456.67 },
-                    frentePrivado: { propostas: 253, investimento: 7505989321.95 }
+                    frentePrivado: { propostas: 255, investimento: 7542669792.42 }
                 },
-                meta2026: { meta: 5000, realizado: 2064, percentual: 0.4128 }
+                meta2026: { meta: 5000, realizado: 2093, percentual: 0.4186 }
             }
         };
 
@@ -1560,6 +1654,130 @@
             if (totalVeic > 0) {
                 set('resPctEuro6', fmtPct(v.euro6 / totalVeic * 100) + '%');
                 set('resPctEletricos', fmtPct(v.eletricos / totalVeic * 100) + '%');
+            }
+        }
+
+        // ---------- Evolução desde a última atualização ----------
+        // Alimentado pelo bloco "_comparativo" do dados.json, gerado pelo
+        // script mensal/semanal. Se não houver comparativo (primeira carga ou
+        // dados.json indisponível), as duas seções permanecem ocultas.
+        let COMPARATIVO = {
+                "dataAnterior": "2026-07-31T09:52:47-03:00",
+                "dataAtual": "2026-08-07T10:07:04-03:00",
+                "metricas": [
+                        {
+                                "rotulo": "Projetos contratados",
+                                "formato": "int",
+                                "anterior": 197,
+                                "atual": 207
+                        },
+                        {
+                                "rotulo": "Veículos contratados",
+                                "formato": "int",
+                                "anterior": 5468,
+                                "atual": 6022
+                        },
+                        {
+                                "rotulo": "Investimento contratado",
+                                "formato": "moeda",
+                                "anterior": 6773974615.26,
+                                "atual": 7237202166.96
+                        },
+                        {
+                                "rotulo": "Projetos selecionados",
+                                "formato": "int",
+                                "anterior": 333,
+                                "atual": 335
+                        },
+                        {
+                                "rotulo": "Veículos selecionados",
+                                "formato": "int",
+                                "anterior": 14065,
+                                "atual": 14094
+                        },
+                        {
+                                "rotulo": "Investimento selecionado",
+                                "formato": "moeda",
+                                "anterior": 19558295778.62,
+                                "atual": 19594976249.09
+                        },
+                        {
+                                "rotulo": "Meta 2026 (veículos)",
+                                "formato": "int",
+                                "anterior": 2164,
+                                "atual": 2193
+                        }
+                ],
+                "destaques": [
+                        "Foram registradas 10 novas contratações — 9 na Refrota Privado e 1 na Refrota Público, somando 554 veículos e R$ 463,2 milhões em investimento.",
+                        "A carteira em preparação caiu de 78 para 70 projetos, confirmando o avanço de propostas já selecionadas para a fase de contratação.",
+                        "Entraram 2 novos projetos selecionados, elevando o investimento selecionado em R$ 36,7 milhões.",
+                        "Mudança no ranking regional: Centro-Oeste entrou entre as três regiões com mais veículos contratados, no lugar do Sul.",
+                        "A participação de ônibus elétricos na frota contratada subiu de 10,2% para 10,6%."
+                ]
+        };
+
+        function renderComparativo() {
+            const secTab = document.getElementById('secaoComparativo');
+            const secDest = document.getElementById('secaoDestaques');
+            const tbody = document.getElementById('comparativoBody');
+            const lista = document.getElementById('destaquesLista');
+            if (!secTab || !secDest || !tbody || !lista) return;
+
+            if (!COMPARATIVO || !Array.isArray(COMPARATIVO.metricas) || !COMPARATIVO.metricas.length) {
+                secTab.style.display = 'none';
+                secDest.style.display = 'none';
+                return;
+            }
+
+            // --- Período comparado ---
+            const fmtData = iso => {
+                if (!iso) return null;
+                const dt = new Date(iso);
+                if (isNaN(dt)) return null;
+                return String(dt.getDate()).padStart(2, '0') + '/' +
+                       String(dt.getMonth() + 1).padStart(2, '0') + '/' + dt.getFullYear();
+            };
+            const dAnt = fmtData(COMPARATIVO.dataAnterior);
+            const dAtu = fmtData(COMPARATIVO.dataAtual);
+            const periodo = document.getElementById('comparativoPeriodo');
+            if (periodo) {
+                periodo.textContent = (dAnt && dAtu)
+                    ? `Comparação entre a atualização de ${dAnt} e a atual, de ${dAtu}.`
+                    : 'Comparação com a atualização anterior.';
+            }
+
+            // --- Tabela comparativa ---
+            const fmtValor = (v, formato) => formato === 'moeda' ? fmtBi(v) : fmtInt(v);
+
+            tbody.innerHTML = COMPARATIVO.metricas.map(m => {
+                const diff = m.atual - m.anterior;
+                let classe = 'var-zero', texto = 'sem alteração';
+                if (diff > 0) {
+                    classe = 'var-pos';
+                    texto = '+' + (m.formato === 'moeda' ? fmtMi(diff) : fmtInt(diff));
+                } else if (diff < 0) {
+                    classe = 'var-neg';
+                    texto = '−' + (m.formato === 'moeda' ? fmtMi(Math.abs(diff)) : fmtInt(Math.abs(diff)));
+                }
+                return `<tr>
+                    <td class="metrica">${m.rotulo}</td>
+                    <td class="num anterior">${fmtValor(m.anterior, m.formato)}</td>
+                    <td class="num atual">${fmtValor(m.atual, m.formato)}</td>
+                    <td class="num"><span class="var-badge ${classe}">${texto}</span></td>
+                </tr>`;
+            }).join('');
+            secTab.style.display = '';
+
+            // --- Destaques ---
+            const destaques = Array.isArray(COMPARATIVO.destaques) ? COMPARATIVO.destaques : [];
+            if (destaques.length) {
+                lista.innerHTML = destaques
+                    .map(t => `<li>${String(t).replace(/</g, '&lt;')}</li>`)
+                    .join('');
+                secDest.style.display = '';
+            } else {
+                secDest.style.display = 'none';
             }
         }
 
@@ -2576,6 +2794,11 @@
                 aplicarCenario(cenarioAtual);
                 atualizarProjetosEMeta();
                 renderResumoExecutivo();
+
+                // Painéis de evolução: só aparecem se o JSON trouxer o comparativo
+                COMPARATIVO = json._comparativo || null;
+                renderComparativo();
+
                 console.log('✅ Dados carregados de dados.json (' +
                     (json._meta ? json._meta.gerado_em : 'sem metadados') + ')');
             } catch (e) {
@@ -2589,6 +2812,7 @@
         aplicarCenario('consolidado');
         atualizarProjetosEMeta();
         renderResumoExecutivo();
+        renderComparativo();
 
         // Em seguida, tenta sobrepor com os dados externos atualizados
         carregarDadosExternos();
@@ -2607,7 +2831,7 @@
         // Ela é sobrescrita automaticamente pela data real do "dados.json"
         // (campo _meta.gerado_em) quando o arquivo é carregado com sucesso;
         // esta constante só aparece caso o dados.json não seja encontrado.
-        const DATA_ATUALIZACAO_ARQUIVO = '31/07/2026 às 09:52';
+        const DATA_ATUALIZACAO_ARQUIVO = '07/08/2026 às 09:56';
 
         function atualizarDataHora() {
             const elemento = document.getElementById('dataHoraAtualizacao');

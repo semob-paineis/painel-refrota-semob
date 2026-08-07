@@ -33,6 +33,7 @@ REQUISITOS
 
 import argparse
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -430,6 +431,148 @@ def comparar_com_anterior(dados_novos, caminho_anterior):
 
 
 # ----------------------------------------------------------------------------
+# BLOCO COMPARATIVO (alimenta os painéis "Evolução" e "Destaques" no HTML)
+# ----------------------------------------------------------------------------
+def montar_comparativo(dados_novos, caminho_anterior):
+    """
+    Compara a extração atual com a anterior (dados.json existente) e devolve
+    um bloco pronto para o painel, com:
+      - metricas: linhas da tabela comparativa (Consolidado)
+      - destaques: observações em linguagem natural, geradas por regras
+    Devolve None se não houver snapshot anterior (ex.: primeira execução).
+    """
+    if not os.path.exists(caminho_anterior):
+        return None
+    try:
+        with open(caminho_anterior, encoding="utf-8") as f:
+            ant = json.load(f)
+    except Exception:
+        return None
+    if not all(k in ant for k in ("consolidado", "publico", "privado")):
+        return None
+
+    nc, ac = dados_novos["consolidado"], ant["consolidado"]
+
+    def veic(cen):
+        v = cen["veiculos"]
+        return v["eletricos"] + v["euro6"] + v["trilhos"]
+
+    def veic_sel(cen):
+        v = cen["veiculosSelecionados"]
+        return v["eletricos"] + v["euro6"] + v["trilhos"]
+
+    metricas = [
+        {"rotulo": "Projetos contratados", "formato": "int",
+         "anterior": ac["projetos"]["contratados"]["propostas"],
+         "atual": nc["projetos"]["contratados"]["propostas"]},
+        {"rotulo": "Veículos contratados", "formato": "int",
+         "anterior": veic(ac), "atual": veic(nc)},
+        {"rotulo": "Investimento contratado", "formato": "moeda",
+         "anterior": ac["projetos"]["contratados"]["investimento"],
+         "atual": nc["projetos"]["contratados"]["investimento"]},
+        {"rotulo": "Projetos selecionados", "formato": "int",
+         "anterior": ac["projetos"]["selecionados"]["propostas"],
+         "atual": nc["projetos"]["selecionados"]["propostas"]},
+        {"rotulo": "Veículos selecionados", "formato": "int",
+         "anterior": veic_sel(ac), "atual": veic_sel(nc)},
+        {"rotulo": "Investimento selecionado", "formato": "moeda",
+         "anterior": ac["projetos"]["selecionados"]["investimento"],
+         "atual": nc["projetos"]["selecionados"]["investimento"]},
+        {"rotulo": "Meta 2026 (veículos)", "formato": "int",
+         "anterior": ac["meta2026"]["realizado"],
+         "atual": nc["meta2026"]["realizado"]},
+    ]
+
+    # ---------------- Destaques gerados por regras ----------------
+    def br(v, casas=0):
+        return f"{v:,.{casas}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    destaques = []
+
+    # 1) Novas contratações e de qual frente vieram
+    d_contr = nc["projetos"]["contratados"]["propostas"] - ac["projetos"]["contratados"]["propostas"]
+    if d_contr > 0:
+        d_pub = (dados_novos["publico"]["projetos"]["contratados"]["propostas"]
+                 - ant["publico"]["projetos"]["contratados"]["propostas"])
+        d_priv = (dados_novos["privado"]["projetos"]["contratados"]["propostas"]
+                  - ant["privado"]["projetos"]["contratados"]["propostas"])
+        partes = []
+        if d_priv:
+            partes.append(f"{br(d_priv)} na Refrota Privado")
+        if d_pub:
+            partes.append(f"{br(d_pub)} na Refrota Público")
+        detalhe = (" — " + " e ".join(partes)) if partes else ""
+        d_veic = veic(nc) - veic(ac)
+        d_inv = nc["projetos"]["contratados"]["investimento"] - ac["projetos"]["contratados"]["investimento"]
+        destaques.append(
+            f"Foram registradas {br(d_contr)} novas contratações{detalhe}, "
+            f"somando {br(d_veic)} veículos e R$ {br(d_inv/1e6,1)} milhões em investimento."
+        )
+    elif d_contr < 0:
+        destaques.append(
+            f"O total de projetos contratados recuou em {br(abs(d_contr))} — "
+            f"vale conferir na base se houve cancelamento ou ajuste."
+        )
+
+    # 2) Migração entre status (Em preparação -> Contratados)
+    d_prep = nc["projetos"]["status"]["emPreparacao"]["qtd"] - ac["projetos"]["status"]["emPreparacao"]["qtd"]
+    if d_contr > 0 and d_prep < 0:
+        destaques.append(
+            f"A carteira em preparação caiu de {br(ac['projetos']['status']['emPreparacao']['qtd'])} "
+            f"para {br(nc['projetos']['status']['emPreparacao']['qtd'])} projetos, confirmando o avanço "
+            f"de propostas já selecionadas para a fase de contratação."
+        )
+
+    # 3) Novos projetos selecionados
+    d_sel = nc["projetos"]["selecionados"]["propostas"] - ac["projetos"]["selecionados"]["propostas"]
+    if d_sel > 0:
+        d_inv_sel = nc["projetos"]["selecionados"]["investimento"] - ac["projetos"]["selecionados"]["investimento"]
+        destaques.append(
+            f"Entraram {br(d_sel)} novos projetos selecionados, elevando o investimento "
+            f"selecionado em R$ {br(d_inv_sel/1e6,1)} milhões."
+        )
+
+    # 4) Mudança no ranking regional (top 3 por veículos contratados)
+    top_novo = [r["nome"] for r in sorted(nc["regioes"], key=lambda r: r["veiculos"], reverse=True)[:3]]
+    top_ant = [r["nome"] for r in sorted(ac["regioes"], key=lambda r: r["veiculos"], reverse=True)[:3]]
+    if top_novo != top_ant:
+        entrou = [r for r in top_novo if r not in top_ant]
+        saiu = [r for r in top_ant if r not in top_novo]
+        if entrou and saiu:
+            destaques.append(
+                f"Mudança no ranking regional: {entrou[0]} entrou entre as três regiões com mais "
+                f"veículos contratados, no lugar do {saiu[0]}."
+            )
+        else:
+            destaques.append(
+                f"Houve troca de posições entre as três regiões com mais veículos contratados: "
+                f"agora {top_novo[0]}, {top_novo[1]} e {top_novo[2]}."
+            )
+
+    # 5) Participação de elétricos na frota contratada
+    tv_n, tv_a = veic(nc), veic(ac)
+    if tv_n > 0 and tv_a > 0:
+        pe_n = nc["veiculos"]["eletricos"] / tv_n * 100
+        pe_a = ac["veiculos"]["eletricos"] / tv_a * 100
+        if abs(pe_n - pe_a) >= 0.1:
+            direcao = "subiu" if pe_n > pe_a else "recuou"
+            destaques.append(
+                f"A participação de ônibus elétricos na frota contratada {direcao} de "
+                f"{br(pe_a,1)}% para {br(pe_n,1)}%."
+            )
+
+    if not destaques:
+        destaques.append("Não houve variação relevante nos indicadores em relação à atualização anterior.")
+
+    return {
+        "dataAnterior": (ant.get("_meta") or {}).get("gerado_em"),
+        "dataAtual": dados_novos.get("_gerado_em"),
+        "metricas": metricas,
+        "destaques": destaques,
+    }
+
+
+# ----------------------------------------------------------------------------
 # FLUXO PRINCIPAL
 # ----------------------------------------------------------------------------
 def main():
@@ -511,15 +654,24 @@ def main():
         log("ok", "Todas as validações passaram sem avisos.")
 
     # -------- Metadados + gravação --------
+    # O comparativo precisa ser montado ANTES de sobrescrever o dados.json,
+    # pois usa o arquivo anterior como referência.
+    ts_atual = agora_brasilia().isoformat(timespec="seconds")
+    dados["_gerado_em"] = ts_atual
+    comparativo = montar_comparativo(dados, args.saida)
+    dados.pop("_gerado_em", None)
+
     saida = {
         "_meta": {
-            "gerado_em": agora_brasilia().isoformat(timespec="seconds"),
+            "gerado_em": ts_atual,
             "planilha_origem": os.path.basename(args.planilha),
             "gerado_por": "gerar_dados.py",
-            "versao_estrutura": 1,
+            "versao_estrutura": 2,
         },
         **dados,
     }
+    if comparativo:
+        saida["_comparativo"] = comparativo
 
     with open(args.saida, "w", encoding="utf-8") as f:
         json.dump(saida, f, ensure_ascii=False, indent=2)
@@ -543,6 +695,29 @@ def main():
     print(f"    Investimento contratado : R$ {tot_contr/1e9:,.2f} bi")
     print(f"    Investimento selecionado: R$ {tot_sel/1e9:,.2f} bi")
     print(f"    Veículos contratados    : {veic_contr:,}")
+
+    # ---- Prévia do texto do "Resumo Executivo" exibido no painel ----
+    # O painel monta este texto sozinho a partir do dados.json, mas a prévia
+    # abaixo permite conferir os números antes de publicar.
+    def br(v, casas=2):
+        return f"{v:,.{casas}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    p = c["projetos"]
+    v = c["veiculos"]
+    sel_floor = math.floor(p["selecionados"]["investimento"] / 1e8) / 10
+    top3 = sorted(c["regioes"], key=lambda r: r["veiculos"], reverse=True)[:3]
+    pct_euro6 = v["euro6"] / veic_contr * 100 if veic_contr else 0
+    pct_elet = v["eletricos"] / veic_contr * 100 if veic_contr else 0
+
+    print("-" * 72)
+    print("  RESUMO EXECUTIVO (confira o texto antes de publicar):")
+    print(f"    ...a soma das seleções ultrapassa R$ {br(sel_floor,1)} bilhões, das quais,")
+    print(f"    foram contratadas {br(p['contratados']['propostas'],0)} propostas... O investimento contratado soma")
+    print(f"    R$ {br(p['contratados']['investimento']/1e9)} bilhões para a aquisição de {br(veic_contr,0)} veículos:")
+    print(f"    {br(v['euro6'],0)} ônibus Euro VI, {br(v['eletricos'],0)} ônibus elétricos e {br(v['trilhos'],0)} veículos sobre trilhos.")
+    print(f"    Distribuição regional: {top3[0]['nome']} ({br(top3[0]['veiculos'],0)}), "
+          f"{top3[1]['nome']} ({br(top3[1]['veiculos'],0)}), {top3[2]['nome']} ({br(top3[2]['veiculos'],0)}).")
+    print(f"    Euro 6: {br(pct_euro6,1)}% da frota | Elétricos: {br(pct_elet,1)}%")
     print("=" * 72)
     log("ok", "Concluído com sucesso. Faça o upload de dados.json no servidor.")
     print("=" * 72)
