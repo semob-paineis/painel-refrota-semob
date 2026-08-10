@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "gerado_em": "2026-08-07T10:07:04-03:00",
+    "gerado_em": "2026-08-10T11:26:40-03:00",
     "planilha_origem": "Dados_Refrota_Contratações.xlsx",
     "gerado_por": "gerar_dados.py",
     "versao_estrutura": 2
@@ -17,6 +17,11 @@
       "eletricos": 3129,
       "euro6": 10918,
       "trilhos": 47
+    },
+    "veiculosEntregues": {
+      "eletricos": 371,
+      "euro6": 3662,
+      "trilhos": 2
     },
     "regioes": [
       {
@@ -191,6 +196,11 @@
       "euro6": 3539,
       "trilhos": 47
     },
+    "veiculosEntregues": {
+      "eletricos": 225,
+      "euro6": 382,
+      "trilhos": 2
+    },
     "regioes": [
       {
         "nome": "Norte",
@@ -364,6 +374,11 @@
       "euro6": 7379,
       "trilhos": 0
     },
+    "veiculosEntregues": {
+      "eletricos": 106,
+      "euro6": 3055,
+      "trilhos": 0
+    },
     "regioes": [
       {
         "nome": "Norte",
@@ -526,7 +541,7 @@
   },
   "_comparativo": {
     "dataAnterior": "2026-07-31T09:52:47-03:00",
-    "dataAtual": "2026-08-07T10:07:04-03:00",
+    "dataAtual": "2026-08-10T11:26:40-03:00",
     "metricas": [
       {
         "rotulo": "Projetos contratados",
@@ -578,5 +593,9 @@
       "Mudança no ranking regional: Centro-Oeste entrou entre as três regiões com mais veículos contratados, no lugar do Sul.",
       "A participação de ônibus elétricos na frota contratada subiu de 10,2% para 10,6%."
     ]
-  }
+  },
+  "_dados_inconsistentes": [
+    "Reconciliação veiculosEntregues.eletricos: Consolidado (371) ≠ Público+Privado (331)",
+    "Reconciliação veiculosEntregues.euro6: Consolidado (3662) ≠ Público+Privado (3437)"
+  ]
 }

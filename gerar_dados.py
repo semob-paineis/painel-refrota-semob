@@ -85,6 +85,12 @@ LINHA_VEIC_CONTRATADOS = 13
 LINHA_VEIC_SELECIONADOS = 32
 COL_ELETRICOS, COL_EURO6, COL_TRILHOS = 5, 6, 7   # E, F, G
 
+# Veículos ENTREGUES — bloco K5:P13 da aba "Dados para Painel".
+# Mesma estrutura dos contratados, porém em outras colunas: a linha 13 traz os
+# totais e as colunas N/O/P trazem Elétricos / Euro VI / Veículos sobre trilhos.
+LINHA_VEIC_ENTREGUES = 13
+COL_ENT_ELETRICOS, COL_ENT_EURO6, COL_ENT_TRILHOS = 14, 15, 16   # N, O, P
+
 # Tabelas de Região e Ano (contratados) — usadas nas tabelas e mini-gráficos
 # Colunas: B(nome) C(propostas) D(veiculos) H(investimento)
 REGIOES_LINHAS = range(8, 13)     # Norte..Sul (exclui Total)
@@ -221,6 +227,11 @@ def extrair_cenario(caminho_xlsx, chave_cenario):
             "eletricos": cel(LINHA_VEIC_SELECIONADOS, COL_ELETRICOS),
             "euro6": cel(LINHA_VEIC_SELECIONADOS, COL_EURO6),
             "trilhos": cel(LINHA_VEIC_SELECIONADOS, COL_TRILHOS),
+        },
+        "veiculosEntregues": {
+            "eletricos": cel(LINHA_VEIC_ENTREGUES, COL_ENT_ELETRICOS),
+            "euro6": cel(LINHA_VEIC_ENTREGUES, COL_ENT_EURO6),
+            "trilhos": cel(LINHA_VEIC_ENTREGUES, COL_ENT_TRILHOS),
         },
         "regioes": [],
         "anos": [],
@@ -399,6 +410,26 @@ def validar(dados):
             f"Reconciliação meta2026.realizado: Consolidado ({meta_cons}) "
             f"≠ Público+Privado ({meta_soma})"
         )
+
+    # 9) Veículos entregues: Público + Privado = Consolidado
+    for campo in ["eletricos", "euro6", "trilhos"]:
+        cons_e = c["veiculosEntregues"][campo]
+        soma_e = p["veiculosEntregues"][campo] + v["veiculosEntregues"][campo]
+        if cons_e != soma_e:
+            erros.append(
+                f"Reconciliação veiculosEntregues.{campo}: Consolidado ({cons_e}) "
+                f"≠ Público+Privado ({soma_e})"
+            )
+
+    # 10) Entregues não podem superar os contratados (sanidade)
+    for chave, cen in dados.items():
+        tot_ent = sum(cen["veiculosEntregues"].values())
+        tot_con = sum(cen["veiculos"].values())
+        if tot_ent > tot_con:
+            avisos.append(
+                f"[{chave}] Veículos entregues ({tot_ent}) superam os contratados "
+                f"({tot_con}) — confira a base."
+            )
 
     return erros, avisos
 
@@ -592,6 +623,12 @@ def main():
         help="Não recalcular com LibreOffice; usar valores já salvos por cenário "
              "(requer que a planilha tenha os 3 cenários pré-calculados — não recomendado)."
     )
+    parser.add_argument(
+        "--forcar", action="store_true",
+        help="Gera o dados.json MESMO com erros de consistência. Use apenas para "
+             "inspeção/homologação — NUNCA para publicar. Os erros continuam sendo "
+             "exibidos e o arquivo recebe a marca _dados_inconsistentes."
+    )
     args = parser.parse_args()
 
     print("=" * 72)
@@ -645,10 +682,14 @@ def main():
         for e in erros:
             log("erro", e)
         print("-" * 72)
-        log("erro", "Foram encontrados ERROS de consistência. "
-                    "O arquivo NÃO foi gerado.")
-        log("info", "Revise a planilha e rode novamente.")
-        sys.exit(2)
+        if not args.forcar:
+            log("erro", "Foram encontrados ERROS de consistência. "
+                        "O arquivo NÃO foi gerado.")
+            log("info", "Revise a planilha e rode novamente.")
+            log("info", "Para gerar assim mesmo (apenas para inspeção), use --forcar.")
+            sys.exit(2)
+        log("warn", "MODO --forcar: o arquivo será gerado APESAR dos erros acima.")
+        log("warn", "NÃO PUBLIQUE este arquivo antes de corrigir a planilha.")
 
     if not avisos and not alertas:
         log("ok", "Todas as validações passaram sem avisos.")
@@ -672,6 +713,9 @@ def main():
     }
     if comparativo:
         saida["_comparativo"] = comparativo
+    if erros:
+        # Marca explícita de que o arquivo foi gerado com --forcar
+        saida["_dados_inconsistentes"] = erros
 
     with open(args.saida, "w", encoding="utf-8") as f:
         json.dump(saida, f, ensure_ascii=False, indent=2)

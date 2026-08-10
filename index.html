@@ -514,6 +514,303 @@
             margin-bottom: 15px;
         }
 
+        /* ===== Painel "Funil de Conversão" — modelo vertical, largura decrescente ===== */
+        /* Paleta seguindo a referência: Selecionados (mais escuro) #1E56F0,
+           Contratados (médio) #5B8FF9, Entregues (claro) #A7E3C2. O mesmo
+           sistema de cores se repete na planilha de conversões abaixo. */
+        .funil-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .funil-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .funil-header .chart-title {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .funil-header-icon { width: 19px; height: 19px; flex-shrink: 0; }
+
+        /* Selo do cenário ativo — este painel É reativo ao filtro superior,
+           ao contrário dos dois donuts de projetos (sempre Consolidado). */
+        .funil-cenario-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: #eaf1fb;
+            color: #0052cc;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .funil-cenario-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* ---- Coluna vertical com os 3 cartões (sem numeração/texto lateral) ---- */
+        .funil-vertical {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .funil-step { width: 100%; display: flex; justify-content: center; }
+
+        /* Largura decrescente: Contratados 10% menor que Selecionados;
+           Entregues 10% menor que Contratados (ou seja, 81% do topo). */
+        .funil-w1 .funil-step-card { width: 100%; }
+        .funil-w2 .funil-step-card { width: 90%; }
+        .funil-w3 .funil-step-card { width: 81%; }
+
+        .funil-step-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            border-radius: 16px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+            cursor: pointer;
+        }
+
+        .funil-step-card:hover,
+        .funil-step.ativo .funil-step-card {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
+        }
+
+        /* Cores por intensidade — mais escura no topo, mais clara na base */
+        .funil-card-1 { background: #1e56f0; }
+        .funil-card-2 { background: #5b8ff9; }
+        .funil-card-3 { background: #a7e3c2; }
+
+        .funil-step-icon,
+        .funil-step-icon-r {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px 8px 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .funil-step-icon svg,
+        .funil-step-icon-r svg { width: 23px; height: 23px; }
+
+        .funil-step-icon-r { width: 34px; height: 34px; border-radius: 8px 14px 14px 8px; margin-left: auto; }
+        .funil-step-icon-r svg { width: 19px; height: 19px; }
+
+        /* Cartões 1 e 2 (fundo escuro/médio) — ícone e texto em branco */
+        .funil-card-1 .funil-step-icon,
+        .funil-card-1 .funil-step-icon-r { background: rgba(255, 255, 255, 0.20); color: #ffffff; }
+        .funil-card-2 .funil-step-icon,
+        .funil-card-2 .funil-step-icon-r { background: rgba(255, 255, 255, 0.24); color: #ffffff; }
+
+        .funil-card-1 .funil-step-titulo,
+        .funil-card-1 .funil-step-valor { color: #ffffff; }
+        .funil-card-1 .funil-step-sub { color: rgba(255, 255, 255, 0.78); }
+
+        .funil-card-2 .funil-step-titulo,
+        .funil-card-2 .funil-step-valor { color: #ffffff; }
+        .funil-card-2 .funil-step-sub { color: rgba(255, 255, 255, 0.82); }
+
+        /* Cartão 3 (fundo claro) — ícone e texto em tom escuro para contraste */
+        .funil-card-3 .funil-step-icon,
+        .funil-card-3 .funil-step-icon-r { background: rgba(255, 255, 255, 0.55); color: #0e6b45; }
+        .funil-card-3 .funil-step-titulo { color: #0e4a30; }
+        .funil-card-3 .funil-step-valor { color: #0b3a26; }
+        .funil-card-3 .funil-step-sub { color: #2c6b4c; }
+
+        .funil-step-info { flex: 1; min-width: 0; }
+
+        .funil-step-titulo {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .funil-step-valor {
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1.15;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .funil-step-sub {
+            font-size: 11.5px;
+            margin-top: 1px;
+        }
+
+        /* ---- Tooltip de composição (hover na etapa) ---- */
+        .funil-tooltip {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.94);
+            color: #fff;
+            padding: 10px 13px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.6;
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 50;
+            white-space: nowrap;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            transform: translate(-50%, -108%);
+        }
+
+        .funil-tooltip.show { opacity: 1; visibility: visible; }
+
+        .funil-tooltip .ft-titulo {
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .funil-tooltip .ft-linha {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .funil-tooltip .ft-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .funil-tooltip .ft-num {
+            margin-left: auto;
+            font-variant-numeric: tabular-nums;
+            padding-left: 12px;
+        }
+
+        /* ---- Planilha de conversões (abaixo do funil) ---- */
+        /* Linhas 1 e 2 usam o mesmo fundo claro; a linha 3 (Conversão total)
+           usa o fundo verde claro, refletindo a cor de "Entregues". */
+        .funil-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .funil-metric-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: #f2f6ff;
+            border-radius: 10px;
+        }
+
+        .funil-metric-row.row-destaque {
+            background: #e9f8ef;
+        }
+
+        .funil-metric-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .fmb {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Numeração dos selos reflete a mesma escala de cor dos cartões */
+        .fmb-1 { background: #1e56f0; }
+        .fmb-2 { background: #5b8ff9; }
+        .fmb-3 { background: #2fae76; }
+        .fmb-seta { color: #a9b4c0; font-size: 12px; }
+
+        .funil-metric-icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #2fae76;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .funil-metric-icon svg { width: 15px; height: 15px; }
+
+        .funil-metric-row .fm-label {
+            font-size: 13px;
+            color: #45536b;
+            flex: 1;
+        }
+
+        .funil-metric-row .fm-label-destaque {
+            color: #0e4a30;
+            font-weight: 700;
+        }
+
+        .funil-metric-row .fm-value {
+            font-size: 16px;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* fm-c1 = cor de "Selecionados" (mais escura); fm-c3 = cor associada
+           a "Entregues" (mais clara), usada tanto na 2ª quanto na 3ª linha. */
+        .fm-c1 { color: #1e56f0; }
+        .fm-c3 { color: #1f8f5c; }
+
+        .funil-nota {
+            font-size: 11px;
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            margin: 14px 0 0;
+        }
+
+        @media (max-width: 640px) {
+            .funil-step-card { flex-wrap: wrap; padding: 14px; }
+            .funil-step-icon-r { display: none; }
+            .funil-step-valor { font-size: 22px; }
+        }
+
         .summary-highlight {
             background: #f0f4f8;
             padding: 20px;
@@ -1146,7 +1443,7 @@
                         </div>
                     </div>
                     <div class="legend-item" data-serie="privado">
-                        <div class="legend-color" style="background: #6366f1;"></div>
+                        <div class="legend-color" style="background: #0d9488;"></div>
                         <div>
                             <div style="font-weight: 600;">Refrota Privado</div>
                             <div id="legProjPrivadoSelecionado" style="font-size: 12px; color: #666;">R$ 7,34 bi · 245 projetos</div>
@@ -1173,13 +1470,131 @@
                         </div>
                     </div>
                     <div class="legend-item" data-serie="privado">
-                        <div class="legend-color" style="background: #6366f1;"></div>
+                        <div class="legend-color" style="background: #0d9488;"></div>
                         <div>
                             <div style="font-weight: 600;">Refrota Privado</div>
                             <div id="legProjPrivadoContratado" style="font-size: 12px; color: #666;">R$ 3,23 bi · 179 projetos · 3.900 veículos</div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Funil de Conversão — reativo ao filtro de cenário -->
+            <div class="chart-item funil-card">
+                <div class="funil-header">
+                    <h3 class="chart-title">
+                        <svg class="funil-header-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M3 4h18l-7 8v6l-4 2v-8L3 4z" stroke="#c0392b" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+                        </svg>
+                        Funil de Conversão
+                    </h3>
+                    <span class="funil-cenario-badge" id="funilCenarioBadge">Consolidado</span>
+                </div>
+
+                <div class="funil-vertical" id="funilVertical">
+                    <!-- Etapa 1: Selecionados (100% da largura — cor mais escura) -->
+                    <div class="funil-step funil-w1" id="funilStep0" data-etapa="0">
+                        <div class="funil-step-card funil-card-1">
+                            <div class="funil-step-icon funil-icon-1">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/>
+                                    <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                    <circle cx="17" cy="9" r="2.4" stroke="currentColor" stroke-width="1.7"/>
+                                    <path d="M14.8 19c.3-2.4 2.1-4 4.2-4 1.7 0 3.2.9 4 2.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="funil-step-info">
+                                <div class="funil-step-titulo">Selecionados</div>
+                                <div class="funil-step-valor" id="funilValor0">0</div>
+                                <div class="funil-step-sub">Total de selecionados</div>
+                            </div>
+                            <div class="funil-step-icon-r funil-icon-1">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.6"/>
+                                    <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                    <circle cx="17" cy="9" r="2.2" stroke="currentColor" stroke-width="1.6"/>
+                                    <path d="M14.8 19c.3-2.4 2.1-4 4.2-4 1.7 0 3.2.9 4 2.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Etapa 2: Contratados (90% da largura de Selecionados — cor média) -->
+                    <div class="funil-step funil-w2" id="funilStep1" data-etapa="1">
+                        <div class="funil-step-card funil-card-2">
+                            <div class="funil-step-icon funil-icon-2">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <rect x="5.5" y="3.5" width="12" height="16" rx="1.6" stroke="currentColor" stroke-width="1.7"/>
+                                    <path d="M8.5 8h6M8.5 11.3h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                    <path d="M14.3 13.2l3.4-3.4 1.6 1.6-3.4 3.4-2 .4.4-2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="funil-step-info">
+                                <div class="funil-step-titulo">Contratados</div>
+                                <div class="funil-step-valor" id="funilValor1">0</div>
+                                <div class="funil-step-sub">Total de contratados</div>
+                            </div>
+                            <div class="funil-step-icon-r funil-icon-2">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M3 12l3.2-3.2a2 2 0 0 1 2.5-.25L11 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M21 12l-3.2-3.2a2 2 0 0 0-2.5-.25L13 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M11 10l-2.3 2.3a1.4 1.4 0 0 0 2 2L11 14l.7.7a1.4 1.4 0 0 0 2-2L11 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M13 10l1.3 1.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Etapa 3: Entregues (90% da largura de Contratados — cor mais clara) -->
+                    <div class="funil-step funil-w3" id="funilStep2" data-etapa="2">
+                        <div class="funil-step-card funil-card-3">
+                            <div class="funil-step-icon funil-icon-3">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M12 3l8 4.2v9.6L12 21l-8-4.2V7.2L12 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                                    <path d="M4 7.2L12 11.4l8-4.2M12 11.4V21" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div class="funil-step-info">
+                                <div class="funil-step-titulo">Entregues</div>
+                                <div class="funil-step-valor" id="funilValor2">0</div>
+                                <div class="funil-step-sub">Total de entregues</div>
+                            </div>
+                            <div class="funil-step-icon-r funil-icon-3">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/>
+                                    <path d="M8 12.3l2.6 2.6L16.3 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="funil-tooltip" id="funilTooltip" aria-hidden="true"></div>
+                </div>
+
+                <div class="funil-metrics" id="funilMetrics">
+                    <div class="funil-metric-row">
+                        <span class="funil-metric-badge">
+                            <span class="fmb fmb-1">1</span><span class="fmb-seta">→</span><span class="fmb fmb-2">2</span>
+                        </span>
+                        <span class="fm-label">Seleção → Contratação</span>
+                        <span class="fm-value fm-c1" id="funilTaxa1">—</span>
+                    </div>
+                    <div class="funil-metric-row">
+                        <span class="funil-metric-badge">
+                            <span class="fmb fmb-2">2</span><span class="fmb-seta">→</span><span class="fmb fmb-3">3</span>
+                        </span>
+                        <span class="fm-label">Contratação → Entrega</span>
+                        <span class="fm-value fm-c3" id="funilTaxa2">—</span>
+                    </div>
+                    <div class="funil-metric-row row-destaque">
+                        <span class="funil-metric-icon">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V10M10 19V5M16 19v-7M20 19v-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        </span>
+                        <span class="fm-label fm-label-destaque">Conversão total</span>
+                        <span class="fm-value fm-c3" id="funilTaxaTotal">—</span>
+                    </div>
+                </div>
+                <p class="funil-nota">*Veículos. Passe o cursor sobre cada etapa para ver a composição.</p>
             </div>
         </div>
 
@@ -1209,9 +1624,33 @@
                 </div>
             </div>
 
+            <!-- Donut Chart - Distribuição de Veículos Entregues -->
+            <div class="chart-item">
+                <h3 class="chart-title">Distribuição de Veículos Entregues</h3>
+                <div class="donut-wrapper">
+                    <div class="donut-chart">
+                        <canvas id="deliveredDonutChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span><strong>Ônibus Elétricos:</strong> <span id="legEntEletricos">371 (9,2%)</span></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f59e0b;"></div>
+                        <span><strong>Ônibus Euro 6:</strong> <span id="legEntEuro6">3.662 (90,8%)</span></span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #8b5cf6;"></div>
+                        <span><strong>Veículos sobre Trilhos:</strong> <span id="legEntTrilhos">2 (0,0%)</span></span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Nova coluna: Indicador de Metas de Veículos Selecionados 2026 -->
             <div class="chart-item">
-                <h3 class="chart-title">📈 Metas Quantidade de Veículos Selecionados - Ano 2026</h3>
+                <h3 class="chart-title">📈 Meta Quantidade de Veículos Selecionados - Ano 2026</h3>
                 <div class="donut-wrapper">
                     <div class="donut-chart" id="metasChart">
                         <canvas id="metasProgressChart"></canvas>
@@ -1370,6 +1809,7 @@
                 destaque: null,
                 veiculos: { eletricos: 638, euro6: 5337, trilhos: 47 },
                 veiculosSelecionados: { eletricos: 3129, euro6: 10918, trilhos: 47 },
+                veiculosEntregues: { eletricos: 371, euro6: 3662, trilhos: 2 },
                 regioes: [
                     { nome: 'Norte', propostas: 8, veiculos: 439, investimento: 531922189.09 },
                     { nome: 'Nordeste', propostas: 29, veiculos: 1147, investimento: 1804031420.52 },
@@ -1421,6 +1861,7 @@
                 destaque: 0,
                 veiculos: { eletricos: 442, euro6: 993, trilhos: 47 },
                 veiculosSelecionados: { eletricos: 2412, euro6: 3539, trilhos: 47 },
+                veiculosEntregues: { eletricos: 225, euro6: 382, trilhos: 2 },
                 regioes: [
                     { nome: 'Norte', propostas: 2, veiculos: 316, investimento: 435695000 },
                     { nome: 'Nordeste', propostas: 5, veiculos: 487, investimento: 1333145413.21 },
@@ -1472,6 +1913,7 @@
                 destaque: 1,
                 veiculos: { eletricos: 196, euro6: 4344, trilhos: 0 },
                 veiculosSelecionados: { eletricos: 717, euro6: 7379, trilhos: 0 },
+                veiculosEntregues: { eletricos: 106, euro6: 3055, trilhos: 0 },
                 regioes: [
                     { nome: 'Norte', propostas: 6, veiculos: 123, investimento: 96227189.09 },
                     { nome: 'Nordeste', propostas: 24, veiculos: 660, investimento: 470886007.31 },
@@ -1663,7 +2105,7 @@
         // dados.json indisponível), as duas seções permanecem ocultas.
         let COMPARATIVO = {
                 "dataAnterior": "2026-07-31T09:52:47-03:00",
-                "dataAtual": "2026-08-07T10:07:04-03:00",
+                "dataAtual": "2026-08-10T11:26:40-03:00",
                 "metricas": [
                         {
                                 "rotulo": "Projetos contratados",
@@ -1790,6 +2232,18 @@
             return tipoProjetoMapa === 'selecionados' ? e.ufsSelecionados : e.ufsContratados;
         }
         function totalVeiculos(e) { return e.veiculos.eletricos + e.veiculos.euro6 + e.veiculos.trilhos; }
+        function totalVeiculosSelecionados(e) {
+            return e.veiculosSelecionados.eletricos + e.veiculosSelecionados.euro6 + e.veiculosSelecionados.trilhos;
+        }
+        // Total de veículos ENTREGUES do cenário. Usa fallback vazio caso o
+        // dados.json ainda não traga o bloco (compatibilidade retroativa).
+        function veiculosEntregues(e) {
+            return (e && e.veiculosEntregues) || { eletricos: 0, euro6: 0, trilhos: 0 };
+        }
+        function totalVeiculosEntregues(e) {
+            const v = veiculosEntregues(e);
+            return v.eletricos + v.euro6 + v.trilhos;
+        }
         function somaRegioes(e, campo) { return e.regioes.reduce((a, r) => a + r[campo], 0); }
         function somaAnos(e, campo) { return e.anos.reduce((a, r) => a + r[campo], 0); }
 
@@ -1809,6 +2263,28 @@
                 ctx.textBaseline = 'middle';
                 // Total do cenário ativo (Consolidado / Público / Privado)
                 ctx.fillText(fmtInt(totalVeiculos(estado())), centerX, centerY);
+
+                ctx.restore();
+            }
+        };
+
+        // Plugin de texto central do donut de Veículos ENTREGUES
+        // Mesmo padrão visual do donut de contratados (centerTextPlugin).
+        const deliveredCenterTextPlugin = {
+            id: 'deliveredCenterText',
+            afterDatasetsDraw(chart) {
+                const {ctx, chartArea: {left, top, width, height}} = chart;
+                ctx.save();
+
+                const centerX = left + width / 2;
+                const centerY = top + height / 2;
+
+                ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#0052cc';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                // Total do cenário ativo (Consolidado / Público / Privado)
+                ctx.fillText(fmtInt(totalVeiculosEntregues(estado())), centerX, centerY);
 
                 ctx.restore();
             }
@@ -2035,6 +2511,50 @@
             }
         });
 
+        // Donut Chart - Distribuição de Veículos Entregues
+        // Mesma configuração visual do donut de contratados.
+        const deliveredDonutCtx = document.getElementById('deliveredDonutChart').getContext('2d');
+        const chartVeiculosEntregues = new Chart(deliveredDonutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ônibus Elétricos', 'Ônibus Euro 6', 'Veículos sobre Trilhos'],
+                datasets: [{
+                    data: [371, 3662, 2],
+                    backgroundColor: ['#10b981', '#f59e0b', '#8b5cf6'],
+                    borderColor: ['#ffffff', '#ffffff', '#ffffff'],
+                    borderWidth: 3,
+                    borderRadius: 10,
+                    hoverOffset: 8
+                }]
+            },
+            plugins: [deliveredCenterTextPlugin],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '78%',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : '0.0';
+                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        padding: 12,
+                        displayColors: true,
+                        borderRadius: 8
+                    }
+                }
+            }
+        });
+
         // Donut Chart - Distribuição de Recursos dos Projetos
         const resourcesDonutCtx = document.getElementById('resourcesDonutChart').getContext('2d');
         const chartSelecionados = new Chart(resourcesDonutCtx, {
@@ -2043,7 +2563,7 @@
                 labels: ['Desistências', 'Selecionados', 'Refrota Privado'],
                 datasets: [{
                     data: [7.22, 4.83, 7.34],
-                    backgroundColor: ['#7a9fd9', '#0052cc', '#6366f1'],
+                    backgroundColor: ['#7a9fd9', '#0052cc', '#0d9488'],
                     borderColor: ['#ffffff', '#ffffff', '#ffffff'],
                     borderWidth: 3,
                     borderRadius: 10,
@@ -2122,7 +2642,7 @@
                 labels: ['Refrota Público', 'Refrota Privado'],
                 datasets: [{
                     data: [2.97, 3.23],
-                    backgroundColor: ['#0052cc', '#6366f1'],
+                    backgroundColor: ['#0052cc', '#0d9488'],
                     borderColor: ['#ffffff', '#ffffff'],
                     borderWidth: 3,
                     borderRadius: 10,
@@ -2235,31 +2755,76 @@
         // Year Evolution Chart
         const yearCtx = document.getElementById('yearChart').getContext('2d');
         const chartAno = new Chart(yearCtx, {
-            type: 'line',
+            // Gráfico combinado: barras (contratações do ano) + linha (acumulado).
+            // O acumulado é a soma progressiva dos veículos contratados, e por isso
+            // é calculado a partir da mesma série — garantindo que sempre reconcilie.
+            type: 'bar',
             data: {
                 labels: ['2023', '2024', '2025', '2026'],
-                datasets: [{
-                    label: 'Veículos Contratados',
-                    data: [22, 1493, 2623, 575],
-                    borderColor: '#0052cc',
-                    backgroundColor: 'rgba(0, 82, 204, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#0052cc',
-                    pointBorderColor: '#ffffff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }]
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Veículos contratados no ano',
+                        data: [541, 1735, 2627, 1119],
+                        backgroundColor: '#0052cc',
+                        hoverBackgroundColor: '#0041a3',
+                        borderRadius: 6,
+                        borderSkipped: false,
+                        maxBarThickness: 56,
+                        order: 2
+                    },
+                    {
+                        type: 'line',
+                        label: 'Acumulado de veículos contratados',
+                        data: [541, 2276, 4903, 6022],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                        fill: true,
+                        tension: 0.35,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        order: 1
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: { display: false }
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 10,
+                            padding: 16,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + fmtInt(context.parsed.y) + ' veículos';
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        padding: 12,
+                        displayColors: true,
+                        borderRadius: 8
+                    }
                 },
                 scales: {
-                    y: { beginAtZero: true }
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: v => fmtInt(v) }
+                    }
                 }
             }
         });
@@ -2268,7 +2833,7 @@
            MOTOR DE RENDERIZAÇÃO — injeta os dados do cenário ativo em todo o painel
            ========================================================================= */
 
-        const CORES_DONUT_PROJETOS = ['#0052cc', '#6366f1']; // [Refrota Público, Refrota Privado]
+        const CORES_DONUT_PROJETOS = ['#0052cc', '#0d9488']; // [Refrota Público, Refrota Privado]
 
         // --- Donut de veículos: fatias, legenda e total central ---
         function renderDonutVeiculos() {
@@ -2283,6 +2848,180 @@
             document.getElementById('legEletricos').textContent = rotulo(v[0]);
             document.getElementById('legEuro6').textContent = rotulo(v[1]);
             document.getElementById('legTrilhos').textContent = rotulo(v[2]);
+        }
+
+        // Mesma lógica do donut de contratados, aplicada aos ENTREGUES.
+        function renderDonutVeiculosEntregues() {
+            const e = estado();
+            const ent = veiculosEntregues(e);
+            const total = totalVeiculosEntregues(e) || 1;
+            const v = [ent.eletricos, ent.euro6, ent.trilhos];
+
+            chartVeiculosEntregues.data.datasets[0].data = v;
+            chartVeiculosEntregues.update();
+
+            const rotulo = qtd => fmtInt(qtd) + ' (' + fmtPct(qtd / total * 100) + '%)';
+            const set = (id, txt) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = txt;
+            };
+            set('legEntEletricos', rotulo(v[0]));
+            set('legEntEuro6', rotulo(v[1]));
+            set('legEntTrilhos', rotulo(v[2]));
+        }
+
+        // --- Funil de Conversão: Selecionados -> Contratados -> Entregues ---
+        // Ao contrário dos donuts de projetos (que comparam Público x Privado
+        // e por isso ficam sempre no panorama Consolidado), o funil representa
+        // a progressão de UMA única população de veículos através de etapas —
+        // por isso pode acompanhar o filtro Consolidado/Público/Privado sem
+        // perder sentido: cada frente tem seu próprio funil completo.
+        const FUNIL_ETAPAS = [
+            { chave: 'selecionados', rotulo: 'Selecionados' },
+            { chave: 'contratados',  rotulo: 'Contratados' },
+            { chave: 'entregues',    rotulo: 'Entregues' }
+        ];
+
+        const FUNIL_TIPOS = [
+            { chave: 'eletricos', rotulo: 'Elétricos', cor: '#10b981' },
+            { chave: 'euro6',     rotulo: 'Euro 6',    cor: '#f59e0b' },
+            { chave: 'trilhos',   rotulo: 'Trilhos',   cor: '#8b5cf6' }
+        ];
+
+        let funilAnimId = null;             // id do requestAnimationFrame em curso
+        let funilValoresAtuais = [0, 0, 0];  // estado animado (para transição suave)
+        let funilEtapaFoco = null;           // etapa destacada no hover
+        let funilInteracaoLigada = false;    // liga os listeners de hover uma única vez
+
+        function funilComposicao(e) {
+            return {
+                selecionados: e.veiculosSelecionados,
+                contratados: e.veiculos,
+                entregues: veiculosEntregues(e)
+            };
+        }
+
+        // Atualiza os números exibidos nos 3 cartões do funil
+        // (usado a cada frame da animação — função pura de "pintura" dos textos).
+        function funilPintar(valores) {
+            const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+            set('funilValor0', fmtInt(valores[0]));
+            set('funilValor1', fmtInt(valores[1]));
+            set('funilValor2', fmtInt(valores[2]));
+        }
+
+        // Hover em cada card: destaca a etapa e mostra a composição por tipo
+        // de veículo (elétricos / Euro 6 / trilhos) em um tooltip flutuante.
+        function funilLigarInteracao() {
+            if (funilInteracaoLigada) return;
+            const container = document.getElementById('funilVertical');
+            const tip = document.getElementById('funilTooltip');
+            if (!container || !tip) return;
+
+            FUNIL_ETAPAS.forEach((etapa, idx) => {
+                const step = document.getElementById('funilStep' + idx);
+                if (!step) return;
+
+                step.addEventListener('mouseenter', () => {
+                    funilEtapaFoco = idx;
+                    document.querySelectorAll('.funil-step').forEach(s => s.classList.remove('ativo'));
+                    step.classList.add('ativo');
+
+                    const e = estado();
+                    const comp = funilComposicao(e);
+                    const dados = comp[etapa.chave] || { eletricos: 0, euro6: 0, trilhos: 0 };
+                    const total = dados.eletricos + dados.euro6 + dados.trilhos;
+
+                    let html = `<span class="ft-titulo">${etapa.rotulo} — ${fmtInt(total)} veículos</span>`;
+                    FUNIL_TIPOS.forEach(t => {
+                        const qtd = dados[t.chave] || 0;
+                        const pct = total > 0 ? (qtd / total * 100) : 0;
+                        html += `<div class="ft-linha">
+                            <span class="ft-dot" style="background:${t.cor}"></span>
+                            <span>${t.rotulo}</span>
+                            <span class="ft-num">${fmtInt(qtd)} (${fmtPct(pct)}%)</span>
+                        </div>`;
+                    });
+                    tip.innerHTML = html;
+                    tip.classList.add('show');
+                });
+
+                step.addEventListener('mousemove', ev => {
+                    const r = container.getBoundingClientRect();
+                    let left = ev.clientX - r.left;
+                    let top = ev.clientY - r.top - 10;
+                    tip.style.left = left + 'px';
+                    tip.style.top = Math.max(top, 30) + 'px';
+                });
+
+                step.addEventListener('mouseleave', () => {
+                    funilEtapaFoco = null;
+                    step.classList.remove('ativo');
+                    tip.classList.remove('show');
+                });
+            });
+
+            funilInteracaoLigada = true;
+        }
+
+        function renderFunil() {
+            const container = document.getElementById('funilVertical');
+            if (!container) return;
+            const e = estado();
+
+            const alvo = [
+                totalVeiculosSelecionados(e),
+                totalVeiculos(e),
+                totalVeiculosEntregues(e)
+            ];
+
+            // Badge do cenário ativo
+            const badge = document.getElementById('funilCenarioBadge');
+            if (badge) badge.textContent = e.rotulo;
+
+            // Taxas de conversão (resumo abaixo do funil)
+            const taxa1 = alvo[0] > 0 ? alvo[1] / alvo[0] * 100 : 0;
+            const taxa2 = alvo[1] > 0 ? alvo[2] / alvo[1] * 100 : 0;
+            const taxaTot = alvo[0] > 0 ? alvo[2] / alvo[0] * 100 : 0;
+            const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+            set('funilTaxa1', fmtPct(taxa1) + '%');
+            set('funilTaxa2', fmtPct(taxa2) + '%');
+            set('funilTaxaTotal', fmtPct(taxaTot) + '%');
+
+            funilLigarInteracao();
+
+            // Animação de contagem: interpola do valor atual até o alvo.
+            // Respeita "prefers-reduced-motion" para acessibilidade.
+            const reduzirMovimento = window.matchMedia &&
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            if (funilAnimId) cancelAnimationFrame(funilAnimId);
+
+            if (reduzirMovimento) {
+                funilValoresAtuais = alvo.slice();
+                funilPintar(alvo);
+                return;
+            }
+
+            const inicio = funilValoresAtuais.slice();
+            const t0 = performance.now();
+            const dur = 650;
+            const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+            const passo = agora => {
+                const t = Math.min(1, (agora - t0) / dur);
+                const k = easeOut(t);
+                const atual = alvo.map((v, i) => inicio[i] + (v - inicio[i]) * k);
+                funilValoresAtuais = atual;
+                funilPintar(atual);
+                if (t < 1) {
+                    funilAnimId = requestAnimationFrame(passo);
+                } else {
+                    funilAnimId = null;
+                    funilValoresAtuais = alvo.slice();
+                }
+            };
+            funilAnimId = requestAnimationFrame(passo);
         }
 
         // --- Donuts de projetos: destaque/esmaecimento conforme o cenário ---
@@ -2303,8 +3042,8 @@
             const destaque = estado().destaque;
             const ds = chart.data.datasets[0];
             
-            // Cores: [Desistências #7a9fd9, Selecionados #0052cc, Refrota Privado #6366f1]
-            const cores = ['#7a9fd9', '#0052cc', '#6366f1'];
+            // Cores: [Desistências #7a9fd9, Selecionados #0052cc, Refrota Privado #0d9488]
+            const cores = ['#7a9fd9', '#0052cc', '#0d9488'];
             
             // Desistências e Selecionados são parte do Público (índice 0)
             // Refrota Privado é índice 1
@@ -2346,7 +3085,7 @@
                 const ativoPrivado = (destaque === null || destaque === 1); // ativo em Consolidado e Privado
                 itemPrivado.classList.toggle('legend-dim', !ativoPrivado);
                 const swatch = itemPrivado.querySelector('.legend-color');
-                swatch.style.background = ativoPrivado ? '#6366f1' : '#ffffff';
+                swatch.style.background = ativoPrivado ? '#0d9488' : '#ffffff';
                 swatch.style.border = ativoPrivado ? 'none' : '1px solid #d8dee9';
             });
         }
@@ -2397,6 +3136,10 @@
 
             chartAno.data.labels = e.anos.map(a => String(a.ano));
             chartAno.data.datasets[0].data = e.anos.map(a => a.veiculos);
+            // Acumulado: soma progressiva dos veículos contratados ano a ano
+            // (equivale à coluna "Acumulado" da planilha).
+            let acumulado = 0;
+            chartAno.data.datasets[1].data = e.anos.map(a => (acumulado += a.veiculos));
             chartAno.update();
         }
 
@@ -2437,6 +3180,8 @@
         function aplicarCenario(cenario) {
             cenarioAtual = cenario;
             renderDonutVeiculos();
+            renderDonutVeiculosEntregues();
+            renderFunil();
             aplicarDestaqueDountSelecionados(chartSelecionados);
             aplicarDestaqueDonut(chartContratados);
             renderLegendasProjetos();
@@ -2753,6 +3498,7 @@
                 Array.isArray(json[k].anos) &&
                 json[k].ufsContratados &&
                 json[k].ufsSelecionados &&
+                json[k].veiculosEntregues &&
                 json[k].projetos &&
                 json[k].meta2026
             );
@@ -2831,7 +3577,7 @@
         // Ela é sobrescrita automaticamente pela data real do "dados.json"
         // (campo _meta.gerado_em) quando o arquivo é carregado com sucesso;
         // esta constante só aparece caso o dados.json não seja encontrado.
-        const DATA_ATUALIZACAO_ARQUIVO = '07/08/2026 às 09:56';
+        const DATA_ATUALIZACAO_ARQUIVO = '10/08/2026 às 11:26';
 
         function atualizarDataHora() {
             const elemento = document.getElementById('dataHoraAtualizacao');
@@ -3006,7 +3752,9 @@
                     const graficos = [
                         {id: 'resourcesDonutChart', label: 'Gráfico de distribuição de projetos selecionados. Total de 325 projetos, 13.907 veículos, com R$ 19,40 bilhões de investimento.'},
                         {id: 'contractedProjectsChart', label: 'Gráfico de distribuição de projetos contratados. Total de 193 projetos, 5.232 veículos, com R$ 6,19 bilhões de investimento.'},
-                        {id: 'mainDonutChart', label: 'Gráfico de distribuição de veículos contratados. Total de 5.232 veículos.'},
+                        {id: 'mainDonutChart', label: 'Gráfico de distribuição de veículos contratados.'},
+                        {id: 'deliveredDonutChart', label: 'Gráfico de distribuição de veículos entregues, por tipo: elétricos, Euro 6 e sobre trilhos.'},
+                        {id: 'yearChart', label: 'Gráfico combinado da evolução de contratações por ano: barras azuis com os veículos contratados em cada ano e linha verde com o total acumulado.'},
                         {id: 'metasProgressChart', label: 'Indicador de progresso de metas 2026. Meta total 5.000 unidades, concluído 2.005 unidades.'}
                     ];
                     
