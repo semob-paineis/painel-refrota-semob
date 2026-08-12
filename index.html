@@ -445,11 +445,13 @@
             background: currentColor;
         }
 
-        /* Selecionados usa o tom taupe/neutro para diferenciar do azul
-           institucional que representa "contratado" (efetivado). */
+        /* Selecionados usa índigo-violeta para diferenciar do azul
+           institucional ("Contratado"/efetivado) — e também do taupe já
+           usado em "Desistências" no painel de Projetos Selecionados,
+           que ficaria próximo demais em tom se reaproveitado aqui. */
         .tipo-badge.is-selecionados {
-            background: #f3efe9;
-            color: #7d6a55;
+            background: #efe9f9;
+            color: #6d3fb0;
         }
 
         .table-container {
@@ -1793,7 +1795,7 @@
             </div>
             <div class="map-legend" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 15px; font-size: 12px; color: #666; flex-wrap: wrap;">
                 <span>Sem investimento</span>
-                <div style="display: flex; height: 14px; border-radius: 3px; overflow: hidden;">
+                <div id="mapLegendGradient" style="display: flex; height: 14px; border-radius: 3px; overflow: hidden;">
                     <div style="width: 40px; background: #eef2f7;"></div>
                     <div style="width: 40px; background: #c6dbef;"></div>
                     <div style="width: 40px; background: #9ecae1;"></div>
@@ -2842,7 +2844,7 @@
             data: {
                 labels: ['Norte', 'Nordeste', 'Centro-Oeste', 'Sudeste', 'Sul'],
                 datasets: [{
-                    label: 'Veículos Contratados',
+                    label: 'Quantidade de Veículos',
                     data: [174, 920, 483, 2636, 500],
                     // Cor sólida: o comprimento da barra já comunica a magnitude.
                     // Cores variadas por posição (usadas antes) não representavam
@@ -3245,6 +3247,15 @@
 
             chartRegional.data.labels = regioes.map(r => r.nome);
             chartRegional.data.datasets[0].data = regioes.map(r => r.veiculos);
+            // Cor da barra acompanha o tipo de projeto ativo — mesma paleta
+            // já usada nos selos (azul = Contratados, taupe = Selecionados).
+            const ehSelRegiao = tipoProjetoMapa === 'selecionados';
+            // Cor da barra acompanha o tipo de projeto ativo. Usamos um
+            // índigo-violeta (não o taupe do selo) porque o taupe está
+            // muito próximo, em distância de cor, do usado em "Desistências"
+            // no painel de Projetos Selecionados — poderiam se confundir.
+            chartRegional.data.datasets[0].backgroundColor = ehSelRegiao ? '#6d3fb0' : '#0052cc';
+            chartRegional.data.datasets[0].hoverBackgroundColor = ehSelRegiao ? '#59279c' : '#0041a3';
             chartRegional.update();
         }
 
@@ -3270,13 +3281,21 @@
 
             chartAno.data.labels = anos.map(a => String(a.ano));
             chartAno.data.datasets[0].data = anos.map(a => a.veiculos);
+            // Cor da barra acompanha o tipo de projeto ativo (mesma convenção
+            // do gráfico de região). A linha de acumulado permanece sempre
+            // verde: não é um conceito à parte como "Desistências" — é a
+            // mesma série agregada de forma diferente — e manter uma cor
+            // fixa preserva o contraste visual entre barra e linha nos dois
+            // estados do seletor.
+            const ehSel = tipoProjetoMapa === 'selecionados';
+            chartAno.data.datasets[0].backgroundColor = ehSel ? '#6d3fb0' : '#0052cc';
+            chartAno.data.datasets[0].hoverBackgroundColor = ehSel ? '#59279c' : '#0041a3';
             // Acumulado: soma progressiva dos veículos ano a ano
             // (equivale à coluna "Acumulado" da planilha).
             let acumulado = 0;
             chartAno.data.datasets[1].data = anos.map(a => (acumulado += a.veiculos));
 
             // Rótulos das séries acompanham o tipo de projeto exibido
-            const ehSel = tipoProjetoMapa === 'selecionados';
             chartAno.data.datasets[0].label = ehSel ? 'Veículos selecionados no ano' : 'Veículos contratados no ano';
             chartAno.data.datasets[1].label = ehSel ? 'Acumulado de veículos selecionados' : 'Acumulado de veículos contratados';
             chartAno.update();
@@ -3289,25 +3308,32 @@
             const total = Object.values(ufs).reduce((a, b) => a + b, 0) || 1;
             const maxVal = ranking.length ? ranking[0][1] : 1;
 
+            // Mesma convenção de cor do restante do painel: azul = Contratados,
+            // índigo = Selecionados. Usado tanto na barra mini quanto nos
+            // valores em destaque (1º lugar e linha de Total) — aplicado via
+            // estilo inline porque ".value-highlight" é uma classe global
+            // compartilhada por outras tabelas do painel, que não devem mudar.
+            const corDestaque = tipoProjetoMapa === 'selecionados' ? '#6d3fb0' : '#0052cc';
+
             const linhas = ranking.map(([uf, v], i) => {
                 const pos = (i + 1) + 'º';
                 const pct = fmtPct(v / total * 100, 2);
                 const titulo = `${pos} lugar — ${NOMES_UF[uf]} (${uf}): R$ ${fmtInt(v)} (${pct}% do total)`;
                 const largura = (v / maxVal * 100).toFixed(1);
-                const classe = i === 0 ? 'value-highlight' : 'value-secondary';
+                const estiloValor = i === 0 ? `style="font-weight:600; color:${corDestaque};"` : 'class="value-secondary"';
                 return `
                     <tr title="${titulo}">
                         <td><strong>${pos}</strong></td>
                         <td><strong>${NOMES_UF[uf]}</strong> <span style="color:#999; font-size:11px;">(${uf})</span></td>
-                        <td class="${classe}">R$ ${fmtInt(v)} (${pct}%)</td>
-                        <td><div style="background: #0052cc; height: 8px; border-radius: 4px; width: ${largura}%; transition: width 0.4s ease;" title="${titulo}"></div></td>
+                        <td ${estiloValor}>R$ ${fmtInt(v)} (${pct}%)</td>
+                        <td><div style="background: ${corDestaque}; height: 8px; border-radius: 4px; width: ${largura}%; transition: width 0.4s ease, background 0.4s ease;" title="${titulo}"></div></td>
                     </tr>`;
             }).join('');
 
             document.getElementById('ufRankingBody').innerHTML = linhas + `
                     <tr style="background: #f0f4f8; font-weight: 600;">
                         <td colspan="2"><strong>Total</strong></td>
-                        <td class="value-highlight">R$ ${fmtInt(total)}</td>
+                        <td style="font-weight:600; color:${corDestaque};">R$ ${fmtInt(total)}</td>
                         <td></td>
                     </tr>`;
 
@@ -3582,11 +3608,33 @@
             const projection = d3.geoMercator().fitSize([w - 20, h - 20], geoData);
             const path = d3.geoPath().projection(projection);
 
-            // Escala de cores (sqrt suaviza a dominância de SP/BA)
+            // Escala de cores (sqrt suaviza a dominância de SP/BA).
+            // Duas escalas sequenciais, mesma convenção já usada nas barras:
+            // azul = Contratados, índigo = Selecionados. O "zero" (sem
+            // investimento) fica neutro nas duas, pois não é um dado do tipo,
+            // é ausência de dado.
+            const ehSelMapa = tipoProjetoMapa === 'selecionados';
+            const escalaCores = ehSelMapa
+                ? ['#ede7f9', '#2f1660']   // claro -> escuro, família índigo
+                : ['#dbe7f3', '#08306b'];  // claro -> escuro, família azul
             const maxVal = d3.max(Object.values(investimentoUF));
             const colorScale = d3.scaleSequential()
                 .domain([0, Math.sqrt(maxVal)])
-                .interpolator(d3.interpolate('#dbe7f3', '#08306b'));
+                .interpolator(d3.interpolate(escalaCores[0], escalaCores[1]));
+
+            // Legenda: 6 faixas geradas a partir do MESMO interpolador do
+            // mapa, garantindo que a cor exibida na legenda seja idêntica à
+            // do mapa (nunca uma aproximação hardcoded desalinhada).
+            const legendaEl = document.getElementById('mapLegendGradient');
+            if (legendaEl) {
+                const passos = 6;
+                let html = '<div style="width: 40px; background: #eef2f7;"></div>';
+                for (let i = 1; i <= passos; i++) {
+                    const cor = d3.interpolate(escalaCores[0], escalaCores[1])(i / passos);
+                    html += `<div style="width: 40px; background: ${cor};"></div>`;
+                }
+                legendaEl.innerHTML = html;
+            }
 
             const tooltip = document.getElementById('mapTooltip');
             const wrapper = document.getElementById('mapWrapper');
@@ -3612,7 +3660,7 @@
                 .style('cursor', 'pointer')
                 .on('mousemove', function(event, d) {
                     const v = investimentoUF[d.properties.sigla] || 0;
-                    d3.select(this).attr('stroke', '#0052cc').attr('stroke-width', 2).raise();
+                    d3.select(this).attr('stroke', ehSelMapa ? '#6d3fb0' : '#0052cc').attr('stroke-width', 2).raise();
                     tooltip.style.display = 'block';
                     const rank = rankedUFs.indexOf(d.properties.sigla) + 1;
                     const pct = (v / totalInvestimento * 100).toFixed(1).replace('.', ',');
