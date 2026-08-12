@@ -394,6 +394,64 @@
             margin-bottom: 30px;
         }
 
+        /* ===== Barra do seletor "Projetos Selecionados | Contratados" =====
+           Controla simultaneamente os painéis de Região, Ano e o Mapa. */
+        .tipo-projeto-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 22px;
+        }
+
+        /* Cabeçalho dos painéis controlados pelo seletor: título + selo
+           indicando qual conjunto de dados está sendo exibido. */
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .table-header .table-title,
+        .table-header .map-title {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .tipo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: #eaf1fb;
+            color: #0052cc;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .tipo-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Selecionados usa o tom taupe/neutro para diferenciar do azul
+           institucional que representa "contratado" (efetivado). */
+        .tipo-badge.is-selecionados {
+            background: #f3efe9;
+            color: #7d6a55;
+        }
+
         .table-container {
             background: white;
             padding: 25px;
@@ -1193,7 +1251,10 @@
         .notification-warning {
             background: #fef3c7;
             color: #78350f;
-            border-left-color: #f59e0b;
+            /* Tom de âmbar ligeiramente diferente do laranja usado para
+               "Euro 6" nos gráficos de veículos — mesma família (aviso),
+               mas sem reutilizar o hexadecimal exato de um dado específico. */
+            border-left-color: #d97706;
         }
 
         @media (max-width: 480px) {
@@ -1433,7 +1494,7 @@
                         </div>
                         <div style="margin-left: 0; display: flex; flex-direction: column; gap: 6px;">
                             <div style="display: flex; align-items: center;">
-                                <div class="legend-color" style="background: #7a9fd9; width: 12px; height: 12px; border-radius: 2px; margin-right: 8px;"></div>
+                                <div class="legend-color" style="background: #9c8a78; width: 12px; height: 12px; border-radius: 2px; margin-right: 8px;"></div>
                                 <div id="legDesistencias" style="font-size: 12px; color: #666;">Desistências - R$ 7,22 bi</div>
                             </div>
                             <div style="display: flex; align-items: center;">
@@ -1484,7 +1545,7 @@
                 <div class="funil-header">
                     <h3 class="chart-title">
                         <svg class="funil-header-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M3 4h18l-7 8v6l-4 2v-8L3 4z" stroke="#c0392b" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+                            <path d="M3 4h18l-7 8v6l-4 2v-8L3 4z" stroke="#1e56f0" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
                         </svg>
                         Funil de Conversão
                     </h3>
@@ -1660,10 +1721,26 @@
                 <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">*Meta: <span id="metaRodapeValor">5.000</span> unidades</p>
             </div>
         </div>
+        <!-- Seletor: Projetos Selecionados | Projetos Contratados
+             Controla, ao mesmo tempo: as tabelas/gráficos de Região e Ano
+             (abaixo) e o mapa de Investimento por Estado. -->
+        <div class="tipo-projeto-bar">
+            <div class="segmented-control segmented-2" role="group" aria-label="Tipo de projeto exibido nos painéis de região, ano e no mapa">
+                <input type="radio" name="map-tipo-group" id="map-tipo-selecionados">
+                <label for="map-tipo-selecionados">Projetos Selecionados</label>
+                <input type="radio" name="map-tipo-group" id="map-tipo-contratados" checked>
+                <label for="map-tipo-contratados">Projetos Contratados</label>
+                <div class="selection-slider"></div>
+            </div>
+        </div>
+
         <div class="table-section">
             <!-- Regional Table -->
             <div class="table-container">
-                <h3 class="table-title">📍 Contratações por Região</h3>
+                <div class="table-header">
+                    <h3 class="table-title" id="tituloRegiao">📍 Contratações por Região</h3>
+                    <span class="tipo-badge" id="badgeRegiao">Contratados</span>
+                </div>
                 <table id="table-regioes">
                     <thead>
                         <tr>
@@ -1682,7 +1759,10 @@
 
             <!-- Evolution by Year Table -->
             <div class="table-container">
-                <h3 class="table-title">📈 Evolução de Contratações por Ano</h3>
+                <div class="table-header">
+                    <h3 class="table-title" id="tituloAno">📈 Evolução de Contratações por Ano</h3>
+                    <span class="tipo-badge" id="badgeAno">Contratados</span>
+                </div>
                 <table id="table-anos">
                     <thead>
                         <tr>
@@ -1702,15 +1782,9 @@
 
         <!-- Map Section -->
         <div class="map-section">
-            <h3 class="map-title">🗺️ Investimento Total por Estado</h3>
-
-            <!-- Seletor: Projetos Contratados | Projetos Selecionados -->
-            <div class="segmented-control segmented-2" role="group" aria-label="Tipo de projeto exibido no mapa">
-                <input type="radio" name="map-tipo-group" id="map-tipo-selecionados">
-                <label for="map-tipo-selecionados">Projetos Selecionados</label>
-                <input type="radio" name="map-tipo-group" id="map-tipo-contratados" checked>
-                <label for="map-tipo-contratados">Projetos Contratados</label>
-                <div class="selection-slider"></div>
+            <div class="table-header">
+                <h3 class="map-title" id="tituloMapa">🗺️ Investimento Total por Estado</h3>
+                <span class="tipo-badge" id="badgeMapa">Contratados</span>
             </div>
 
             <div class="map-wrapper" id="mapWrapper" style="height: 560px;">
@@ -1817,11 +1891,24 @@
                     { nome: 'Sudeste', propostas: 119, veiculos: 3184, investimento: 3476833181.27 },
                     { nome: 'Sul', propostas: 40, veiculos: 603, investimento: 970733063.1 }
                 ],
+                regioesSelecionados: [
+                    { nome: 'Norte', propostas: 16, veiculos: 922, investimento: 1317380295.92 },
+                    { nome: 'Nordeste', propostas: 55, veiculos: 3029, investimento: 4474432046.13 },
+                    { nome: 'Centro-Oeste', propostas: 15, veiculos: 1307, investimento: 1114888323.45 },
+                    { nome: 'Sudeste', propostas: 182, veiculos: 6979, investimento: 9693749474.93 },
+                    { nome: 'Sul', propostas: 67, veiculos: 1857, investimento: 2994526108.66 }
+                ],
                 anos: [
                     { ano: 2023, propostas: 3, veiculos: 541, investimento: 1028432350 },
                     { ano: 2024, propostas: 42, veiculos: 1735, investimento: 2949635492.23 },
                     { ano: 2025, propostas: 118, veiculos: 2627, investimento: 2127732122.79 },
                     { ano: 2026, propostas: 44, veiculos: 1119, investimento: 1131402201.94 }
+                ],
+                anosSelecionados: [
+                    { ano: 2023, propostas: 3, veiculos: 541, investimento: 1169863250 },
+                    { ano: 2024, propostas: 110, veiculos: 6431, investimento: 11498574294.45 },
+                    { ano: 2025, propostas: 157, veiculos: 4929, investimento: 4208755281.54 },
+                    { ano: 2026, propostas: 65, veiculos: 2193, investimento: 2717783423.1 }
                 ],
                 ufsContratados: {
                     'AC': 67000000, 'AL': 22909060, 'AP': 0, 'AM': 44855750,
@@ -1869,9 +1956,22 @@
                     { nome: 'Sudeste', propostas: 7, veiculos: 575, investimento: 1332647817 },
                     { nome: 'Sul', propostas: 2, veiculos: 104, investimento: 463397487 }
                 ],
+                regioesSelecionados: [
+                    { nome: 'Norte', propostas: 8, veiculos: 766, investimento: 1187588445.92 },
+                    { nome: 'Nordeste', propostas: 25, veiculos: 1874, investimento: 3590566468.22 },
+                    { nome: 'Centro-Oeste', propostas: 3, veiculos: 100, investimento: 118620000 },
+                    { nome: 'Sudeste', propostas: 29, veiculos: 2349, investimento: 5081767032.53 },
+                    { nome: 'Sul', propostas: 15, veiculos: 909, investimento: 2073764510 }
+                ],
                 anos: [
                     { ano: 2023, propostas: 2, veiculos: 519, investimento: 1014626000 },
                     { ano: 2024, propostas: 13, veiculos: 863, investimento: 2230259717.21 },
+                    { ano: 2025, propostas: 0, veiculos: 0, investimento: 0 },
+                    { ano: 2026, propostas: 1, veiculos: 100, investimento: 320000000 }
+                ],
+                anosSelecionados: [
+                    { ano: 2023, propostas: 2, veiculos: 519, investimento: 1156056900 },
+                    { ano: 2024, propostas: 77, veiculos: 5379, investimento: 10576249556.67 },
                     { ano: 2025, propostas: 0, veiculos: 0, investimento: 0 },
                     { ano: 2026, propostas: 1, veiculos: 100, investimento: 320000000 }
                 ],
@@ -1921,11 +2021,24 @@
                     { nome: 'Sudeste', propostas: 112, veiculos: 2609, investimento: 2144185364.27 },
                     { nome: 'Sul', propostas: 38, veiculos: 499, investimento: 507335576.1 }
                 ],
+                regioesSelecionados: [
+                    { nome: 'Norte', propostas: 8, veiculos: 156, investimento: 129791850 },
+                    { nome: 'Nordeste', propostas: 30, veiculos: 1155, investimento: 883865577.91 },
+                    { nome: 'Centro-Oeste', propostas: 12, veiculos: 1207, investimento: 996268323.45 },
+                    { nome: 'Sudeste', propostas: 153, veiculos: 4630, investimento: 4611982442.4 },
+                    { nome: 'Sul', propostas: 52, veiculos: 948, investimento: 920761598.66 }
+                ],
                 anos: [
                     { ano: 2023, propostas: 1, veiculos: 22, investimento: 13806350 },
                     { ano: 2024, propostas: 29, veiculos: 872, investimento: 719375775.02 },
                     { ano: 2025, propostas: 118, veiculos: 2627, investimento: 2127732122.79 },
                     { ano: 2026, propostas: 43, veiculos: 1019, investimento: 811402201.94 }
+                ],
+                anosSelecionados: [
+                    { ano: 2023, propostas: 1, veiculos: 22, investimento: 13806350 },
+                    { ano: 2024, propostas: 33, veiculos: 1052, investimento: 922324737.78 },
+                    { ano: 2025, propostas: 157, veiculos: 4929, investimento: 4208755281.54 },
+                    { ano: 2026, propostas: 64, veiculos: 2093, investimento: 2397783423.1 }
                 ],
                 ufsContratados: {
                     'AC': 0, 'AL': 22909060, 'AP': 0, 'AM': 44855750,
@@ -2244,8 +2357,21 @@
             const v = veiculosEntregues(e);
             return v.eletricos + v.euro6 + v.trilhos;
         }
-        function somaRegioes(e, campo) { return e.regioes.reduce((a, r) => a + r[campo], 0); }
-        function somaAnos(e, campo) { return e.anos.reduce((a, r) => a + r[campo], 0); }
+        // Conjuntos de Região/Ano conforme o tipo de projeto ativo no seletor.
+        // Fallback para os dados de contratados garante compatibilidade caso o
+        // dados.json ainda não traga os blocos de selecionados.
+        function regioesAtuais(e) {
+            return tipoProjetoMapa === 'selecionados'
+                ? (e.regioesSelecionados || e.regioes)
+                : e.regioes;
+        }
+        function anosAtuais(e) {
+            return tipoProjetoMapa === 'selecionados'
+                ? (e.anosSelecionados || e.anos)
+                : e.anos;
+        }
+        function somaRegioes(e, campo) { return regioesAtuais(e).reduce((a, r) => a + r[campo], 0); }
+        function somaAnos(e, campo) { return anosAtuais(e).reduce((a, r) => a + r[campo], 0); }
 
         // Plugin para adicionar texto no centro do doughnut (gráfico de veículos)
         const centerTextPlugin = {
@@ -2563,7 +2689,7 @@
                 labels: ['Desistências', 'Selecionados', 'Refrota Privado'],
                 datasets: [{
                     data: [7.22, 4.83, 7.34],
-                    backgroundColor: ['#7a9fd9', '#0052cc', '#0d9488'],
+                    backgroundColor: ['#9c8a78', '#0052cc', '#0d9488'],
                     borderColor: ['#ffffff', '#ffffff', '#ffffff'],
                     borderWidth: 3,
                     borderRadius: 10,
@@ -2718,11 +2844,16 @@
                 datasets: [{
                     label: 'Veículos Contratados',
                     data: [174, 920, 483, 2636, 500],
-                    backgroundColor: ['#0052cc', '#2563eb', '#3b82f6', '#1e40af', '#93c5fd'],
+                    // Cor sólida: o comprimento da barra já comunica a magnitude.
+                    // Cores variadas por posição (usadas antes) não representavam
+                    // nenhuma intensidade real — eram apenas decorativas e podiam
+                    // sugerir uma hierarquia entre regiões que não existe nos dados.
+                    backgroundColor: '#0052cc',
+                    hoverBackgroundColor: '#0041a3',
                     borderRadius: 4,
                     borderSkipped: false,
                     barThickness: 35
-                }]
+                }],
             },
             options: {
                 indexAxis: 'y',
@@ -3042,8 +3173,9 @@
             const destaque = estado().destaque;
             const ds = chart.data.datasets[0];
             
-            // Cores: [Desistências #7a9fd9, Selecionados #0052cc, Refrota Privado #0d9488]
-            const cores = ['#7a9fd9', '#0052cc', '#0d9488'];
+            // Cores: [Desistências #9c8a78 (taupe — fora da família azul, já que
+            // é conceito oposto a "Selecionados"), Selecionados #0052cc, Refrota Privado #0d9488]
+            const cores = ['#9c8a78', '#0052cc', '#0d9488'];
             
             // Desistências e Selecionados são parte do Público (índice 0)
             // Refrota Privado é índice 1
@@ -3093,8 +3225,9 @@
         // --- Tabela + gráfico: Contratações por Região ---
         function renderRegioes() {
             const e = estado();
+            const regioes = regioesAtuais(e);
             const totalInv = somaRegioes(e, 'investimento') || 1;
-            const linhas = e.regioes.map(r => `
+            const linhas = regioes.map(r => `
                         <tr>
                             <td><strong>${r.nome}</strong></td>
                             <td class="value-highlight">${fmtInt(r.propostas)}</td>
@@ -3110,15 +3243,16 @@
                             <td class="value-secondary">${fmtMi(somaRegioes(e, 'investimento'))} (100%)</td>
                         </tr>`;
 
-            chartRegional.data.labels = e.regioes.map(r => r.nome);
-            chartRegional.data.datasets[0].data = e.regioes.map(r => r.veiculos);
+            chartRegional.data.labels = regioes.map(r => r.nome);
+            chartRegional.data.datasets[0].data = regioes.map(r => r.veiculos);
             chartRegional.update();
         }
 
         // --- Tabela + gráfico: Evolução de Contratações por Ano ---
         function renderAnos() {
             const e = estado();
-            const linhas = e.anos.map(a => `
+            const anos = anosAtuais(e);
+            const linhas = anos.map(a => `
                         <tr>
                             <td><strong>${a.ano}</strong></td>
                             <td class="value-highlight">${fmtInt(a.propostas)}</td>
@@ -3134,12 +3268,17 @@
                             <td class="value-secondary">${fmtMi(somaAnos(e, 'investimento'))}</td>
                         </tr>`;
 
-            chartAno.data.labels = e.anos.map(a => String(a.ano));
-            chartAno.data.datasets[0].data = e.anos.map(a => a.veiculos);
-            // Acumulado: soma progressiva dos veículos contratados ano a ano
+            chartAno.data.labels = anos.map(a => String(a.ano));
+            chartAno.data.datasets[0].data = anos.map(a => a.veiculos);
+            // Acumulado: soma progressiva dos veículos ano a ano
             // (equivale à coluna "Acumulado" da planilha).
             let acumulado = 0;
-            chartAno.data.datasets[1].data = e.anos.map(a => (acumulado += a.veiculos));
+            chartAno.data.datasets[1].data = anos.map(a => (acumulado += a.veiculos));
+
+            // Rótulos das séries acompanham o tipo de projeto exibido
+            const ehSel = tipoProjetoMapa === 'selecionados';
+            chartAno.data.datasets[0].label = ehSel ? 'Veículos selecionados no ano' : 'Veículos contratados no ano';
+            chartAno.data.datasets[1].label = ehSel ? 'Acumulado de veículos selecionados' : 'Acumulado de veículos contratados';
             chartAno.update();
         }
 
@@ -3188,6 +3327,7 @@
             renderRegioes();
             renderAnos();
             renderRankingUF();
+            atualizarRotulosTipoProjeto();
             if (typeof drawBrazilMap === 'function') drawBrazilMap();
         }
 
@@ -3201,13 +3341,41 @@
 
         // --- Seletor do mapa: Projetos Contratados | Projetos Selecionados ---
         // Atualiza apenas o mapa e o ranking; respeita o filtro principal em vigor.
+        // Atualiza títulos e selos dos painéis controlados pelo seletor,
+        // deixando explícito qual conjunto de dados está sendo exibido.
+        function atualizarRotulosTipoProjeto() {
+            const ehSel = tipoProjetoMapa === 'selecionados';
+            const palavra = ehSel ? 'Seleções' : 'Contratações';
+            const selo = ehSel ? 'Selecionados' : 'Contratados';
+
+            const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+            set('tituloRegiao', `📍 ${palavra} por Região`);
+            set('tituloAno', `📈 Evolução de ${palavra} por Ano`);
+            set('badgeRegiao', selo);
+            set('badgeAno', selo);
+            set('badgeMapa', selo);
+
+            ['badgeRegiao', 'badgeAno', 'badgeMapa'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('is-selecionados', ehSel);
+            });
+        }
+
+        // Re-renderiza tudo que depende do tipo de projeto (Selecionados/Contratados)
+        function aplicarTipoProjeto() {
+            renderRegioes();
+            renderAnos();
+            renderRankingUF();
+            atualizarRotulosTipoProjeto();
+            if (typeof drawBrazilMap === 'function') drawBrazilMap();
+        }
+
         const MAPA_TIPO_OPCOES = { 'map-tipo-contratados': 'contratados', 'map-tipo-selecionados': 'selecionados' };
         document.querySelectorAll('input[name="map-tipo-group"]').forEach(radio => {
             radio.addEventListener('change', function () {
                 if (!this.checked) return;
                 tipoProjetoMapa = MAPA_TIPO_OPCOES[this.id];
-                renderRankingUF();
-                if (typeof drawBrazilMap === 'function') drawBrazilMap();
+                aplicarTipoProjeto();
             });
         });
 
@@ -3499,6 +3667,8 @@
                 json[k].ufsContratados &&
                 json[k].ufsSelecionados &&
                 json[k].veiculosEntregues &&
+                Array.isArray(json[k].regioesSelecionados) &&
+                Array.isArray(json[k].anosSelecionados) &&
                 json[k].projetos &&
                 json[k].meta2026
             );

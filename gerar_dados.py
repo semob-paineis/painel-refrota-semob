@@ -97,6 +97,11 @@ REGIOES_LINHAS = range(8, 13)     # Norte..Sul (exclui Total)
 ANOS_LINHAS = range(18, 22)       # 2023..2026 (exclui Total)
 COL_NOME, COL_PROPOSTAS, COL_VEICULOS, COL_INVEST = 2, 3, 4, 8
 
+# Mesmas tabelas, porém para projetos SELECIONADOS. Mesmas colunas
+# (B/C/D/H), apenas em outro bloco de linhas da aba "Dados para Painel".
+REGIOES_SEL_LINHAS = range(27, 32)   # Norte..Sul (exclui Total, linha 32)
+ANOS_SEL_LINHAS = range(38, 42)      # 2023..2026 (exclui Total, linha 42)
+
 # Totais de "Projetos" — alimentam os 2 donuts de projetos (texto central,
 # segmentos, tooltips e legendas). Linhas de Total das tabelas de Selecionados
 # (27-32) e Contratados (8-13); C=propostas, D=veiculos, H=investimento.
@@ -235,6 +240,8 @@ def extrair_cenario(caminho_xlsx, chave_cenario):
         },
         "regioes": [],
         "anos": [],
+        "regioesSelecionados": [],
+        "anosSelecionados": [],
         "ufsContratados": {},
         "ufsSelecionados": {},
     }
@@ -249,6 +256,23 @@ def extrair_cenario(caminho_xlsx, chave_cenario):
 
     for r in ANOS_LINHAS:
         dados["anos"].append({
+            "ano": ws.cell(r, COL_NOME).value,
+            "propostas": cel(r, COL_PROPOSTAS),
+            "veiculos": cel(r, COL_VEICULOS),
+            "investimento": cel(r, COL_INVEST),
+        })
+
+    # --- Mesmas tabelas, para projetos SELECIONADOS ---
+    for r in REGIOES_SEL_LINHAS:
+        dados["regioesSelecionados"].append({
+            "nome": ws.cell(r, COL_NOME).value,
+            "propostas": cel(r, COL_PROPOSTAS),
+            "veiculos": cel(r, COL_VEICULOS),
+            "investimento": cel(r, COL_INVEST),
+        })
+
+    for r in ANOS_SEL_LINHAS:
+        dados["anosSelecionados"].append({
             "ano": ws.cell(r, COL_NOME).value,
             "propostas": cel(r, COL_PROPOSTAS),
             "veiculos": cel(r, COL_VEICULOS),
@@ -419,6 +443,28 @@ def validar(dados):
             erros.append(
                 f"Reconciliação veiculosEntregues.{campo}: Consolidado ({cons_e}) "
                 f"≠ Público+Privado ({soma_e})"
+            )
+
+    # 11) Regiões/anos de SELECIONADOS devem bater com os totais do cenário
+    for chave, cen in dados.items():
+        tot_sel = cen["projetos"]["selecionados"]
+        reg_v = sum(x["veiculos"] for x in cen["regioesSelecionados"])
+        ano_v = sum(x["veiculos"] for x in cen["anosSelecionados"])
+        if reg_v != ano_v:
+            avisos.append(
+                f"[{chave}] Veículos selecionados por região ({reg_v}) "
+                f"≠ por ano ({ano_v})"
+            )
+        if reg_v != tot_sel["veiculos"]:
+            avisos.append(
+                f"[{chave}] Veículos selecionados por região ({reg_v}) "
+                f"≠ total de selecionados ({tot_sel['veiculos']})"
+            )
+        reg_p = sum(x["propostas"] for x in cen["regioesSelecionados"])
+        if reg_p != tot_sel["propostas"]:
+            avisos.append(
+                f"[{chave}] Propostas selecionadas por região ({reg_p}) "
+                f"≠ total de projetos selecionados ({tot_sel['propostas']})"
             )
 
     # 10) Entregues não podem superar os contratados (sanidade)

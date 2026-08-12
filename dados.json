@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "gerado_em": "2026-08-10T11:26:40-03:00",
+    "gerado_em": "2026-08-12T16:03:15-03:00",
     "planilha_origem": "Dados_Refrota_Contratações.xlsx",
     "gerado_por": "gerar_dados.py",
     "versao_estrutura": 2
@@ -79,6 +79,64 @@
         "propostas": 44,
         "veiculos": 1119,
         "investimento": 1131402201.94
+      }
+    ],
+    "regioesSelecionados": [
+      {
+        "nome": "Norte",
+        "propostas": 16,
+        "veiculos": 922,
+        "investimento": 1317380295.92
+      },
+      {
+        "nome": "Nordeste",
+        "propostas": 55,
+        "veiculos": 3029,
+        "investimento": 4474432046.13
+      },
+      {
+        "nome": "Centro-Oeste",
+        "propostas": 15,
+        "veiculos": 1307,
+        "investimento": 1114888323.45
+      },
+      {
+        "nome": "Sudeste",
+        "propostas": 182,
+        "veiculos": 6979,
+        "investimento": 9693749474.93
+      },
+      {
+        "nome": "Sul",
+        "propostas": 67,
+        "veiculos": 1857,
+        "investimento": 2994526108.66
+      }
+    ],
+    "anosSelecionados": [
+      {
+        "ano": 2023,
+        "propostas": 3,
+        "veiculos": 541,
+        "investimento": 1169863250
+      },
+      {
+        "ano": 2024,
+        "propostas": 110,
+        "veiculos": 6431,
+        "investimento": 11498574294.45
+      },
+      {
+        "ano": 2025,
+        "propostas": 157,
+        "veiculos": 4929,
+        "investimento": 4208755281.54
+      },
+      {
+        "ano": 2026,
+        "propostas": 65,
+        "veiculos": 2193,
+        "investimento": 2717783423.1
       }
     ],
     "ufsContratados": {
@@ -245,6 +303,64 @@
         "propostas": 13,
         "veiculos": 863,
         "investimento": 2230259717.21
+      },
+      {
+        "ano": 2025,
+        "propostas": 0,
+        "veiculos": 0,
+        "investimento": 0
+      },
+      {
+        "ano": 2026,
+        "propostas": 1,
+        "veiculos": 100,
+        "investimento": 320000000
+      }
+    ],
+    "regioesSelecionados": [
+      {
+        "nome": "Norte",
+        "propostas": 8,
+        "veiculos": 766,
+        "investimento": 1187588445.92
+      },
+      {
+        "nome": "Nordeste",
+        "propostas": 25,
+        "veiculos": 1874,
+        "investimento": 3590566468.22
+      },
+      {
+        "nome": "Centro-Oeste",
+        "propostas": 3,
+        "veiculos": 100,
+        "investimento": 118620000
+      },
+      {
+        "nome": "Sudeste",
+        "propostas": 29,
+        "veiculos": 2349,
+        "investimento": 5081767032.53
+      },
+      {
+        "nome": "Sul",
+        "propostas": 15,
+        "veiculos": 909,
+        "investimento": 2073764510
+      }
+    ],
+    "anosSelecionados": [
+      {
+        "ano": 2023,
+        "propostas": 2,
+        "veiculos": 519,
+        "investimento": 1156056900
+      },
+      {
+        "ano": 2024,
+        "propostas": 77,
+        "veiculos": 5379,
+        "investimento": 10576249556.67
       },
       {
         "ano": 2025,
@@ -437,6 +553,64 @@
         "investimento": 811402201.94
       }
     ],
+    "regioesSelecionados": [
+      {
+        "nome": "Norte",
+        "propostas": 8,
+        "veiculos": 156,
+        "investimento": 129791850
+      },
+      {
+        "nome": "Nordeste",
+        "propostas": 30,
+        "veiculos": 1155,
+        "investimento": 883865577.91
+      },
+      {
+        "nome": "Centro-Oeste",
+        "propostas": 12,
+        "veiculos": 1207,
+        "investimento": 996268323.45
+      },
+      {
+        "nome": "Sudeste",
+        "propostas": 153,
+        "veiculos": 4630,
+        "investimento": 4611982442.4
+      },
+      {
+        "nome": "Sul",
+        "propostas": 52,
+        "veiculos": 948,
+        "investimento": 920761598.66
+      }
+    ],
+    "anosSelecionados": [
+      {
+        "ano": 2023,
+        "propostas": 1,
+        "veiculos": 22,
+        "investimento": 13806350
+      },
+      {
+        "ano": 2024,
+        "propostas": 33,
+        "veiculos": 1052,
+        "investimento": 922324737.78
+      },
+      {
+        "ano": 2025,
+        "propostas": 157,
+        "veiculos": 4929,
+        "investimento": 4208755281.54
+      },
+      {
+        "ano": 2026,
+        "propostas": 64,
+        "veiculos": 2093,
+        "investimento": 2397783423.1
+      }
+    ],
     "ufsContratados": {
       "AC": 0,
       "AL": 22909060,
@@ -540,58 +714,54 @@
     }
   },
   "_comparativo": {
-    "dataAnterior": "2026-07-31T09:52:47-03:00",
-    "dataAtual": "2026-08-10T11:26:40-03:00",
+    "dataAnterior": "2026-08-10T11:26:40-03:00",
+    "dataAtual": "2026-08-12T16:03:15-03:00",
     "metricas": [
       {
         "rotulo": "Projetos contratados",
         "formato": "int",
-        "anterior": 197,
+        "anterior": 207,
         "atual": 207
       },
       {
         "rotulo": "Veículos contratados",
         "formato": "int",
-        "anterior": 5468,
+        "anterior": 6022,
         "atual": 6022
       },
       {
         "rotulo": "Investimento contratado",
         "formato": "moeda",
-        "anterior": 6773974615.26,
+        "anterior": 7237202166.96,
         "atual": 7237202166.96
       },
       {
         "rotulo": "Projetos selecionados",
         "formato": "int",
-        "anterior": 333,
+        "anterior": 335,
         "atual": 335
       },
       {
         "rotulo": "Veículos selecionados",
         "formato": "int",
-        "anterior": 14065,
+        "anterior": 14094,
         "atual": 14094
       },
       {
         "rotulo": "Investimento selecionado",
         "formato": "moeda",
-        "anterior": 19558295778.62,
+        "anterior": 19594976249.09,
         "atual": 19594976249.09
       },
       {
         "rotulo": "Meta 2026 (veículos)",
         "formato": "int",
-        "anterior": 2164,
+        "anterior": 2193,
         "atual": 2193
       }
     ],
     "destaques": [
-      "Foram registradas 10 novas contratações — 9 na Refrota Privado e 1 na Refrota Público, somando 554 veículos e R$ 463,2 milhões em investimento.",
-      "A carteira em preparação caiu de 78 para 70 projetos, confirmando o avanço de propostas já selecionadas para a fase de contratação.",
-      "Entraram 2 novos projetos selecionados, elevando o investimento selecionado em R$ 36,7 milhões.",
-      "Mudança no ranking regional: Centro-Oeste entrou entre as três regiões com mais veículos contratados, no lugar do Sul.",
-      "A participação de ônibus elétricos na frota contratada subiu de 10,2% para 10,6%."
+      "Não houve variação relevante nos indicadores em relação à atualização anterior."
     ]
   },
   "_dados_inconsistentes": [
