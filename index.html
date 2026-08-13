@@ -3229,32 +3229,36 @@
             const e = estado();
             const regioes = regioesAtuais(e);
             const totalInv = somaRegioes(e, 'investimento') || 1;
+            // Mesma cor de destaque usada no restante do painel (azul =
+            // Contratados, índigo = Selecionados), aplicada apenas na linha
+            // de Total. Nas linhas normais, as 3 colunas (Propostas, Veículos,
+            // Investimento) usam o mesmo formato neutro — sem negrito, cinza.
+            const ehSelRegiao = tipoProjetoMapa === 'selecionados';
+            const corDestaque = ehSelRegiao ? '#6d3fb0' : '#0052cc';
+
             const linhas = regioes.map(r => `
                         <tr>
                             <td><strong>${r.nome}</strong></td>
-                            <td class="value-highlight">${fmtInt(r.propostas)}</td>
-                            <td>${fmtInt(r.veiculos)}</td>
+                            <td class="value-secondary">${fmtInt(r.propostas)}</td>
+                            <td class="value-secondary">${fmtInt(r.veiculos)}</td>
                             <td class="value-secondary">${fmtMi(r.investimento)} (${fmtPct(r.investimento / totalInv * 100, 2)}%)</td>
                         </tr>`).join('');
 
             document.getElementById('regionalTableBody').innerHTML = linhas + `
                         <tr style="background: #f0f4f8; font-weight: 600;">
                             <td><strong>Total</strong></td>
-                            <td class="value-highlight">${fmtInt(somaRegioes(e, 'propostas'))}</td>
-                            <td>${fmtInt(somaRegioes(e, 'veiculos'))}</td>
-                            <td class="value-secondary">${fmtMi(somaRegioes(e, 'investimento'))} (100%)</td>
+                            <td style="font-weight:600; color:${corDestaque};">${fmtInt(somaRegioes(e, 'propostas'))}</td>
+                            <td style="font-weight:600; color:${corDestaque};">${fmtInt(somaRegioes(e, 'veiculos'))}</td>
+                            <td style="font-weight:600; color:${corDestaque};">${fmtMi(somaRegioes(e, 'investimento'))} (100%)</td>
                         </tr>`;
 
             chartRegional.data.labels = regioes.map(r => r.nome);
             chartRegional.data.datasets[0].data = regioes.map(r => r.veiculos);
-            // Cor da barra acompanha o tipo de projeto ativo — mesma paleta
-            // já usada nos selos (azul = Contratados, taupe = Selecionados).
-            const ehSelRegiao = tipoProjetoMapa === 'selecionados';
             // Cor da barra acompanha o tipo de projeto ativo. Usamos um
             // índigo-violeta (não o taupe do selo) porque o taupe está
             // muito próximo, em distância de cor, do usado em "Desistências"
             // no painel de Projetos Selecionados — poderiam se confundir.
-            chartRegional.data.datasets[0].backgroundColor = ehSelRegiao ? '#6d3fb0' : '#0052cc';
+            chartRegional.data.datasets[0].backgroundColor = corDestaque;
             chartRegional.data.datasets[0].hoverBackgroundColor = ehSelRegiao ? '#59279c' : '#0041a3';
             chartRegional.update();
         }
@@ -3263,20 +3267,25 @@
         function renderAnos() {
             const e = estado();
             const anos = anosAtuais(e);
+            // Mesma cor de destaque do restante do painel, aplicada só na
+            // linha de Total. Linhas normais: as 3 colunas em formato neutro.
+            const ehSel = tipoProjetoMapa === 'selecionados';
+            const corDestaque = ehSel ? '#6d3fb0' : '#0052cc';
+
             const linhas = anos.map(a => `
                         <tr>
                             <td><strong>${a.ano}</strong></td>
-                            <td class="value-highlight">${fmtInt(a.propostas)}</td>
-                            <td>${fmtInt(a.veiculos)}</td>
+                            <td class="value-secondary">${fmtInt(a.propostas)}</td>
+                            <td class="value-secondary">${fmtInt(a.veiculos)}</td>
                             <td class="value-secondary">${fmtMi(a.investimento)}</td>
                         </tr>`).join('');
 
             document.getElementById('yearTableBody').innerHTML = linhas + `
                         <tr style="background: #f0f4f8; font-weight: 600;">
                             <td><strong>Total</strong></td>
-                            <td class="value-highlight">${fmtInt(somaAnos(e, 'propostas'))}</td>
-                            <td>${fmtInt(somaAnos(e, 'veiculos'))}</td>
-                            <td class="value-secondary">${fmtMi(somaAnos(e, 'investimento'))}</td>
+                            <td style="font-weight:600; color:${corDestaque};">${fmtInt(somaAnos(e, 'propostas'))}</td>
+                            <td style="font-weight:600; color:${corDestaque};">${fmtInt(somaAnos(e, 'veiculos'))}</td>
+                            <td style="font-weight:600; color:${corDestaque};">${fmtMi(somaAnos(e, 'investimento'))}</td>
                         </tr>`;
 
             chartAno.data.labels = anos.map(a => String(a.ano));
@@ -3287,8 +3296,7 @@
             // mesma série agregada de forma diferente — e manter uma cor
             // fixa preserva o contraste visual entre barra e linha nos dois
             // estados do seletor.
-            const ehSel = tipoProjetoMapa === 'selecionados';
-            chartAno.data.datasets[0].backgroundColor = ehSel ? '#6d3fb0' : '#0052cc';
+            chartAno.data.datasets[0].backgroundColor = corDestaque;
             chartAno.data.datasets[0].hoverBackgroundColor = ehSel ? '#59279c' : '#0041a3';
             // Acumulado: soma progressiva dos veículos ano a ano
             // (equivale à coluna "Acumulado" da planilha).
