@@ -1379,6 +1379,20 @@
             animation: fadeIn 0.5s ease-out;
         }
 
+        /* Neutraliza animações/transições durante a exportação (Imagem/PDF).
+           O html2canvas clona o DOM internamente para "fotografar" a página;
+           nesse clone, animações de entrada (como o fadeIn acima) reiniciam
+           do zero, e a captura pode acontecer no meio da transição —
+           resultando num efeito "esfumaçado". Esta classe é aplicada só
+           durante a captura (ver downloadAsImage/downloadAsPDF) e remove
+           qualquer animação ou transição em andamento no instante do print. */
+        body.exportando-captura *,
+        body.exportando-captura *::before,
+        body.exportando-captura *::after {
+            animation: none !important;
+            transition: none !important;
+        }
+
         /* ========== MELHORIAS DE CONTRASTE WCAG AA ========== */
         .legend-item {
             cursor: pointer;
@@ -3448,12 +3462,20 @@
 
                 const scale = 2;
                 const element = document.body;
-                const canvas = await html2canvas(element, {
-                    backgroundColor: '#f5f7fa',
-                    scale: scale,
-                    allowTaint: true,
-                    useCORS: true
-                });
+                // Desliga animações/transições antes da captura (ver comentário
+                // da classe .exportando-captura no CSS) e restaura no finally.
+                document.body.classList.add('exportando-captura');
+                let canvas;
+                try {
+                    canvas = await html2canvas(element, {
+                        backgroundColor: '#f5f7fa',
+                        scale: scale,
+                        allowTaint: true,
+                        useCORS: true
+                    });
+                } finally {
+                    document.body.classList.remove('exportando-captura');
+                }
 
                 const corte = calcularCorteMapa(scale);
                 const dataStr = new Date().toLocaleDateString('pt-BR');
@@ -3509,12 +3531,20 @@
 
                 const scale = 2;
                 const element = document.body;
-                const canvas = await html2canvas(element, {
-                    backgroundColor: '#f5f7fa',
-                    scale: scale,
-                    allowTaint: true,
-                    useCORS: true
-                });
+                // Desliga animações/transições antes da captura (ver comentário
+                // da classe .exportando-captura no CSS) e restaura no finally.
+                document.body.classList.add('exportando-captura');
+                let canvas;
+                try {
+                    canvas = await html2canvas(element, {
+                        backgroundColor: '#f5f7fa',
+                        scale: scale,
+                        allowTaint: true,
+                        useCORS: true
+                    });
+                } finally {
+                    document.body.classList.remove('exportando-captura');
+                }
 
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({
