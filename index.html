@@ -3855,19 +3855,27 @@
         // Caso contrário, mantém os dados embutidos (comportamento original).
         function estruturaValida(json) {
             if (!json || typeof json !== 'object') return false;
-            return ['consolidado', 'publico', 'privado'].every(k =>
-                json[k] &&
-                json[k].veiculos &&
-                Array.isArray(json[k].regioes) &&
-                Array.isArray(json[k].anos) &&
-                json[k].ufsContratados &&
-                json[k].ufsSelecionados &&
-                json[k].veiculosEntregues &&
-                Array.isArray(json[k].regioesSelecionados) &&
-                Array.isArray(json[k].anosSelecionados) &&
-                json[k].projetos &&
-                json[k].meta2026
-            );
+            return ['consolidado', 'publico', 'privado'].every(k => {
+                const c = json[k];
+                if (!c) return false;
+                const statusOk = c.projetos && c.projetos.status &&
+                    ['contratados', 'emPreparacao', 'aCancelar', 'cancelados'].every(st =>
+                        c.projetos.status[st] && typeof c.projetos.status[st].veiculos === 'number'
+                    );
+                return (
+                    c.veiculos &&
+                    Array.isArray(c.regioes) &&
+                    Array.isArray(c.anos) &&
+                    c.ufsContratados &&
+                    c.ufsSelecionados &&
+                    c.veiculosEntregues &&
+                    Array.isArray(c.regioesSelecionados) &&
+                    Array.isArray(c.anosSelecionados) &&
+                    c.projetos &&
+                    c.meta2026 &&
+                    statusOk
+                );
+            });
         }
 
         async function carregarDadosExternos() {

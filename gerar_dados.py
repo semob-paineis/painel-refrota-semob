@@ -117,6 +117,8 @@ LINHA_STATUS_EM_PREPARACAO = 50
 LINHA_STATUS_A_CANCELAR = 51
 LINHA_STATUS_CANCELADOS = 52
 COL_STATUS_QTD = 3    # coluna C (quantidade de projetos)
+COL_STATUS_VEICULOS = 4  # coluna D (quantidade de veículos) — populada a
+                          # partir da atualização de 13/08/2026
 COL_STATUS_VALOR = 5  # coluna E (investimento em R$)
 
 # Projetos selecionados por frente (Público/Privado) — legendas dos donuts
@@ -302,10 +304,10 @@ def extrair_cenario(caminho_xlsx, chave_cenario):
             "investimento": cel(LINHA_TOTAL_PROJETOS_CONTRATADOS, COL_INVEST),
         },
         "status": {
-            "contratados": {"qtd": cel(LINHA_STATUS_CONTRATADOS, COL_STATUS_QTD), "valor": cel(LINHA_STATUS_CONTRATADOS, COL_STATUS_VALOR)},
-            "emPreparacao": {"qtd": cel(LINHA_STATUS_EM_PREPARACAO, COL_STATUS_QTD), "valor": cel(LINHA_STATUS_EM_PREPARACAO, COL_STATUS_VALOR)},
-            "aCancelar": {"qtd": cel(LINHA_STATUS_A_CANCELAR, COL_STATUS_QTD), "valor": cel(LINHA_STATUS_A_CANCELAR, COL_STATUS_VALOR)},
-            "cancelados": {"qtd": cel(LINHA_STATUS_CANCELADOS, COL_STATUS_QTD), "valor": cel(LINHA_STATUS_CANCELADOS, COL_STATUS_VALOR)},
+            "contratados": {"qtd": cel(LINHA_STATUS_CONTRATADOS, COL_STATUS_QTD), "veiculos": cel(LINHA_STATUS_CONTRATADOS, COL_STATUS_VEICULOS), "valor": cel(LINHA_STATUS_CONTRATADOS, COL_STATUS_VALOR)},
+            "emPreparacao": {"qtd": cel(LINHA_STATUS_EM_PREPARACAO, COL_STATUS_QTD), "veiculos": cel(LINHA_STATUS_EM_PREPARACAO, COL_STATUS_VEICULOS), "valor": cel(LINHA_STATUS_EM_PREPARACAO, COL_STATUS_VALOR)},
+            "aCancelar": {"qtd": cel(LINHA_STATUS_A_CANCELAR, COL_STATUS_QTD), "veiculos": cel(LINHA_STATUS_A_CANCELAR, COL_STATUS_VEICULOS), "valor": cel(LINHA_STATUS_A_CANCELAR, COL_STATUS_VALOR)},
+            "cancelados": {"qtd": cel(LINHA_STATUS_CANCELADOS, COL_STATUS_QTD), "veiculos": cel(LINHA_STATUS_CANCELADOS, COL_STATUS_VEICULOS), "valor": cel(LINHA_STATUS_CANCELADOS, COL_STATUS_VALOR)},
         },
         "frentePublico": {
             "propostas": cel(LINHA_FRENTE_PUBLICO, COL_FRENTE_PROPOSTAS),
@@ -412,6 +414,23 @@ def validar(dados):
             avisos.append(
                 f"[{chave}] Soma do valor por status ({soma_status_valor:,.2f}) "
                 f"≠ investimento total selecionado ({total_sel_valor:,.2f})"
+            )
+        soma_status_veiculos = sum(v["veiculos"] for v in status.values())
+        total_sel_veiculos = cen["projetos"]["selecionados"]["veiculos"]
+        if soma_status_veiculos != total_sel_veiculos:
+            avisos.append(
+                f"[{chave}] Soma de veículos por status ({soma_status_veiculos}) "
+                f"≠ total de veículos selecionados ({total_sel_veiculos})"
+            )
+        # 6b) O status "Contratados" (veículos) deve bater com o total de
+        # veículos contratados usado no restante do painel (D13/soma UF) —
+        # são a mesma população, vista por duas fontes diferentes da planilha.
+        veic_contratados_painel = sum(cen["veiculos"].values())
+        if status["contratados"]["veiculos"] != veic_contratados_painel:
+            avisos.append(
+                f"[{chave}] Veículos 'Contratados' no detalhamento de status "
+                f"({status['contratados']['veiculos']}) ≠ total de veículos "
+                f"contratados do painel ({veic_contratados_painel})"
             )
 
     # 7) Frentes (Público/Privado) devem bater com os totais por cenário próprio
