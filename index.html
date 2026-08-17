@@ -2420,6 +2420,45 @@
 
         // ---------- Agregações derivadas do cenário ----------
         function estado() { return DADOS[cenarioAtual]; }
+
+        // ACESSIBILIDADE — definida cedo no arquivo (antes de aplicarCenario e
+        // de sua primeira chamada) porque "class" não sofre hoisting como
+        // "function": referenciá-la antes da declaração lançaria erro e
+        // quebraria o carregamento inicial do painel.
+        class A11yManager {
+            static adicionarAriaLabels() {
+                try {
+                    // Rótulos calculados a partir do cenário ativo — antes eram
+                    // texto fixo, escrito uma vez na criação do painel e nunca
+                    // mais atualizado (ficaram desatualizados após sucessivas
+                    // atualizações de dados, o mesmo tipo de inconsistência
+                    // corrigida no tooltip do gráfico de Metas).
+                    const e = estado();
+                    const sel = e.projetos.selecionados;
+                    const con = e.projetos.contratados;
+                    const m = e.meta2026;
+                    const graficos = [
+                        {id: 'resourcesDonutChart', label: `Gráfico de distribuição de projetos selecionados. Total de ${fmtInt(sel.propostas)} projetos, ${fmtInt(sel.veiculos)} veículos, com ${fmtBi(sel.investimento)} de investimento.`},
+                        {id: 'contractedProjectsChart', label: `Gráfico de distribuição de projetos contratados. Total de ${fmtInt(con.propostas)} projetos, ${fmtInt(con.veiculos)} veículos, com ${fmtBi(con.investimento)} de investimento.`},
+                        {id: 'mainDonutChart', label: 'Gráfico de distribuição de veículos contratados.'},
+                        {id: 'deliveredDonutChart', label: 'Gráfico de distribuição de veículos entregues, por tipo: elétricos, Euro 6 e sobre trilhos.'},
+                        {id: 'yearChart', label: 'Gráfico combinado da evolução de contratações por ano: barras azuis com os veículos contratados em cada ano e linha verde com o total acumulado.'},
+                        {id: 'metasProgressChart', label: `Indicador de progresso de metas 2026. Meta total ${fmtInt(m.meta)} unidades, concluído ${fmtInt(m.realizado)} unidades.`}
+                    ];
+
+                    graficos.forEach(g => {
+                        const canvas = document.getElementById(g.id);
+                        if (canvas) {
+                            canvas.setAttribute('role', 'img');
+                            canvas.setAttribute('aria-label', g.label);
+                        }
+                    });
+                } catch (error) {
+                    console.error('Erro ao adicionar ARIA labels:', error);
+                }
+            }
+        }
+
         // Conjunto de investimentos por UF conforme o tipo de projeto ativo no mapa.
         // Reutilizado tanto pelo mapa quanto pelo ranking, preservando a lógica original.
         function ufsAtuais() {
@@ -2660,9 +2699,14 @@
                     tooltip: {
                         callbacks: {
                             label: function(context) {
+                                // Lê o cenário ativo em tempo real (a fatia do
+                                // gráfico já é dinâmica desde a criação — o
+                                // tooltip estava com valores fixos [2005, 2995],
+                                // desatualizados e sem refletir o cenário).
+                                const m = estado().meta2026;
                                 const labels = ['Concluído', 'Restante'];
-                                const valores = [2005, 2995];
-                                return labels[context.dataIndex] + ': ' + valores[context.dataIndex] + ' unidades';
+                                const valores = [m.realizado, m.meta - m.realizado];
+                                return labels[context.dataIndex] + ': ' + fmtInt(valores[context.dataIndex]) + ' unidades';
                             }
                         },
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -3491,6 +3535,7 @@
             renderRankingUF();
             atualizarRotulosTipoProjeto();
             if (typeof drawBrazilMap === 'function') drawBrazilMap();
+            if (typeof A11yManager !== 'undefined') A11yManager.adicionarAriaLabels();
         }
 
         // --- Botão triplo (Segmented Control): Consolidado | Público | Privado ---
@@ -3926,7 +3971,7 @@
                 console.log('✅ Dados carregados de dados.json (' +
                     (json._meta ? json._meta.gerado_em : 'sem metadados') + ')');
             } catch (e) {
-                console.info('ℹ️ Usando dados embutidos no HTML (dados.json indisponível: ' +
+                console.log('ℹ️ Usando dados embutidos no HTML (dados.json indisponível: ' +
                     e.message + ')');
             }
         }
@@ -4119,32 +4164,6 @@
                     }
                 } catch (error) {
                     console.error('Erro ao filtrar tabela:', error);
-                }
-            }
-        }
-
-        // 5. ACESSIBILIDADE
-        class A11yManager {
-            static adicionarAriaLabels() {
-                try {
-                    const graficos = [
-                        {id: 'resourcesDonutChart', label: 'Gráfico de distribuição de projetos selecionados. Total de 325 projetos, 13.907 veículos, com R$ 19,40 bilhões de investimento.'},
-                        {id: 'contractedProjectsChart', label: 'Gráfico de distribuição de projetos contratados. Total de 193 projetos, 5.232 veículos, com R$ 6,19 bilhões de investimento.'},
-                        {id: 'mainDonutChart', label: 'Gráfico de distribuição de veículos contratados.'},
-                        {id: 'deliveredDonutChart', label: 'Gráfico de distribuição de veículos entregues, por tipo: elétricos, Euro 6 e sobre trilhos.'},
-                        {id: 'yearChart', label: 'Gráfico combinado da evolução de contratações por ano: barras azuis com os veículos contratados em cada ano e linha verde com o total acumulado.'},
-                        {id: 'metasProgressChart', label: 'Indicador de progresso de metas 2026. Meta total 5.000 unidades, concluído 2.005 unidades.'}
-                    ];
-                    
-                    graficos.forEach(g => {
-                        const canvas = document.getElementById(g.id);
-                        if (canvas) {
-                            canvas.setAttribute('role', 'img');
-                            canvas.setAttribute('aria-label', g.label);
-                        }
-                    });
-                } catch (error) {
-                    console.error('Erro ao adicionar ARIA labels:', error);
                 }
             }
         }
