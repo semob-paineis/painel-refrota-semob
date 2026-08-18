@@ -615,140 +615,170 @@
 
         .funil-header-icon { width: 19px; height: 19px; flex-shrink: 0; }
 
-        /* Selo do cenário ativo — este painel É reativo ao filtro superior,
-           ao contrário dos dois donuts de projetos (sempre Consolidado). */
-        .funil-cenario-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
-            border-radius: 999px;
-            background: #eaf1fb;
-            color: #0052cc;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-            transition: background 0.3s ease, color 0.3s ease;
-        }
-
-        .funil-cenario-badge::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: currentColor;
-        }
-
-        /* ---- Coluna vertical com os 3 cartões (sem numeração/texto lateral) ---- */
+        /* ---- Fluxo ramificado: Selecionados > (Contratados / A Contratar /
+           Desistências) > Contratados > Entregues. Larguras proporcionais ao
+           percentual que cada bloco representa dentro de Selecionados (com
+           piso mínimo de legibilidade), animadas ao trocar de cenário.
+           Testado em protótipo isolado antes de entrar em produção. ---- */
         .funil-vertical {
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .funil-step { width: 100%; display: flex; justify-content: center; }
 
-        /* Largura decrescente: Contratados 10% menor que Selecionados;
-           Entregues 10% menor que Contratados (ou seja, 81% do topo). */
-        .funil-w1 .funil-step-card { width: 100%; }
-        .funil-w2 .funil-step-card { width: 90%; }
-        .funil-w3 .funil-step-card { width: 81%; }
-
-        .funil-step-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            border-radius: 13px;
-            box-shadow: 0 2px 7px rgba(0, 0, 0, 0.09);
-            transition: transform 0.22s ease, box-shadow 0.22s ease;
+        /* ---- Selecionados: origem do funil, sempre 100% da largura ---- */
+        .funil-sel-card {
+            width: 100%;
+            background: linear-gradient(180deg, #2a63f2 0%, #1a4bd6 100%);
+            border-radius: 16px;
+            padding: 16px 18px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(30, 86, 240, 0.28);
             cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .funil-step-card:hover,
-        .funil-step.ativo .funil-step-card {
+        .funil-sel-card:hover, .funil-step.ativo .funil-sel-card {
             transform: translateY(-2px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+            box-shadow: 0 10px 22px rgba(30, 86, 240, 0.35);
         }
 
-        /* Cores por intensidade — mais escura no topo, mais clara na base */
-        .funil-card-1 { background: #1e56f0; }
-        .funil-card-2 { background: #5b8ff9; }
-        .funil-card-3 { background: #a7e3c2; }
+        .funil-sel-rotulo { font-size: 11.5px; font-weight: 700; letter-spacing: 0.2px; opacity: 0.92; }
+        .funil-sel-valor { font-size: 26px; font-weight: 800; margin: 3px 0 1px; font-variant-numeric: tabular-nums; }
+        .funil-sel-unidade { font-size: 10.5px; opacity: 0.78; }
 
-        .funil-step-icon,
-        .funil-step-icon-r {
-            width: 34px;
-            height: 34px;
-            border-radius: 11px 6px 6px 11px;
+        /* ---- Linha 2: Contratados / A Contratar / Desistências ----
+           Larguras (flex-basis) definidas via JS, proporcionais ao
+           percentual de cada uma dentro do total de Selecionados. Somam
+           exatamente 100%; flex-shrink não é zerado, para o próprio
+           flexbox absorver o espaço do "gap" e nunca ultrapassar a
+           largura do card "Selecionados" acima (sobretudo à direita). */
+        .funil-linha2 {
             display: flex;
+            gap: 7px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        .funil-card2 {
+            height: 58px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            border-radius: 11px;
+            padding: 6px 4px;
+            text-align: center;
+            color: #fff;
+            cursor: pointer;
+            transition: flex-basis 0.6s cubic-bezier(.4,0,.2,1),
+                        transform 0.2s ease, box-shadow 0.2s ease;
+            flex-shrink: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .funil-card2:hover, .funil-card2.ativo {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
+        }
+
+        .funil-card2-valor { font-size: 16px; font-weight: 800; margin: 0 0 5px; font-variant-numeric: tabular-nums; }
+
+        .funil-card2-pct {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 999px;
+            font-size: 9.5px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.26);
+        }
+
+        /* Contratados: caminho principal — cor mais forte, maior destaque */
+        .funil-card-contratados { background: linear-gradient(180deg, #6b9bfa 0%, #4a7ff5 100%); box-shadow: 0 3px 8px rgba(91, 143, 249, 0.3); }
+
+        /* A Contratar: mesma família de azul de Contratados, tom mais claro
+           — reforça que é uma ramificação subordinada ao caminho principal */
+        .funil-card-acontratar { background: linear-gradient(180deg, #bcd0f3 0%, #9db8ea 100%); }
+        .funil-card-acontratar .funil-card2-valor { color: #1c3d73; }
+        .funil-card-acontratar .funil-card2-pct { background: rgba(28, 61, 115, 0.14); color: #1c3d73; }
+
+        /* ---- Legenda: rótulos de "Contratados/A Contratar/Desistência" ficam
+           aqui, fora dos cards — a largura de cada card é proporcional ao
+           valor e pode ficar muito estreita em cenários extremos (ex.:
+           Desistência a 0%), o que quebrava/truncava o texto quando ele
+           morava dentro do card. Na legenda, o texto sempre tem espaço
+           para respirar, independente da largura de cada card. ---- */
+        .funil-legenda {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px 14px;
+            width: 100%;
+            padding: 2px 0 0;
+        }
+        .funil-legenda-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10.5px;
+            color: #555;
+            white-space: nowrap;
+        }
+        .funil-legenda-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
             flex-shrink: 0;
         }
 
-        .funil-step-icon svg,
-        .funil-step-icon-r svg { width: 18px; height: 18px; }
+        /* Desistências: mesmo tom taupe já usado na "Distribuição dos
+           Projetos Selecionados", conectando visualmente os dois painéis */
+        .funil-card-desistencias { background: linear-gradient(180deg, #ab9986 0%, #93816e 100%); }
 
-        .funil-step-icon-r { width: 26px; height: 26px; border-radius: 6px 11px 11px 6px; margin-left: auto; }
-        .funil-step-icon-r svg { width: 14px; height: 14px; }
+        /* ---- Entregues: largura proporcional ao valor, justificado à
+           esquerda (mesmo início de "Contratados") — sem conector visual
+           entre os blocos, a sequência de cima para baixo já comunica o
+           fluxo. Mesma altura dos 3 cards da linha 2. ---- */
+        .funil-ent-wrap { width: 100%; }
+        .funil-ent-wrap .funil-step { justify-content: flex-start; }
 
-        /* Cartões 1 e 2 (fundo escuro/médio) — ícone e texto em branco */
-        .funil-card-1 .funil-step-icon,
-        .funil-card-1 .funil-step-icon-r { background: rgba(255, 255, 255, 0.20); color: #ffffff; }
-        .funil-card-2 .funil-step-icon,
-        .funil-card-2 .funil-step-icon-r { background: rgba(255, 255, 255, 0.24); color: #ffffff; }
-
-        .funil-card-1 .funil-step-titulo,
-        .funil-card-1 .funil-step-valor { color: #ffffff; }
-        .funil-card-1 .funil-step-sub { color: rgba(255, 255, 255, 0.78); }
-
-        .funil-card-2 .funil-step-titulo,
-        .funil-card-2 .funil-step-valor { color: #ffffff; }
-        .funil-card-2 .funil-step-sub { color: rgba(255, 255, 255, 0.82); }
-
-        /* Cartão 3 (fundo claro) — ícone e texto em tom escuro para contraste */
-        .funil-card-3 .funil-step-icon,
-        .funil-card-3 .funil-step-icon-r { background: rgba(255, 255, 255, 0.55); color: #0e6b45; }
-        .funil-card-3 .funil-step-titulo { color: #0e4a30; }
-        .funil-card-3 .funil-step-valor { color: #0b3a26; }
-        .funil-card-3 .funil-step-sub { color: #2c6b4c; }
-
-        .funil-step-info { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-
-        .funil-step-titulo {
-            font-size: 12px;
-            font-weight: 700;
+        .funil-ent-card {
+            height: 58px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #b7ecd2 0%, #9adcbb 100%);
+            border-radius: 11px;
+            padding: 6px 4px;
+            text-align: center;
+            color: #0b3a26;
+            transition: width 0.6s cubic-bezier(.4,0,.2,1),
+                        transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
         }
 
-        .funil-step-valor {
-            font-size: 19px;
-            font-weight: 800;
-            line-height: 1.1;
-            font-variant-numeric: tabular-nums;
+        .funil-ent-card:hover, .funil-step.ativo .funil-ent-card {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
         }
 
-        .funil-step-sub {
-            font-size: 10.5px;
-            opacity: 0.9;
-        }
+        .funil-ent-valor { font-size: 16px; font-weight: 800; margin: 0 0 5px; font-variant-numeric: tabular-nums; }
 
-        /* Selo de percentual no card "Entregues" — mesma linguagem visual
-           dos selos usados no bloco "Detalhamento da Seleção" (Prioridade 3
-           do redesign), mostrando a conversão total (Entregues ÷ Selecionados)
-           diretamente onde o usuário já está olhando o número de entregues. */
-        .funil-step-pct {
+        .funil-ent-pct {
             display: inline-block;
-            padding: 2px 9px;
+            padding: 1px 8px;
             border-radius: 999px;
-            font-size: 10.5px;
+            font-size: 9.5px;
             font-weight: 700;
             background: rgba(14, 74, 48, 0.14);
             color: #0e4a30;
-            white-space: nowrap;
         }
 
         /* ---- Tooltip de composição (hover na etapa) ---- */
@@ -805,129 +835,23 @@
             margin: 14px 0 0;
         }
 
-        /* ---- Detalhamento da Seleção ----
-           Substitui, dentro do próprio funil, o antigo card único
-           "Contratados": mesma largura da etapa "Selecionados" (100%), dando
-           peso visual equivalente às 3 situações que um projeto selecionado
-           pode assumir antes da entrega. "Contratados" recebe leve ênfase
-           (fundo mais forte, borda mais grossa) sem ofuscar as outras duas —
-           "A Contratar" fica neutro (ainda em aberto), "Desistência" usa o
-           mesmo tom taupe já usado na "Distribuição dos Projetos
-           Selecionados", conectando visualmente os dois painéis. */
-        .funil-detalhe {
-            width: 100%;
-        }
-
-        .funil-detalhe-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .funil-detalhe-card {
-            background: #fafbfc;
-            border: 1px solid #eef0f3;
-            border-top: 3px solid #ccc;
-            border-radius: 9px;
-            padding: 9px 8px;
-            text-align: center;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .funil-detalhe-card:hover,
-        .funil-detalhe-card.ativo {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-        }
-
-        .funil-detalhe-icon {
-            width: 22px;
-            height: 22px;
-            margin: 0 auto 5px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .funil-detalhe-icon svg { width: 12px; height: 12px; }
-
-        .funil-detalhe-valor {
-            font-size: 16px;
-            font-weight: 800;
-            line-height: 1.1;
-            font-variant-numeric: tabular-nums;
-            color: #1a1a1a;
-        }
-
-        .funil-detalhe-label {
-            font-size: 10.5px;
-            font-weight: 600;
-            color: #666;
-            margin-top: 2px;
-        }
-
-        .funil-detalhe-pct {
-            display: inline-block;
-            margin-top: 4px;
-            padding: 1px 8px;
-            border-radius: 999px;
-            font-size: 9.5px;
-            font-weight: 700;
-            background: #eee;
-            color: #777;
-        }
-
-        /* Contratados: ênfase — fundo azul claro, borda mais forte, número maior */
-        .funil-detalhe-card.is-contratados {
-            background: #eaf1fb;
-            border-color: #d3e2f7;
-            border-top: 4px solid #0052cc;
-        }
-        .funil-detalhe-card.is-contratados .funil-detalhe-icon { background: rgba(0, 82, 204, 0.14); color: #0052cc; }
-        .funil-detalhe-card.is-contratados .funil-detalhe-valor { font-size: 19px; color: #0052cc; }
-        .funil-detalhe-card.is-contratados .funil-detalhe-label { color: #0052cc; }
-        .funil-detalhe-card.is-contratados .funil-detalhe-pct { background: #0052cc; color: #fff; }
-
-        /* A Contratar: neutro — ainda em aberto, sem carga positiva/negativa */
-        .funil-detalhe-card.is-acontratar { border-top-color: #94a3b8; }
-        .funil-detalhe-card.is-acontratar .funil-detalhe-icon { background: rgba(148, 163, 184, 0.18); color: #64748b; }
-        .funil-detalhe-card.is-acontratar .funil-detalhe-pct { background: #eef1f4; color: #64748b; }
-
-        /* Desistência: mesmo taupe do donut "Distribuição dos Projetos Selecionados" */
-        .funil-detalhe-card.is-desistencia { background: #f6f2ec; border-top-color: #9c8a78; }
-        .funil-detalhe-card.is-desistencia .funil-detalhe-icon { background: rgba(156, 138, 120, 0.18); color: #8a7863; }
-        .funil-detalhe-card.is-desistencia .funil-detalhe-pct { background: #9c8a78; color: #fff; }
-
-        /* Barra fina de referência abaixo dos cards — reforça a proporção
-           visual entre os três, complementar aos percentuais nos cards. */
-        .funil-detalhe-bar {
-            display: flex;
-            width: 100%;
-            height: 6px;
-            border-radius: 999px;
-            overflow: hidden;
-            background: #e9ecef;
-            margin-top: 14px;
-        }
-
-        .funil-comp-seg {
-            height: 100%;
-            transition: width 0.5s ease;
-        }
-
-        .funil-comp-contratados { background: #0052cc; }
-        .funil-comp-acontratar { background: #94a3b8; }
-        .funil-comp-desistencias { background: #9c8a78; }
-
-        @media (max-width: 560px) {
-            .funil-detalhe-grid { grid-template-columns: 1fr; }
-        }
-
         @media (max-width: 640px) {
-            .funil-step-card { flex-wrap: wrap; padding: 14px; }
-            .funil-step-icon-r { display: none; }
-            .funil-step-valor { font-size: 22px; }
+            .funil-card2-valor { font-size: 13px; margin: 0 0 4px; }
+            .funil-card2-pct { font-size: 8.5px; padding: 1px 6px; }
+            .funil-sel-valor { font-size: 22px; }
+            .funil-linha2 { gap: 5px; }
+            .funil-card2 { height: 50px; }
+            .funil-ent-card { height: 50px; }
+            .funil-legenda-item { font-size: 9.5px; }
+        }
+
+        /* As transições de largura/margem do funil (que animam a proporção
+           ao trocar de cenário) também respeitam prefers-reduced-motion,
+           assim como a contagem numérica já tratada via JS. */
+        @media (prefers-reduced-motion: reduce) {
+            .funil-card2, .funil-ent-card, .funil-sel-card {
+                transition: none !important;
+            }
         }
 
         .summary-highlight {
@@ -1631,105 +1555,53 @@
                         </svg>
                         Funil de Conversão
                     </h3>
-                    <span class="funil-cenario-badge" id="funilCenarioBadge">Consolidado</span>
                 </div>
 
                 <div class="funil-vertical" id="funilVertical">
-                    <!-- Etapa 1: Selecionados (100% da largura — cor mais escura) -->
-                    <div class="funil-step funil-w1" id="funilStep0" data-etapa="0">
-                        <div class="funil-step-card funil-card-1">
-                            <div class="funil-step-icon funil-icon-1">
-                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/>
-                                    <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                                    <circle cx="17" cy="9" r="2.4" stroke="currentColor" stroke-width="1.7"/>
-                                    <path d="M14.8 19c.3-2.4 2.1-4 4.2-4 1.7 0 3.2.9 4 2.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                                </svg>
-                            </div>
-                            <div class="funil-step-info">
-                                <div class="funil-step-titulo">Selecionados</div>
-                                <div class="funil-step-valor" id="funilValor0">0</div>
-                                <div class="funil-step-sub">Total de veículos</div>
-                            </div>
-                            <div class="funil-step-icon-r funil-icon-1">
-                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.6"/>
-                                    <path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                                    <circle cx="17" cy="9" r="2.2" stroke="currentColor" stroke-width="1.6"/>
-                                    <path d="M14.8 19c.3-2.4 2.1-4 4.2-4 1.7 0 3.2.9 4 2.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                                </svg>
+                    <!-- Selecionados: origem do funil -->
+                    <div class="funil-step" id="funilStep0" data-etapa="0">
+                        <div class="funil-sel-card">
+                            <div class="funil-sel-rotulo">Selecionados</div>
+                            <div class="funil-sel-valor" id="funilValor0">0</div>
+                            <div class="funil-sel-unidade">veículos</div>
+                        </div>
+                    </div>
+
+                    <!-- Os 3 destinos: só Contratados segue adiante até Entregues -->
+                    <div class="funil-linha2" id="funilLinha2">
+                        <div class="funil-card2 funil-card-contratados" id="funilStep1" data-etapa="1">
+                            <div class="funil-card2-valor" id="funilCompContratados">0</div>
+                            <span class="funil-card2-pct" id="funilCompContratadosPct">0%</span>
+                        </div>
+                        <div class="funil-card2 funil-card-acontratar" data-etapa="acontratar">
+                            <div class="funil-card2-valor" id="funilCompAContratar">0</div>
+                            <span class="funil-card2-pct" id="funilCompAContratarPct">0%</span>
+                        </div>
+                        <div class="funil-card2 funil-card-desistencias" data-etapa="desistencias">
+                            <div class="funil-card2-valor" id="funilCompDesistencias">0</div>
+                            <span class="funil-card2-pct" id="funilCompDesistenciasPct">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- Entregues: resultado final, justificado à esquerda -->
+                    <div class="funil-ent-wrap">
+                        <div class="funil-step" id="funilStep2" data-etapa="2">
+                            <div class="funil-ent-card" id="funilEntCard" style="width: 46%;">
+                                <div class="funil-ent-valor" id="funilValor2">0</div>
+                                <span class="funil-ent-pct" id="funilPctConversaoTotal">0%</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Etapa 2: Detalhamento (substitui o card único "Contratados" —
-                         mostra, no mesmo lugar do funil, para onde foram os projetos
-                         selecionados: Contratados / A Contratar / Desistências). -->
-                    <div class="funil-detalhe" id="funilComposicao">
-                        <div class="funil-detalhe-grid">
-                            <div class="funil-detalhe-card is-contratados" id="funilStep1" data-etapa="1">
-                                <div class="funil-detalhe-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
-                                        <path d="M8 12.3l2.6 2.6L16.3 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </div>
-                                <div class="funil-detalhe-valor" id="funilCompContratados">0</div>
-                                <div class="funil-detalhe-label">Contratados</div>
-                                <div class="funil-detalhe-pct" id="funilCompContratadosPct">0%</div>
-                            </div>
-                            <div class="funil-detalhe-card is-acontratar">
-                                <div class="funil-detalhe-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
-                                        <path d="M12 7v5.3l3.6 2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </div>
-                                <div class="funil-detalhe-valor" id="funilCompAContratar">0</div>
-                                <div class="funil-detalhe-label">A Contratar</div>
-                                <div class="funil-detalhe-pct" id="funilCompAContratarPct">0%</div>
-                            </div>
-                            <div class="funil-detalhe-card is-desistencia">
-                                <div class="funil-detalhe-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
-                                        <path d="M9.5 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                    </svg>
-                                </div>
-                                <div class="funil-detalhe-valor" id="funilCompDesistencias">0</div>
-                                <div class="funil-detalhe-label">Desistência</div>
-                                <div class="funil-detalhe-pct" id="funilCompDesistenciasPct">0%</div>
-                            </div>
-                        </div>
-                        <div class="funil-detalhe-bar" id="funilCompBar">
-                            <div class="funil-comp-seg funil-comp-contratados" id="funilCompSegContratados"></div>
-                            <div class="funil-comp-seg funil-comp-acontratar" id="funilCompSegAContratar"></div>
-                            <div class="funil-comp-seg funil-comp-desistencias" id="funilCompSegDesistencias"></div>
-                        </div>
-                    </div>
-
-                    <!-- Etapa 3: Entregues (90% da largura de Contratados — cor mais clara) -->
-                    <div class="funil-step funil-w3" id="funilStep2" data-etapa="2">
-                        <div class="funil-step-card funil-card-3">
-                            <div class="funil-step-icon funil-icon-3">
-                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <path d="M12 3l8 4.2v9.6L12 21l-8-4.2V7.2L12 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-                                    <path d="M4 7.2L12 11.4l8-4.2M12 11.4V21" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                            <div class="funil-step-info">
-                                <div class="funil-step-titulo">Entregues</div>
-                                <div class="funil-step-valor" id="funilValor2">0</div>
-                                <div class="funil-step-sub">Total de veículos</div>
-                                <span class="funil-step-pct" id="funilPctConversaoTotal">0%</span>
-                            </div>
-                            <div class="funil-step-icon-r funil-icon-3">
-                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/>
-                                    <path d="M8 12.3l2.6 2.6L16.3 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                        </div>
+                    <!-- Legenda: rótulos fora dos cards, para não depender da
+                         largura proporcional de cada um (que pode ficar muito
+                         estreita em cenários extremos, como Desistência a 0%).
+                         Fica abaixo de todos os cards, incluindo Entregues. -->
+                    <div class="funil-legenda">
+                        <span class="funil-legenda-item"><span class="funil-legenda-dot" style="background:#4a7ff5"></span>Contratados</span>
+                        <span class="funil-legenda-item"><span class="funil-legenda-dot" style="background:#9db8ea"></span>A Contratar</span>
+                        <span class="funil-legenda-item"><span class="funil-legenda-dot" style="background:#93816e"></span>Desistência</span>
+                        <span class="funil-legenda-item"><span class="funil-legenda-dot" style="background:#9adcbb"></span>Entregues</span>
                     </div>
 
                     <div class="funil-tooltip" id="funilTooltip" aria-hidden="true"></div>
@@ -2503,12 +2375,19 @@
                 const centerX = left + width / 2;
                 const centerY = top + height / 2;
 
+                // Número (total do cenário ativo: Consolidado / Público / Privado)
                 ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#0052cc';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                // Total do cenário ativo (Consolidado / Público / Privado)
-                ctx.fillText(fmtInt(totalVeiculos(estado())), centerX, centerY);
+                ctx.fillText(fmtInt(totalVeiculos(estado())), centerX, centerY - 12);
+
+                // Rótulo "unidades" — mesmo padrão do gráfico de Meta 2026
+                ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#999';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('unidades', centerX, centerY + 22);
 
                 ctx.restore();
             }
@@ -2525,12 +2404,19 @@
                 const centerX = left + width / 2;
                 const centerY = top + height / 2;
 
+                // Número (total do cenário ativo: Consolidado / Público / Privado)
                 ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#0052cc';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                // Total do cenário ativo (Consolidado / Público / Privado)
-                ctx.fillText(fmtInt(totalVeiculosEntregues(estado())), centerX, centerY);
+                ctx.fillText(fmtInt(totalVeiculosEntregues(estado())), centerX, centerY - 12);
+
+                // Rótulo "unidades" — mesmo padrão do gráfico de Meta 2026
+                ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#999';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('unidades', centerX, centerY + 22);
 
                 ctx.restore();
             }
@@ -2605,29 +2491,36 @@
                 const centerX = left + width / 2;
                 const centerY = top + height / 2;
 
+                // Consolidado: informação estática de sempre (total do
+                // programa). Público/Privado: mesma informação da legenda
+                // desta frente, ao lado do gráfico.
+                let valorTxt = '—', subTxt = '—';
+                if (projetosAtuais) {
+                    if (cenarioAtual === 'publico') {
+                        valorTxt = fmtBi(projetosAtuais.frentePublico.investimento);
+                        subTxt = fmtInt(projetosAtuais.frentePublico.propostas) + ' projetos';
+                    } else if (cenarioAtual === 'privado') {
+                        valorTxt = fmtBi(projetosAtuais.frentePrivado.investimento);
+                        subTxt = fmtInt(projetosAtuais.frentePrivado.propostas) + ' projetos';
+                    } else {
+                        valorTxt = fmtBi(projetosAtuais.selecionados.investimento);
+                        subTxt = fmtInt(projetosAtuais.selecionados.propostas) + ' projetos';
+                    }
+                }
+
                 // Primeira linha - valor
                 ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#0052cc';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                const selValor = projetosAtuais ? fmtBi(projetosAtuais.selecionados.investimento) : '—';
-                ctx.fillText(selValor, centerX, centerY - 15);
+                ctx.fillText(valorTxt, centerX, centerY - 12);
 
-                // Segunda linha - quantidade
+                // Segunda linha - quantidade de projetos
                 ctx.font = '14px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#666';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                const selProjetos = projetosAtuais ? fmtInt(projetosAtuais.selecionados.propostas) + ' projetos' : '—';
-                ctx.fillText(selProjetos, centerX, centerY + 20);
-
-                // Terceira linha - total de veículos
-                ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
-                ctx.fillStyle = '#999';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                const selVeiculos = projetosAtuais ? fmtInt(projetosAtuais.selecionados.veiculos) + ' veículos' : '—';
-                ctx.fillText(selVeiculos, centerX, centerY + 40);
+                ctx.fillText(subTxt, centerX, centerY + 16);
 
                 ctx.restore();
             }
@@ -2643,29 +2536,38 @@
                 const centerX = left + width / 2;
                 const centerY = top + height / 2;
 
+                // Consolidado: informação estática de sempre (total do
+                // programa). Público/Privado: mesma informação da legenda
+                // desta frente, ao lado do gráfico.
+                let valorTxt = '—', subTxt = '—';
+                if (projetosAtuais) {
+                    if (cenarioAtual === 'publico') {
+                        const contrPublicoInv = sum(Object.values(DADOS.publico.ufsContratados));
+                        valorTxt = fmtBi(contrPublicoInv);
+                        subTxt = fmtInt(DADOS.publico.projetos.contratados.propostas) + ' projetos';
+                    } else if (cenarioAtual === 'privado') {
+                        const contrPrivadoInv = sum(Object.values(DADOS.privado.ufsContratados));
+                        valorTxt = fmtBi(contrPrivadoInv);
+                        subTxt = fmtInt(DADOS.privado.projetos.contratados.propostas) + ' projetos';
+                    } else {
+                        valorTxt = fmtBi(projetosAtuais.contratados.investimento);
+                        subTxt = fmtInt(projetosAtuais.contratados.propostas) + ' projetos';
+                    }
+                }
+
                 // Primeira linha - valor
                 ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#0052cc';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                const contrValor = projetosAtuais ? fmtBi(projetosAtuais.contratados.investimento) : '—';
-                ctx.fillText(contrValor, centerX, centerY - 15);
+                ctx.fillText(valorTxt, centerX, centerY - 12);
 
-                // Segunda linha - quantidade
+                // Segunda linha - quantidade de projetos
                 ctx.font = '14px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#666';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                const contrProjetos = projetosAtuais ? fmtInt(projetosAtuais.contratados.propostas) + ' projetos' : '—';
-                ctx.fillText(contrProjetos, centerX, centerY + 20);
-
-                // Terceira linha - total de veículos
-                ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
-                ctx.fillStyle = '#999';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                const contrVeiculos = projetosAtuais ? fmtInt(projetosAtuais.contratados.veiculos) + ' veículos' : '—';
-                ctx.fillText(contrVeiculos, centerX, centerY + 40);
+                ctx.fillText(subTxt, centerX, centerY + 16);
 
                 ctx.restore();
             }
@@ -3145,9 +3047,14 @@
         ];
 
         let funilAnimId = null;             // id do requestAnimationFrame em curso
-        let funilValoresAtuais = [0, 0, 0];  // estado animado (para transição suave)
+        let funilValoresAtuais = [0, 0, 0];  // [Selecionados, Contratados, Entregues] — estado animado
         let funilEtapaFoco = null;           // etapa destacada no hover
         let funilInteracaoLigada = false;    // liga os listeners de hover uma única vez
+
+        // Largura mínima (%) de cada card da linha 2, para o texto nunca
+        // ficar ilegível mesmo quando um valor é uma fatia muito pequena
+        // (ex.: "A Contratar" no cenário Público, ~5% do total).
+        const FUNIL_MIN_LARGURA = 18;
 
         function funilComposicao(e) {
             return {
@@ -3157,23 +3064,30 @@
             };
         }
 
-        // Atualiza os números exibidos nos 3 cartões do funil
-        // (usado a cada frame da animação — função pura de "pintura" dos textos).
+        // Atualiza os números de Selecionados/Contratados/Entregues a cada
+        // frame da animação de contagem — mesmo comportamento de antes (só
+        // A Contratar/Desistências e as larguras/curvas, que não faziam
+        // parte dessa contagem, continuam sendo pintadas por renderFunilComposicao).
         function funilPintar(valores) {
             const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
             set('funilValor0', fmtInt(valores[0]));
-            set('funilValor1', fmtInt(valores[1]));
+            set('funilCompContratados', fmtInt(valores[1]));
             set('funilValor2', fmtInt(valores[2]));
         }
 
-        // Composição de "Selecionados" em 4 situações: Contratados, A Contratar
-        // (em preparação), e Desistências (A Cancelar + Cancelados somados).
+        // Desenha um "ramo" (curva suave) de Selecionados até um dos 3
+        // destinos, ou de Contratados até Entregues — mesma técnica nos
+        // dois casos, o que os deixa visualmente da mesma família.
+        // Composição de "Selecionados" em 3 destinos: Contratados, A Contratar
+        // (em preparação) e Desistências (A Cancelar + Cancelados somados).
         // Contratados+A Contratar+Desistências = total de Selecionados sempre.
-        // Exibida como mini-barra empilhada dentro do card "Contratados",
-        // dando destaque a ele sem esconder as demais situações.
+        // As larguras dos 3 cards são proporcionais ao percentual de cada um
+        // (com piso mínimo de legibilidade), assim como a largura do card
+        // "Entregues" — dando ao funil uma sensação real de afunilamento,
+        // não apenas blocos empilhados do mesmo tamanho.
         function renderFunilComposicao(e) {
-            const bar = document.getElementById('funilCompBar');
-            if (!bar) return;
+            const linha2 = document.getElementById('funilLinha2');
+            if (!linha2) return;
             const status = e.projetos.status;
             const contratados = status.contratados.veiculos || 0;
             const aContratar = status.emPreparacao.veiculos || 0;
@@ -3181,19 +3095,44 @@
             const total = contratados + aContratar + desistencias || 1;
 
             const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
-            const setW = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = pct + '%'; };
 
-            setW('funilCompSegContratados', contratados / total * 100);
-            setW('funilCompSegAContratar', aContratar / total * 100);
-            setW('funilCompSegDesistencias', desistencias / total * 100);
-
-            set('funilCompContratados', fmtInt(contratados));
+            // (o número de "Contratados" em si é pintado por funilPintar,
+            // junto com Selecionados/Entregues, na mesma animação de contagem)
             set('funilCompAContratar', fmtInt(aContratar));
             set('funilCompDesistencias', fmtInt(desistencias));
-
             set('funilCompContratadosPct', fmtPct(contratados / total * 100) + '%');
             set('funilCompAContratarPct', fmtPct(aContratar / total * 100) + '%');
             set('funilCompDesistenciasPct', fmtPct(desistencias / total * 100) + '%');
+
+            // ---- Larguras proporcionais (com piso mínimo de legibilidade) ----
+            // As 3 larguras somam exatamente 100% (mesma largura do card
+            // "Selecionados" acima). O "gap" entre os cards é responsabilidade
+            // do próprio flexbox (flex-shrink não é zerado), então a soma
+            // visual nunca ultrapassa o limite do card de cima — inclusive
+            // na lateral direita, onde o transbordo era mais perceptível.
+            const largura = valor => Math.max(FUNIL_MIN_LARGURA, total > 0 ? (valor / total * 100) : 0);
+            let wCon = largura(contratados);
+            let wAc = largura(aContratar);
+            let wDe = largura(desistencias);
+            const somaW = wCon + wAc + wDe;
+            wCon = wCon / somaW * 100;
+            wAc = wAc / somaW * 100;
+            wDe = wDe / somaW * 100;
+
+            const cards = linha2.children;
+            cards[0].style.flexBasis = wCon + '%';
+            cards[1].style.flexBasis = wAc + '%';
+            cards[2].style.flexBasis = wDe + '%';
+
+            // ---- Entregues: largura proporcional ao valor, justificado à
+            // esquerda (mesmo início de "Contratados", sem centralizar). ----
+            const totalEnt = totalVeiculosEntregues(e);
+            const wEnt = Math.min(largura(totalEnt), 100);
+
+            const entCard = document.getElementById('funilEntCard');
+            if (entCard) {
+                entCard.style.width = wEnt + '%';
+            }
         }
 
         // Hover em cada card: destaca a etapa e mostra a composição por tipo
@@ -3274,28 +3213,27 @@
                 totalVeiculosEntregues(e)
             ];
 
-            // Badge do cenário ativo
-            const badge = document.getElementById('funilCenarioBadge');
-            if (badge) badge.textContent = e.rotulo;
-
-            // Composição de status dentro do card "Contratados" (ver função
-            // dedicada) — não depende da animação de contagem, atualiza direto.
+            // Composição de status (Contratados/A Contratar/Desistências),
+            // larguras proporcionais, ramificação e conector — tudo recalculado
+            // aqui; o CSS cuida da transição suave (não depende da animação
+            // de contagem abaixo, que só afeta os números de Selecionados/Entregues).
             renderFunilComposicao(e);
 
             // Taxa de conversão total (Entregues ÷ Selecionados) — exibida
-            // como selo diretamente no card "Entregues". As demais taxas
-            // (Seleção→Contratação e Contratação→Entrega) não têm mais um
-            // resumo à parte: a primeira já é idêntica ao percentual exibido
-            // no card "Contratados" do bloco de detalhamento; a segunda fica
-            // disponível no tooltip ao passar o cursor sobre "Entregues".
-            const taxaTot = alvo[0] > 0 ? alvo[2] / alvo[0] * 100 : 0;
+            // como selo diretamente no card "Entregues". A taxa Contratação→
+            // Entrega fica disponível no tooltip ao passar o cursor.
+            const totalSelAtual = totalVeiculosSelecionados(e);
+            const totalEntAtual = totalVeiculosEntregues(e);
+            const taxaTot = totalSelAtual > 0 ? totalEntAtual / totalSelAtual * 100 : 0;
             const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
             set('funilPctConversaoTotal', fmtPct(taxaTot) + '%');
 
             funilLigarInteracao();
 
-            // Animação de contagem: interpola do valor atual até o alvo.
-            // Respeita "prefers-reduced-motion" para acessibilidade.
+            // Animação de contagem (Selecionados/Entregues): interpola do
+            // valor atual até o alvo. Respeita "prefers-reduced-motion" —
+            // as transições de largura em CSS também são desligadas nesse
+            // caso, via media query própria.
             const reduzirMovimento = window.matchMedia &&
                 window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -3327,7 +3265,6 @@
             };
             funilAnimId = requestAnimationFrame(passo);
         }
-
         // --- Donuts de projetos: destaque/esmaecimento conforme o cenário ---
         // Os valores permanecem constantes; muda apenas a evidência visual.
         function aplicarDestaqueDonut(chart) {
