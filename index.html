@@ -599,9 +599,7 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 6px;
         }
 
         .funil-header .chart-title {
@@ -628,29 +626,57 @@
             gap: 10px;
         }
 
+        /* Título de cada seção do painel (Investimento / Veículos). O
+           primeiro não tem borda superior — já vem logo após o cabeçalho
+           do painel, que já tem sua própria linha divisória. */
+        .funil-secao-divisor {
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #8a93a3;
+            letter-spacing: 0.3px;
+            margin: 18px 0 10px;
+            padding-top: 14px;
+            border-top: 1px dashed #e5e8ec;
+        }
+
+        /* :first-of-type comparava por tag (<div>), não por classe — e como
+           .funil-header também é uma <div>, ela "roubava" a posição. Usando
+           irmão adjacente, que mira exatamente o divisor logo após o
+           cabeçalho (sempre o de "Investimento", o primeiro do painel). */
+        .funil-header + .funil-secao-divisor {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+
         .funil-step { width: 100%; display: flex; justify-content: center; }
 
         /* ---- Selecionados: origem do funil, sempre 100% da largura ---- */
         .funil-sel-card {
             width: 100%;
+            height: 58px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             background: linear-gradient(180deg, #2a63f2 0%, #1a4bd6 100%);
-            border-radius: 16px;
-            padding: 16px 18px;
+            border-radius: 11px;
+            padding: 6px 10px;
             text-align: center;
             color: #fff;
-            box-shadow: 0 6px 16px rgba(30, 86, 240, 0.28);
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .funil-sel-card:hover, .funil-step.ativo .funil-sel-card {
             transform: translateY(-2px);
-            box-shadow: 0 10px 22px rgba(30, 86, 240, 0.35);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
         }
 
-        .funil-sel-rotulo { font-size: 11.5px; font-weight: 700; letter-spacing: 0.2px; opacity: 0.92; }
-        .funil-sel-valor { font-size: 26px; font-weight: 800; margin: 3px 0 1px; font-variant-numeric: tabular-nums; }
-        .funil-sel-unidade { font-size: 10.5px; opacity: 0.78; }
+        .funil-sel-rotulo { font-size: 9.5px; font-weight: 700; letter-spacing: 0.1px; opacity: 0.92; }
+        .funil-sel-valor { font-size: 17px; font-weight: 800; margin: 1px 0; font-variant-numeric: tabular-nums; }
 
         /* ---- Linha 2: Contratados / A Contratar / Desistências ----
            Larguras (flex-basis) definidas via JS, proporcionais ao
@@ -825,14 +851,6 @@
             margin-left: auto;
             font-variant-numeric: tabular-nums;
             padding-left: 12px;
-        }
-
-        .funil-nota {
-            font-size: 11px;
-            color: #999;
-            font-style: italic;
-            text-align: center;
-            margin: 14px 0 0;
         }
 
         @media (max-width: 640px) {
@@ -1557,13 +1575,53 @@
                     </h3>
                 </div>
 
+                <!-- Investimento (R$) — linhas 47-53, coluna E da aba "Dados
+                     para Painel" (contratados/a contratar/a cancelar/
+                     cancelados). Não há estágio "Entregues" aqui — a
+                     planilha não registra investimento por veículo
+                     entregue, só a contagem por tipo. -->
+                <div class="funil-secao-divisor">Investimento (R$ bi)</div>
+
+                <div class="funil-vertical" id="funilInvVertical">
+                    <div class="funil-step">
+                        <div class="funil-sel-card">
+                            <div class="funil-sel-rotulo">Selecionados</div>
+                            <div class="funil-sel-valor" id="funilInvValor0">0</div>
+                        </div>
+                    </div>
+
+                    <div class="funil-linha2" id="funilInvLinha2">
+                        <div class="funil-card2 funil-card-contratados">
+                            <div class="funil-card2-valor" id="funilInvCompContratados">0</div>
+                            <span class="funil-card2-pct" id="funilInvCompContratadosPct">0%</span>
+                        </div>
+                        <div class="funil-card2 funil-card-acontratar">
+                            <div class="funil-card2-valor" id="funilInvCompAContratar">0</div>
+                            <span class="funil-card2-pct" id="funilInvCompAContratarPct">0%</span>
+                        </div>
+                        <div class="funil-card2 funil-card-desistencias">
+                            <div class="funil-card2-valor" id="funilInvCompDesistencias">0</div>
+                            <span class="funil-card2-pct" id="funilInvCompDesistenciasPct">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="funil-legenda">
+                        <span class="funil-legenda-item"><span class="funil-legenda-dot" style="background:#4a7ff5"></span>Contratados</span>
+                        <span class="funil-legenda-item"><span class="funil-legenda-dot" style="background:#9db8ea"></span>A Contratar</span>
+                        <span class="funil-legenda-item"><span class="funil-legenda-dot" style="background:#93816e"></span>Desistência</span>
+                    </div>
+                </div>
+
+                <!-- Veículos (unidades) — mesma estrutura, com o estágio
+                     "Entregues" ao final. -->
+                <div class="funil-secao-divisor">Veículos (unidades)</div>
+
                 <div class="funil-vertical" id="funilVertical">
                     <!-- Selecionados: origem do funil -->
                     <div class="funil-step" id="funilStep0" data-etapa="0">
                         <div class="funil-sel-card">
                             <div class="funil-sel-rotulo">Selecionados</div>
                             <div class="funil-sel-valor" id="funilValor0">0</div>
-                            <div class="funil-sel-unidade">veículos</div>
                         </div>
                     </div>
 
@@ -1606,8 +1664,6 @@
 
                     <div class="funil-tooltip" id="funilTooltip" aria-hidden="true"></div>
                 </div>
-
-                <p class="funil-nota">*Veículos. Passe o cursor sobre cada etapa para ver a composição.</p>
             </div>
         </div>
 
@@ -3047,7 +3103,9 @@
         ];
 
         let funilAnimId = null;             // id do requestAnimationFrame em curso
-        let funilValoresAtuais = [0, 0, 0];  // [Selecionados, Contratados, Entregues] — estado animado
+        // [Selecionados-veículos, Contratados-veículos, Entregues-veículos,
+        //  Selecionados-investimento, Contratados-investimento] — estado animado
+        let funilValoresAtuais = [0, 0, 0, 0, 0];
         let funilEtapaFoco = null;           // etapa destacada no hover
         let funilInteracaoLigada = false;    // liga os listeners de hover uma única vez
 
@@ -3055,6 +3113,11 @@
         // ficar ilegível mesmo quando um valor é uma fatia muito pequena
         // (ex.: "A Contratar" no cenário Público, ~5% do total).
         const FUNIL_MIN_LARGURA = 18;
+
+        // Mesmo formato de fmtBi, sem o sufixo " bi" — usado só dentro dos
+        // cards do funil de investimento, já que o título da seção
+        // ("Investimento (R$ bi)") já deixa a unidade estabelecida.
+        function fmtBiCard(v) { return fmtBi(v).replace('R$ ', '').replace(' bi', ''); }
 
         function funilComposicao(e) {
             return {
@@ -3064,20 +3127,21 @@
             };
         }
 
-        // Atualiza os números de Selecionados/Contratados/Entregues a cada
-        // frame da animação de contagem — mesmo comportamento de antes (só
-        // A Contratar/Desistências e as larguras/curvas, que não faziam
-        // parte dessa contagem, continuam sendo pintadas por renderFunilComposicao).
+        // Atualiza os números "de contagem" a cada frame da animação — os de
+        // veículos (Selecionados/Contratados/Entregues) e, no mesmo ciclo, os
+        // dois de investimento (Selecionados/Contratados). Os demais valores
+        // (A Contratar/Desistências dos dois funis e as larguras) não fazem
+        // parte dessa contagem — são pintados por renderFunilComposicao e
+        // renderFunilInvestimentoComposicao, sem animação de número.
         function funilPintar(valores) {
             const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
             set('funilValor0', fmtInt(valores[0]));
             set('funilCompContratados', fmtInt(valores[1]));
             set('funilValor2', fmtInt(valores[2]));
+            set('funilInvValor0', fmtBiCard(valores[3]));
+            set('funilInvCompContratados', fmtBiCard(valores[4]));
         }
 
-        // Desenha um "ramo" (curva suave) de Selecionados até um dos 3
-        // destinos, ou de Contratados até Entregues — mesma técnica nos
-        // dois casos, o que os deixa visualmente da mesma família.
         // Composição de "Selecionados" em 3 destinos: Contratados, A Contratar
         // (em preparação) e Desistências (A Cancelar + Cancelados somados).
         // Contratados+A Contratar+Desistências = total de Selecionados sempre.
@@ -3133,6 +3197,45 @@
             if (entCard) {
                 entCard.style.width = wEnt + '%';
             }
+        }
+
+        // Mesma lógica de renderFunilComposicao, agora para investimento (R$)
+        // em vez de veículos — usa a coluna "valor" do mesmo bloco de status
+        // (linhas 49-52 da aba "Dados para Painel"). Não existe um "Entregues"
+        // em investimento (a planilha não associa R$ a veículo entregue), por
+        // isso este funil termina em Contratados/A Contratar/Desistência.
+        function renderFunilInvestimentoComposicao(e) {
+            const linha2 = document.getElementById('funilInvLinha2');
+            if (!linha2) return;
+            const status = e.projetos.status;
+            const contratados = status.contratados.valor || 0;
+            const aContratar = status.emPreparacao.valor || 0;
+            const desistencias = (status.aCancelar.valor || 0) + (status.cancelados.valor || 0);
+            const total = contratados + aContratar + desistencias || 1;
+
+            const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+            // (o valor de "Contratados" em si é pintado por funilPintar,
+            // junto com Selecionados, na mesma animação de contagem)
+            set('funilInvCompAContratar', fmtBiCard(aContratar));
+            set('funilInvCompDesistencias', fmtBiCard(desistencias));
+            set('funilInvCompContratadosPct', fmtPct(contratados / total * 100) + '%');
+            set('funilInvCompAContratarPct', fmtPct(aContratar / total * 100) + '%');
+            set('funilInvCompDesistenciasPct', fmtPct(desistencias / total * 100) + '%');
+
+            const largura = valor => Math.max(FUNIL_MIN_LARGURA, total > 0 ? (valor / total * 100) : 0);
+            let wCon = largura(contratados);
+            let wAc = largura(aContratar);
+            let wDe = largura(desistencias);
+            const somaW = wCon + wAc + wDe;
+            wCon = wCon / somaW * 100;
+            wAc = wAc / somaW * 100;
+            wDe = wDe / somaW * 100;
+
+            const cards = linha2.children;
+            cards[0].style.flexBasis = wCon + '%';
+            cards[1].style.flexBasis = wAc + '%';
+            cards[2].style.flexBasis = wDe + '%';
         }
 
         // Hover em cada card: destaca a etapa e mostra a composição por tipo
@@ -3210,14 +3313,18 @@
             const alvo = [
                 totalVeiculosSelecionados(e),
                 totalVeiculos(e),
-                totalVeiculosEntregues(e)
+                totalVeiculosEntregues(e),
+                e.projetos.selecionados.investimento,
+                e.projetos.contratados.investimento
             ];
 
             // Composição de status (Contratados/A Contratar/Desistências),
-            // larguras proporcionais, ramificação e conector — tudo recalculado
-            // aqui; o CSS cuida da transição suave (não depende da animação
-            // de contagem abaixo, que só afeta os números de Selecionados/Entregues).
+            // larguras proporcionais — tanto do funil de veículos quanto do
+            // funil de investimento (mesmo painel, duas métricas). O CSS
+            // cuida da transição suave das larguras (não depende da animação
+            // de contagem abaixo, que só afeta os números "grandes").
             renderFunilComposicao(e);
+            renderFunilInvestimentoComposicao(e);
 
             // Taxa de conversão total (Entregues ÷ Selecionados) — exibida
             // como selo diretamente no card "Entregues". A taxa Contratação→
