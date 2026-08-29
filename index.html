@@ -196,6 +196,31 @@
             color: #0052cc;
         }
 
+        /* Botão de navegação para o Radar de Propostas */
+        .btn-propostas {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 30px;
+            padding: 0 14px;
+            background: #fff;
+            color: #0052cc;
+            border: 1px solid #cfe0f5;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1;
+            box-sizing: border-box;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-propostas:hover {
+            background: #eaf1fb;
+            border-color: #0052cc;
+        }
+
         /* Botão Exportar com dropdown */
         .export-dropdown {
             position: relative;
@@ -1464,6 +1489,10 @@
                     <span class="pill-dot"></span>
                     <span id="dataHoraAtualizacao" class="pill-label">Atualizado --/--/---- às --:--</span>
                 </div>
+                <a href="propostas.html" class="btn-propostas" title="Acompanhamento de Propostas — listagem detalhada dos projetos">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                    Propostas
+                </a>
                 <div class="export-dropdown">
                     <button class="btn-export" onclick="toggleExportMenu(event)">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>

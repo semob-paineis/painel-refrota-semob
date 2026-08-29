@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acompanhamento de Propostas — REFROTA | SEMOB</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f5f7fa;
+        color: #1a1a1a;
+        line-height: 1.5;
+    }
+
+    /* ===== Barra Gov ===== */
+    .gov-bar { background: #071d41; color: #fff; font-size: 13px; }
+    .gov-bar-inner {
+        max-width: 1400px; margin: 0 auto; padding: 8px 20px;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .gov-bar strong { font-weight: 700; }
+    .gov-divider { color: rgba(255,255,255,0.4); }
+
+    /* ===== Cabeçalho ===== */
+    .top-header { background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .top-header-inner {
+        max-width: 1400px; margin: 0 auto; padding: 10px 20px;
+        display: flex; justify-content: space-between; align-items: center;
+        flex-wrap: wrap; gap: 15px;
+    }
+    .top-header-titles h1 { font-size: 17px; font-weight: 700; color: #071d41; margin-bottom: 1px; }
+    .top-header-titles p { font-size: 11px; color: #666; }
+    .top-header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .pill {
+        display: inline-flex; align-items: center; gap: 6px; height: 30px;
+        padding: 0 14px; border-radius: 999px; font-size: 11px; font-weight: 600;
+        line-height: 1; white-space: nowrap; box-sizing: border-box;
+        background: #eaf1fb; color: #0052cc; border: 1px solid #cfe0f5;
+    }
+    .pill-dot { width: 7px; height: 7px; border-radius: 50%; background: #4a90e2; }
+
+    .btn-voltar {
+        display: inline-flex; align-items: center; gap: 6px; height: 30px;
+        padding: 0 14px; background: #0052cc; color: #fff; border: none;
+        border-radius: 999px; cursor: pointer; font-size: 11px; font-weight: 600;
+        text-decoration: none; transition: all .3s ease;
+    }
+    .btn-voltar:hover { background: #0041a3; box-shadow: 0 4px 12px rgba(0,82,204,.3); }
+    .btn-voltar svg { width: 13px; height: 13px; }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+    /* ===== Título da seção ===== */
+    .title-section {
+        text-align: center; margin-bottom: 20px; padding: 16px 20px;
+        background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .main-title { font-size: 28px; font-weight: 700; color: #0052cc; margin-bottom: 4px; letter-spacing: -.5px; }
+    .subtitle { font-size: 13px; color: #888; }
+
+    /* ===== Cards de resumo ===== */
+    .resumo-cards {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px; margin-bottom: 20px;
+    }
+    .resumo-card {
+        background: #fff; border-radius: 10px; padding: 14px 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.06); border-left: 4px solid #0052cc;
+    }
+    .resumo-card .rc-label { font-size: 11px; color: #777; font-weight: 600; }
+    .resumo-card .rc-valor { font-size: 22px; font-weight: 800; color: #1a1a1a; margin-top: 2px; font-variant-numeric: tabular-nums; }
+    .resumo-card .rc-sub { font-size: 10.5px; color: #999; margin-top: 1px; }
+    .resumo-card.is-contratados { border-left-color: #0052cc; }
+    .resumo-card.is-acontratar { border-left-color: #94a3b8; }
+    .resumo-card.is-desistencia { border-left-color: #9c8a78; }
+    .resumo-card.is-total { border-left-color: #1e56f0; background: #f7faff; }
+
+    /* ===== Painel da tabela ===== */
+    .tabela-painel {
+        background: #fff; border-radius: 10px; padding: 18px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .tabela-toolbar {
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 12px; margin-bottom: 14px;
+    }
+    .busca-global {
+        flex: 1; min-width: 240px; max-width: 420px; position: relative;
+    }
+    .busca-global input {
+        width: 100%; padding: 8px 12px 8px 34px; border: 1px solid #dfe4ea;
+        border-radius: 8px; font-size: 13px; font-family: inherit;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .busca-global input:focus {
+        outline: none; border-color: #0052cc; box-shadow: 0 0 0 3px rgba(0,82,204,.12);
+    }
+    .busca-global svg {
+        position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+        width: 15px; height: 15px; color: #98a2ae; pointer-events: none;
+    }
+
+    .toolbar-acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .btn-acao {
+        display: inline-flex; align-items: center; gap: 6px; height: 32px;
+        padding: 0 13px; border-radius: 8px; font-size: 12px; font-weight: 600;
+        cursor: pointer; border: 1px solid #dfe4ea; background: #fff; color: #444;
+        transition: all .2s ease; font-family: inherit;
+    }
+    .btn-acao:hover { border-color: #0052cc; color: #0052cc; background: #f7faff; }
+    .btn-acao svg { width: 14px; height: 14px; }
+    .btn-acao.is-limpar { color: #a33; border-color: #f0d5d5; }
+    .btn-acao.is-limpar:hover { background: #fdf5f5; border-color: #d66; color: #a33; }
+
+    .contador-resultados { font-size: 12px; color: #666; white-space: nowrap; }
+    .contador-resultados strong { color: #0052cc; }
+
+    /* ===== Tabela ===== */
+    .tabela-scroll { overflow-x: auto; border: 1px solid #eef0f3; border-radius: 8px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+
+    thead th {
+        background: #f7f9fb; padding: 0; text-align: left;
+        border-bottom: 2px solid #e9ecef; position: sticky; top: 0; z-index: 5;
+        white-space: nowrap;
+    }
+
+    .th-conteudo {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 6px; padding: 10px 12px;
+    }
+    .th-label {
+        font-weight: 700; color: #333; font-size: 11.5px;
+        cursor: pointer; user-select: none; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .th-label:hover { color: #0052cc; }
+    .th-sort-icon { font-size: 9px; color: #b0b8c1; }
+    .th-label.sorted-asc .th-sort-icon,
+    .th-label.sorted-desc .th-sort-icon { color: #0052cc; }
+
+    /* Botão de filtro por coluna */
+    .btn-filtro {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 22px; height: 22px; border-radius: 5px; border: 1px solid transparent;
+        background: transparent; cursor: pointer; color: #98a2ae; flex-shrink: 0;
+        transition: all .2s ease; position: relative;
+    }
+    .btn-filtro:hover { background: #eaf1fb; color: #0052cc; border-color: #cfe0f5; }
+    .btn-filtro.ativo { background: #0052cc; color: #fff; border-color: #0052cc; }
+    .btn-filtro svg { width: 12px; height: 12px; }
+
+    /* Dropdown de filtro */
+    .filtro-dropdown {
+        position: absolute; top: 100%; left: 0; margin-top: 2px;
+        background: #fff; border: 1px solid #dfe4ea; border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.14); z-index: 100;
+        min-width: 230px; max-width: 320px; display: none;
+        font-weight: 400; white-space: normal;
+    }
+    .filtro-dropdown.aberto { display: block; }
+
+    .fd-busca { padding: 10px 10px 6px; border-bottom: 1px solid #f0f2f5; }
+    .fd-busca input {
+        width: 100%; padding: 6px 9px; border: 1px solid #dfe4ea; border-radius: 6px;
+        font-size: 12px; font-family: inherit;
+    }
+    .fd-busca input:focus { outline: none; border-color: #0052cc; }
+
+    .fd-acoes {
+        display: flex; gap: 6px; padding: 8px 10px; border-bottom: 1px solid #f0f2f5;
+    }
+    .fd-acoes button {
+        flex: 1; padding: 5px 8px; font-size: 11px; font-weight: 600;
+        border: 1px solid #dfe4ea; background: #fff; border-radius: 6px;
+        cursor: pointer; color: #555; font-family: inherit; transition: all .2s ease;
+    }
+    .fd-acoes button:hover { border-color: #0052cc; color: #0052cc; }
+
+    .fd-lista { max-height: 240px; overflow-y: auto; padding: 6px 4px; }
+    .fd-item {
+        display: flex; align-items: center; gap: 8px; padding: 5px 8px;
+        border-radius: 5px; cursor: pointer; font-size: 12px; color: #333;
+    }
+    .fd-item:hover { background: #f5f8fc; }
+    .fd-item input { cursor: pointer; accent-color: #0052cc; flex-shrink: 0; }
+    .fd-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fd-item .fd-contagem { margin-left: auto; color: #a0a8b3; font-size: 10.5px; flex-shrink: 0; }
+
+    .fd-vazio { padding: 14px 10px; text-align: center; color: #999; font-size: 12px; }
+
+    tbody td {
+        padding: 9px 12px; border-bottom: 1px solid #f2f4f7; vertical-align: top;
+    }
+    tbody tr:hover { background: #f9fbfd; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .td-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .td-uf { font-weight: 700; color: #0052cc; }
+    .td-vazio { color: #c5cbd3; }
+
+    /* Selo de classificação */
+    .selo {
+        display: inline-block; padding: 2px 9px; border-radius: 999px;
+        font-size: 10.5px; font-weight: 700; white-space: nowrap;
+    }
+    .selo-contratados { background: #eaf1fb; color: #0052cc; }
+    .selo-acontratar { background: #eef1f4; color: #64748b; }
+    .selo-desistencia { background: #f6f2ec; color: #8a7863; }
+    .selo-selecionada { background: #eaf1fb; color: #0052cc; }
+    .selo-habilitada { background: #f3efe9; color: #7d6a55; }
+
+    /* Selo de situação */
+    .selo-sit {
+        display: inline-block; padding: 2px 8px; border-radius: 5px;
+        font-size: 10.5px; font-weight: 600; white-space: nowrap;
+        background: #f2f4f7; color: #555;
+    }
+    .sit-contratada, .sit-concluido, .sit-em-andamento, .sit-em-licitacao { background: #eaf6ef; color: #1f7a4d; }
+    .sit-em-acao-preparatoria { background: #eef1f4; color: #5b6875; }
+    .sit-cancelada, .sit-desistencia, .sit-desistencia-da-habilitacao { background: #f7efe9; color: #8a6a55; }
+    .sit-habilitada { background: #f3efe9; color: #7d6a55; }
+
+    .sem-resultados {
+        padding: 50px 20px; text-align: center; color: #999; font-size: 14px;
+    }
+    .sem-resultados strong { display: block; font-size: 16px; color: #666; margin-bottom: 4px; }
+
+    /* Rodapé de totais */
+    .tabela-rodape {
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 12px; margin-top: 14px; padding-top: 12px;
+        border-top: 1px solid #eef0f3; font-size: 12.5px; color: #555;
+    }
+    .rodape-totais { display: flex; gap: 20px; flex-wrap: wrap; }
+    .rodape-totais span strong { color: #0052cc; font-variant-numeric: tabular-nums; }
+
+    /* Legenda */
+    .legenda-box {
+        margin-top: 18px; padding: 14px 16px; background: #f7f9fb;
+        border-radius: 8px; border: 1px solid #eef0f3;
+    }
+    .legenda-titulo { font-size: 11.5px; font-weight: 700; color: #555; margin-bottom: 8px; }
+    .legenda-item { font-size: 11.5px; color: #666; margin-bottom: 4px; display: flex; gap: 8px; align-items: baseline; }
+    .legenda-item:last-child { margin-bottom: 0; }
+
+    @media (max-width: 768px) {
+        .main-title { font-size: 22px; }
+        .tabela-toolbar { flex-direction: column; align-items: stretch; }
+        .busca-global { max-width: none; }
+    }
+</style>
+</head>
+<body>
+
+<div class="gov-bar">
+    <div class="gov-bar-inner">
+        <strong>Brasil</strong>
+        <span class="gov-divider">|</span>
+        <span>Ministério das Cidades</span>
+    </div>
+</div>
+
+<div class="top-header">
+    <div class="top-header-inner">
+        <div class="top-header-titles">
+            <h1>ACOMPANHAMENTO DE PROPOSTAS — REFROTA</h1>
+            <p>Secretaria Nacional de Mobilidade — SEMOB</p>
+        </div>
+        <div class="top-header-right">
+            <div class="pill" title="Data da última atualização dos dados">
+                <span class="pill-dot"></span>
+                <span id="dataAtualizacao">Atualizado --/--/----</span>
+            </div>
+            <a href="index.html" class="btn-voltar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                Voltar ao Painel
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="title-section">
+        <div class="main-title">RADAR DE PROPOSTAS</div>
+        <div class="subtitle">Listagem detalhada dos projetos do Programa REFROTA</div>
+    </div>
+
+    <div class="resumo-cards" id="resumoCards"></div>
+
+    <div class="tabela-painel">
+        <div class="tabela-toolbar">
+            <div class="busca-global">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                <input type="text" id="buscaGlobal" placeholder="Buscar em todas as colunas..." aria-label="Buscar propostas">
+            </div>
+            <div class="toolbar-acoes">
+                <span class="contador-resultados" id="contadorResultados"></span>
+                <button class="btn-acao is-limpar" id="btnLimparFiltros">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    Limpar filtros
+                </button>
+                <button class="btn-acao" id="btnExportarCSV">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+                    Exportar CSV
+                </button>
+            </div>
+        </div>
+
+        <div class="tabela-scroll">
+            <table id="tabelaProjetos">
+                <thead>
+                    <tr id="cabecalhoTabela"></tr>
+                </thead>
+                <tbody id="corpoTabela"></tbody>
+            </table>
+        </div>
+
+        <div class="tabela-rodape">
+            <div class="rodape-totais" id="rodapeTotais"></div>
+        </div>
+
+        <div class="legenda-box">
+            <div class="legenda-titulo">LEGENDA — Classificação</div>
+            <div class="legenda-item"><span class="selo selo-contratados">Contratados</span> <span>Contratados, Concluídos, Em Andamento e Em Licitação</span></div>
+            <div class="legenda-item"><span class="selo selo-acontratar">A Contratar</span> <span>Em ação preparatória</span></div>
+            <div class="legenda-item"><span class="selo selo-desistencia">Desistência</span> <span>Desistência (A Cancelar) e Cancelados</span></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const PROJETOS = [{"classificacao":"Selecionada","tipo":"Refrota","uf":"SP","municipio":"São José dos Campos","proponente":"Prefeitura de São José dos Campos","empreendimento":"Elétrico (12)","apoio":60312000,"valorContratado":60312000,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Niterói","proponente":"Prefeitura de Niterói","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"ES","municipio":"Vitória, Espírito Santo","proponente":"Estado do Espírito Santo","empreendimento":"Elétrico (50)","apoio":150000000,"valorContratado":150000000,"situacao":"Em licitação"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"CE","municipio":"Sobral, Ceará","proponente":"Prefeitura de Sobral","empreendimento":"Elétrico (5) e Euro 6 (10)","apoio":20000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SC","municipio":"Florianópolis","proponente":"Prefeitura de Florianópolis","empreendimento":"Elétrico (23) e Euro 6 (23)","apoio":99963000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Salvador, Bahia","proponente":"Prefeitura de Salvador","empreendimento":"Elétrico (75)","apoio":255000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Salvador, Bahia","proponente":"Prefeitura de Salvador","empreendimento":"Euro 6 (300)","apoio":264000000,"valorContratado":264000000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"AC","municipio":"Rio Branco, Acre","proponente":"Prefeitura de Rio Branco","empreendimento":"Euro 6 (45) e Elétrico (6)","apoio":90000000,"valorContratado":67000000,"situacao":"Em licitação"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"GO","municipio":"Valparaíso de Goiás","proponente":"Prefeitura de Valparaíso de Goiás","empreendimento":"Euro 6 (20)","apoio":20000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Alagoinhas","proponente":"Prefeitura de Alagoinhas","empreendimento":"Euro 6 (50)","apoio":35000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SP","municipio":"Ribeirão Preto","proponente":"Prefeitura de Ribeirão Preto","empreendimento":"Elétrico (60)","apoio":210000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"São Gonçalo","proponente":"Prefeitura de São Gonçalo","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PR","municipio":"Cascavel","proponente":"Prefeitura de Cascavel","empreendimento":"Elétrico (15)","apoio":52776939,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Petrópolis","proponente":"Prefeitura de Petrópolis","empreendimento":"Elétrico (30) e Euro 6 (182)","apoio":241834923.75,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SP","municipio":"Sorocaba","proponente":"Prefeitura de Sorocaba","empreendimento":"Elétrico (50)","apoio":150000000,"valorContratado":null,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"MG","municipio":"Belo Horizonte","proponente":"Prefeitura de Belo Horizonte","empreendimento":"Elétrico (100)","apoio":317078900,"valorContratado":317078900,"situacao":"Em licitação"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SE","municipio":"Aracaju","proponente":"Estado de Sergipe","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"TO","municipio":"Palmas, Tocantins","proponente":"Prefeitura de Palmas","empreendimento":"Elétrico (12) e Euro 6 (100)","apoio":191108000,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"AL","municipio":"Maceió","proponente":"Estado de Alagoas","empreendimento":"Elétrico (40) e Euro 6 (127)","apoio":250000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PR","municipio":"Foz do Iguaçu","proponente":"Prefeitura de Foz do Iguaçu","empreendimento":"Elétrico (2)","apoio":7605000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PI","municipio":"Teresina","proponente":"Estado do Piauí","empreendimento":"Trilho (3)","apoio":97145413.21,"valorContratado":97145413.21,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Maricá","proponente":"Prefeitura de Maricá","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":95340000,"situacao":"Em licitação"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"MG","municipio":"Ipatinga","proponente":"Prefeitura de Ipatinga","empreendimento":"Euro 6 (88)","apoio":65297917,"valorContratado":65297917,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Macaé","proponente":"Prefeitura de Macaé","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SP","municipio":"Campinas","proponente":"Prefeitura de Campinas","empreendimento":"Elétrico (256)","apoio":732465177.6,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"AL","municipio":"Maceió","proponente":"Prefeitura de Maceió","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"MG","municipio":"Uberlândia","proponente":"Prefeitura de Uberlândia","empreendimento":"Elétrico (216)","apoio":641000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PB","municipio":"João Pessoa","proponente":"Prefeitura de João Pessoa","empreendimento":"Elétrico (30)","apoio":95350000,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PR","municipio":"Curitiba","proponente":"Estado do Paraná","empreendimento":"Elétrico (30)","apoio":90000000,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PB","municipio":"João Pessoa","proponente":"Prefeitura de João Pessoa","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SC","municipio":"Joinville","proponente":"Prefeitura de Joinville","empreendimento":"Elétrico (20)","apoio":50000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"CE","municipio":"Fortaleza","proponente":"Prefeitura de Fortaleza","empreendimento":"Euro 6 (273)","apoio":200000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PE","municipio":"Jaboatão dos Guararapes","proponente":"Prefeitura de Jaboatão dos Guararapes","empreendimento":"Euro 6 (286)","apoio":140000000,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"MG","municipio":"Ribeirão das Neves","proponente":"Prefeitura de Ribeirão das Neves","empreendimento":"Euro 6 (41)","apoio":30000000,"valorContratado":30000000,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SP","municipio":"Hortolândia","proponente":"Prefeitura de Hortolândia","empreendimento":"Elétrico (12)","apoio":29000000,"valorContratado":29000000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Angra dos Reis","proponente":"Prefeitura de Angra dos Reis","empreendimento":"Elétrico (1)","apoio":2400000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SP","municipio":"Bragança Paulista","proponente":"Prefeitura de Bragança Paulista","empreendimento":"Elétrico (7) Euro 6 (53)","apoio":75441614.18,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RS","municipio":"São Leopoldo","proponente":"Prefeitura de São Leopoldo","empreendimento":"Elétrico (4)","apoio":15600000,"valorContratado":15600000,"situacao":"Em licitação"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PR","municipio":"Guarapuava","proponente":"Prefeitura de Guarapuava","empreendimento":"Euro 6 (40)","apoio":40000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RS","municipio":"Porto Alegre","proponente":"Prefeitura de Porto Alegre","empreendimento":"Euro 6 (500)","apoio":560682084,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"MT","municipio":"Rondonópolis","proponente":"Prefeitura de Rondonópolis","empreendimento":"Euro 6 (50)","apoio":38500000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Magé","proponente":"Prefeitura de Magé","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RS","municipio":"Porto Alegre","proponente":"Prefeitura de Porto Alegre","empreendimento":"Elétrico (100)","apoio":447797487,"valorContratado":447797487,"situacao":"Em licitação"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PR","municipio":"São José dos Pinhais","proponente":"Prefeitura de São José dos Pinhais","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SE","municipio":"Aracaju","proponente":"Prefeitura de Aracaju","empreendimento":"Euro 6 (40)","apoio":36000000,"valorContratado":36000000,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Feira de Santana","proponente":"Prefeitura de Feira de Santana","empreendimento":"Elétrico (12)","apoio":37374000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"AP","municipio":"Macapá","proponente":"Prefeitura de Macapá","empreendimento":"Elétrico (100)","apoio":271764454.4,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SP","municipio":"Praia Grande","proponente":"Prefeitura de Praia Grande","empreendimento":"Elétrico (1)","apoio":4300000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"MG","municipio":"Patos de Minas","proponente":"Prefeitura de Patos de Minas","empreendimento":"Elétrico (62)","apoio":191240000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PI","municipio":"Teresina","proponente":"Prefeitura de Teresina","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Angra dos Reis","proponente":"Prefeitura de Angra dos Reis","empreendimento":"Elétrico (1)","apoio":2400000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Jequié","proponente":"Prefeitura de Jequié","empreendimento":"Euro 6 (20)","apoio":10100000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SP","municipio":"Campinas","proponente":"Prefeitura de Campinas","empreendimento":"Euro 6 (256)","apoio":216729600,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Angra dos Reis","proponente":"Prefeitura de Angra dos Reis","empreendimento":"Elétrico (1)","apoio":2400000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RS","municipio":"Santa Maria, Rio Grande do Sul","proponente":"Prefeitura de Santa Maria","empreendimento":"Elétrico (16)","apoio":60200000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Salvador, Bahia","proponente":"Estado da Bahia","empreendimento":"Elétrico (150)","apoio":330000000,"valorContratado":null,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Nova Friburgo","proponente":"Prefeitura de Nova Friburgo","empreendimento":"Euro 6 (50)","apoio":50000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PA","municipio":"Santarém, Pará","proponente":"Estado do Pará","empreendimento":"Elétrico (40)","apoio":90000000,"valorContratado":null,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Vitória da Conquista","proponente":"Prefeitura de Vitória da Conquista","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Salvador, Bahia","proponente":"Estado da Bahia","empreendimento":"Trilho (8)","apoio":616000000,"valorContratado":616000000,"situacao":"Em licitação"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SC","municipio":"Palhoça","proponente":"Prefeitura de Palhoça","empreendimento":"Elétrico (12)","apoio":38136000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Cabo Frio","proponente":"Prefeitura de Cabo Frio","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Lauro de Freitas","proponente":"Prefeitura de Lauro de Freitas","empreendimento":"Elétrico (30)","apoio":60000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PR","municipio":"Londrina","proponente":"Prefeitura de Londrina","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PA","municipio":"Parauapebas","proponente":"Prefeitura de Parauapebas","empreendimento":"Euro 6 (85)","apoio":42460991.52,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Campos dos Goytacazes","proponente":"Prefeitura de Campos dos Goytacazes","empreendimento":"Elétrico (106) e Euro 6 (248)","apoio":534965000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SP","municipio":"Itapetininga","proponente":"Prefeitura de Itapetininga","empreendimento":"Euro 6 (30)","apoio":10500000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PA","municipio":"Belém","proponente":"Prefeitura de Belém","empreendimento":"Elétrico (20)","apoio":63560000,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Salvador, Bahia","proponente":"Prefeitura de Salvador","empreendimento":"Elétrico (19)","apoio":95494000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Camaçari","proponente":"Prefeitura de Camaçari","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PA","municipio":"Belém","proponente":"Prefeitura de Belém","empreendimento":"Euro 6 (93)","apoio":70000000,"valorContratado":null,"situacao":"Desistência"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PR","municipio":"Curitiba","proponente":"Prefeitura de Curitiba","empreendimento":"Elétrico (54)","apoio":380000000,"valorContratado":null,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SC","municipio":"Chapecó","proponente":"Prefeitura de Chapecó","empreendimento":"Elétrico (10)","apoio":40324000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"BA","municipio":"Barreiras","proponente":"Prefeitura de Barreiras","empreendimento":"Elétrico (30)","apoio":95340000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PB","municipio":"Campina Grande","proponente":"Prefeitura de Campina Grande","empreendimento":"Euro 6 (50)","apoio":61723055.01,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"GO","municipio":"Águas Lindas de Goiás","proponente":"Prefeitura de Águas Lindas de Goiás","empreendimento":"Elétrico (30)","apoio":60120000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"SP","municipio":"Santana de Parnaíba","proponente":"Prefeitura de Santana de Parnaíba","empreendimento":"Elétrico (2)","apoio":5000000,"valorContratado":null,"situacao":"Cancelada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"SE","municipio":"Aracaju","proponente":"Prefeitura de Aracaju","empreendimento":"Euro 6 (100)","apoio":95000000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RS","municipio":"Pelotas","proponente":"Prefeitura de Pelotas","empreendimento":"Elétrico (15)","apoio":57000000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"MG","municipio":"Belo Horizonte","proponente":"Prefeitura de Belo Horizonte","empreendimento":"Euro 6 (190)","apoio":425077500,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"SP","municipio":"Osasco","proponente":"Prefeitura de Osasco","empreendimento":"Elétrico (40)","apoio":117800000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RJ","municipio":"Magé","proponente":"Prefeitura de Magé","empreendimento":"Euro 6 (40)","apoio":38000000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"BA","municipio":"Salvador, Bahia","proponente":"Prefeitura de Salvador","empreendimento":"Euro 6 (180)","apoio":95000000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"PI","municipio":"Teresina","proponente":"Estado do Piauí","empreendimento":"VLT (5)","apoio":207328328.27,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"SE","municipio":"Aracaju","proponente":"Estado de Sergipe","empreendimento":"Euro 6 (30)","apoio":28500000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"SP","municipio":"Guarulhos","proponente":"Prefeitura de Guarulhos","empreendimento":"Euro 6 (100)","apoio":65000000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"BA","municipio":"Ilhéus","proponente":"Prefeitura de Ilhéus","empreendimento":"Elétrico (30)","apoio":94076054.21,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"BA","municipio":"Salvador, Bahia","proponente":"Estado da Bahia","empreendimento":"Elétrico (80) e Euro (120)","apoio":364800000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"GO","municipio":"Anápolis","proponente":"Prefeitura de Anápolis","empreendimento":"Elétrico (2) e Euro (158)","apoio":126706983.4,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RJ","municipio":"Duque de Caxias","proponente":"Prefeitura de Duque de Caxias","empreendimento":"Elétrico (100)","apoio":324051241.88,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RJ","municipio":"Angra dos Reis","proponente":"Prefeitura de Angra dos Reis","empreendimento":"Elétrico (80)","apoio":264575000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Prefeitura do Rio de Janeiro","empreendimento":"Euro 6 (50)","apoio":187095698.47,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RJ","municipio":"Teresópolis","proponente":"Prefeitura de Teresópolis","empreendimento":"Euro 6 (60)","apoio":60000000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"MA","municipio":"São Luís, Maranhão","proponente":"Estado do Maranhão","empreendimento":"Elétrico (50)","apoio":123500000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"PB","municipio":"João Pessoa","proponente":"Prefeitura de João Pessoa","empreendimento":"Elétrico (40)","apoio":181155500,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"SP","municipio":"Guarulhos","proponente":"Prefeitura de Guarulhos","empreendimento":"Euro 6 (100)","apoio":100000000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"BA","municipio":"Porto Seguro","proponente":"Prefeitura de Porto Seguro","empreendimento":"Elétrico (15) e Carregadores (15)","apoio":95340000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"BA","municipio":"Jequié","proponente":"Prefeitura de Jequié","empreendimento":"Euro 6 (19)","apoio":20805000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RJ","municipio":"Maricá","proponente":"Prefeitura de Maricá","empreendimento":"Elétrico (17)","apoio":62225000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RJ","municipio":"Maricá","proponente":"Prefeitura de Maricá","empreendimento":"Elétrico (17)","apoio":62225000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PE","municipio":"Recife","proponente":"Estado de Pernambuco","empreendimento":"Elétrico (100)","apoio":320000000,"valorContratado":320000000,"situacao":"Em licitação"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"SP","municipio":"Santana de Parnaíba","proponente":"Prefeitura de Santana de Parnaíba","empreendimento":"Elétrico (54) e Carregadores (10)","apoio":172436400,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RS","municipio":"Canoas","proponente":"Prefeitura de Canoas","empreendimento":"Elétrico (2) e Euro 6 (25)","apoio":35150000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"PI","municipio":"Teresina","proponente":"Prefeitura de Teresina","empreendimento":"Euro 6 (100)","apoio":95000000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"MG","municipio":"Contagem","proponente":"Prefeitura de Contagem","empreendimento":"Elétrico (2), Euro 6 (25) e Estacção de Carregamento (2)","apoio":181372030.65,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RS","municipio":"Pelotas","proponente":"Prefeitura de Pelotas","empreendimento":"Elétrico (15)","apoio":57000000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Habilitada","tipo":"Refrota","uf":"RJ","municipio":"Barra Mansa","proponente":"Prefeitura de Barra Mansa","empreendimento":"Euro 6 (40)","apoio":36442000,"valorContratado":null,"situacao":"Habilitada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Cianorte","proponente":"Viação Cianorte LTDA","empreendimento":"Euro 6 (2)","apoio":13806350,"valorContratado":13806350,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Porto Alegre","proponente":"Nortran Transportes Coletivos Ltda","empreendimento":"Euro 6 (22)","apoio":585200,"valorContratado":585200,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Porto Alegre","proponente":"Carris Porto-Alegrense LTDA","empreendimento":"Euro 6 (51)","apoio":39729000,"valorContratado":39729000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"BA","municipio":"Salvador, Bahia","proponente":"Otima Transportes De Salvador Spe S/A","empreendimento":"Euro 6 (118)","apoio":85303065,"valorContratado":35005600,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"GO","municipio":"Goiânia","proponente":"Hp Mobilidade LTDA","empreendimento":"Euro 6 (125)","apoio":95419046.66,"valorContratado":60748825.4,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Viação Cidade Sorriso LTDA","empreendimento":"Euro 6 (7)","apoio":11338250,"valorContratado":11338250,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Progresso LTDA","empreendimento":"Euro 6 (17)","apoio":12262410,"valorContratado":12262410,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Zurick LTDA","empreendimento":"Euro 6 (17)","apoio":12262410,"valorContratado":12262410,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Porto Alegre","proponente":"Carris Porto-Alegrense LTDA","empreendimento":"Euro 6 (18)","apoio":25493107.5,"valorContratado":19599450,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Santa Luzia d'Oeste","proponente":"Territorial Transportes E Empreendimentos LTDA","empreendimento":"Euro 6 (11)","apoio":7158250,"valorContratado":6553800,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Auto Viação Santo Antonio LTDA","empreendimento":"Euro 6 (11)","apoio":15118300,"valorContratado":15118300,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Auto Viação Redentor LTDA","empreendimento":"Euro 6 (24)","apoio":39594404,"valorContratado":39364200,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Viação Santo Angelo LTDA","empreendimento":"Euro 6 (43)","apoio":43310500,"valorContratado":43311165,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"AM","municipio":"Manaus","proponente":"Via Verde Transportes Coletivos LTDA","empreendimento":"Euro 6 (20)","apoio":15651250,"valorContratado":15105000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Itapecerica da Serra","proponente":"Viação Belem Novo LTDA","empreendimento":"Euro 6 (10)","apoio":9323300,"valorContratado":1784100,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Itapecerica da Serra","proponente":"Viação Miracatiba LTDA","empreendimento":"Euro 6 (50)","apoio":40698684.47,"valorContratado":40556184.47,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Coletivos São Lucas Limitada","empreendimento":"Euro 6 (20)","apoio":15390000,"valorContratado":15275250,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"BA","municipio":"Salvador, Bahia","proponente":"Plataforma Transportes Spe S/A","empreendimento":"Euro 6 (55)","apoio":36630000,"valorContratado":36630000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Rodap Operadora De Transportes LTDA","empreendimento":"Euro 6 (5)","apoio":3942500,"valorContratado":3809500,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"GO","municipio":"Goiânia","proponente":"Cooperativa De Transporte Do Estado De Goias","empreendimento":"Euro 6 (10)","apoio":8550000,"valorContratado":8119650,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Viação Do Sul LTDA","empreendimento":"Euro 6 (3)","apoio":1991790,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"São João de Meriti","proponente":"Empresa De Transportes Flores LTDA","empreendimento":"Euro 6 (50)","apoio":38617500,"valorContratado":38617500,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Seropédica","proponente":"Expresso Real Rio LTDA","empreendimento":"Euro 6 (20)","apoio":15447000,"valorContratado":15447000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Mairiporã","proponente":"Empresa De Transportes Mairipora Limitada","empreendimento":"Euro 6 (5)","apoio":5451575,"valorContratado":5449500,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Guarulhos","proponente":"Guarulhos Transportes SA","empreendimento":"Euro 6 (40)","apoio":43156600,"valorContratado":34443200,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Auto Viação Tijuca S/A","empreendimento":"Euro 6 (20)","apoio":14516000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Empresa Viação Ideal Sa","empreendimento":"Euro 6 (11)","apoio":9300500,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Santo André, São Paulo","proponente":"Abc Sistema De Transporte Spe SA","empreendimento":"Elétrico (11)","apoio":28618595.15,"valorContratado":28618595.15,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação São Geraldo LTDA","empreendimento":"Euro 6 (10)","apoio":8550000,"valorContratado":4499400,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Embu das Artes","proponente":"Viação Pirajucara LTDA","empreendimento":"Euro 6 (50)","apoio":44602500,"valorContratado":40658385,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"São Paulo","proponente":"Mobibrasil Transporte São Paulo LTDA","empreendimento":"Elétrico (50)","apoio":49875000,"valorContratado":49875000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Transportes Futuro LTDA","empreendimento":"Euro 6 (56)","apoio":48146000,"valorContratado":47549400,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Viação Redentor LTDA","empreendimento":"Euro 6 (56)","apoio":48146000,"valorContratado":37059500,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Transportes Barra LTDA","empreendimento":"Euro 6 (56)","apoio":48146000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Auto Viação Alpha S A","empreendimento":"Euro 6 (12)","apoio":11635600,"valorContratado":11497850,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Osasco","proponente":"Viação Osasco LTDA","empreendimento":"Euro 6 (50)","apoio":27300000,"valorContratado":27300000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PB","municipio":"Campina Grande","proponente":"A Candido Cia LTDA","empreendimento":"Euro 6 (20)","apoio":13433000,"valorContratado":10020600,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PB","municipio":"João Pessoa","proponente":"Unidas Transporte E Turismo LTDA","empreendimento":"Euro 6 (22)","apoio":14776300,"valorContratado":7315000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PB","municipio":"João Pessoa","proponente":"Transnacional Transporte Nacional De Passageiros LTDA","empreendimento":"Euro 6 (35)","apoio":23516300,"valorContratado":23147700,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PB","municipio":"João Pessoa","proponente":"Santa Maria Transportes E Fretamentos LTDA","empreendimento":"Euro 6 (13)","apoio":8731450,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PE","municipio":"Petrolina","proponente":"Atlântico Transportes LTDA","empreendimento":"Euro 6 (40)","apoio":22882650,"valorContratado":22882650,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Nova Lima","proponente":"Via Ouro Coletivos LTDA","empreendimento":"Euro 6 (21)","apoio":15888750,"valorContratado":15646500,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"BA","municipio":"São Francisco do Conde","proponente":"Atlântico Transportes LTDA","empreendimento":"Euro 6 (20)","apoio":15295000,"valorContratado":11072250,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"BA","municipio":"Itabuna","proponente":"Atlântico Transportes LTDA","empreendimento":"Euro 6 (40)","apoio":22882650,"valorContratado":22882650,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Porto Alegre","proponente":"Nortran Transportes Coletivos LTDA","empreendimento":"Euro 6 (8)","apoio":5293650,"valorContratado":5293650,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Nova Iguaçu","proponente":"Expresso Nossa Senhora Da Gloria LTDA","empreendimento":"Euro 6 (20)","apoio":15371000,"valorContratado":15371000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"ES","municipio":"Cariacica","proponente":"Expresso Santa Paula LTDA","empreendimento":"Euro 6 (25)","apoio":19000000,"valorContratado":18032805,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"ES","municipio":"Cariacica","proponente":"Viação Serrana LTDA","empreendimento":"Euro 6 (32)","apoio":32300000,"valorContratado":29849143.45,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Pouso Alegre","proponente":"Expresso Planalto Transporte E Logistica LTDA","empreendimento":"Euro 6 (11)","apoio":8132000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"ES","municipio":"Cariacica","proponente":"Santa Zita Transportes Coletivos LTDA","empreendimento":"Euro 6 (20)","apoio":14915000,"valorContratado":12638610,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"ES","municipio":"Cariacica","proponente":"Nova Transportes LTDA","empreendimento":"Euro 6 (28)","apoio":22923500,"valorContratado":22923500,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"Jaraguá do Sul","proponente":"Senhora Dos Campos Concessionaria De Transporte Urbano De Jaragua Do Sul Spe LTDA","empreendimento":"Euro 6 (19)","apoio":15000000,"valorContratado":9298600,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Itaquaquecetuba","proponente":"Quatai Transporte De Passageiros Spe S/A","empreendimento":"Euro 6 (30)","apoio":22800000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Coletur Coletivos Urbanos Sociedade Limitada","empreendimento":"Euro 6 (10)","apoio":7980000,"valorContratado":7175350,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Auto Omnibus Floramar S/A","empreendimento":"Euro 6 (27)","apoio":23085000,"valorContratado":21205900,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"ES","municipio":"Vila Velha","proponente":"Viação Praia Sol LTDA","empreendimento":"Euro 6 (35)","apoio":26600000,"valorContratado":16420560,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PB","municipio":"Campina Grande","proponente":"Empresa Nacional De Passageiros LTDA","empreendimento":"Euro 6 (20)","apoio":13433000,"valorContratado":7315000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Bragança Paulista","proponente":"Jtp Transportes, Servicos, Gerenciamento E Recursos Humanos LTDA","empreendimento":"Euro 6 (30)","apoio":25650000,"valorContratado":18586845,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Angra dos Reis","proponente":"Viação Senhor Do Bonfim LTDA","empreendimento":"Euro 6 (30)","apoio":23750000,"valorContratado":14687000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"AM","municipio":"Manaus","proponente":"Expresso Coroado LTDA","empreendimento":"Euro 6 (10)","apoio":8303000,"valorContratado":8070250,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Autobus Transportes Urbanos LTDA","empreendimento":"Euro 6 (25)","apoio":20282500,"valorContratado":11315360,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Cidade Bh Transportes LTDA","empreendimento":"Euro 6 (25)","apoio":23750000,"valorContratado":7852700,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Pouso Alegre","proponente":"Expresso Planalto Transporte E Logistica LTDA","empreendimento":"Euro 6 (11)","apoio":8132000,"valorContratado":8132000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PB","municipio":"João Pessoa","proponente":"Unidas Transporte E Turismo LTDA","empreendimento":"Euro 6 (22)","apoio":5300000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Itaquaquecetuba","proponente":"Quatai Transporte De Passageiros Spe S/A","empreendimento":"Euro 6 (30)","apoio":22800000,"valorContratado":22800000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Osasco","proponente":"Auto Viação Urubupunga LTDA","empreendimento":"Euro 6 (100)","apoio":85500000,"valorContratado":24404531,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Santo André, São Paulo","proponente":"Viação Guaianazes De Transporte LTDA","empreendimento":"Euro 6 (20)","apoio":19000000,"valorContratado":17930442.5,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"São Caetano do Sul","proponente":"Vipe - Viação Padre Eustaquio LTDA","empreendimento":"Euro 6 (20)","apoio":14999550,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Caieiras","proponente":"Viação Cidade De Caieiras Limitada","empreendimento":"Euro 6 (20)","apoio":17100000,"valorContratado":3153870.8,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"ES","municipio":"Amparo do Serra","proponente":"Serramar Transporte Coletivo LTDA","empreendimento":"Euro 6 (30)","apoio":22800000,"valorContratado":9969300,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"ES","municipio":"Amparo do Serra","proponente":"Vereda Transporte LTDA","empreendimento":"Euro 6 (15)","apoio":11400000,"valorContratado":7975440,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Sidon SA","empreendimento":"Euro 6 (12)","apoio":11827500,"valorContratado":7142100,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SE","municipio":"Aracaju","proponente":"Transporte Sergipe I SA","empreendimento":"Euro 6 (255)","apoio":192432000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Progresso LTDA","empreendimento":"Euro 6 (20)","apoio":16150000,"valorContratado":9790700,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"João Monlevade","proponente":"Enscon Viação LTDA","empreendimento":"Euro 6 (12)","apoio":9120000,"valorContratado":8947328,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Zurick LTDA","empreendimento":"Euro 6 (20)","apoio":16150000,"valorContratado":8914800,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Macaé","proponente":"Rapido Macaense LTDA","empreendimento":"Euro 6 (28)","apoio":21685517,"valorContratado":21685517,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RR","municipio":"Boa Vista, Roraima","proponente":"Cidade De Boa Vista Transportes Urbanos LTDA","empreendimento":"Euro 6 (18)","apoio":12226500,"valorContratado":10013157,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Niterói","proponente":"Auto Viação 1001 LTDA","empreendimento":"Euro 6 (35)","apoio":27106896.25,"valorContratado":27106896.25,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Porto Alegre","proponente":"Sociedade De Onibus Porto Alegrense LTDA","empreendimento":"Euro 6 (30)","apoio":28500000,"valorContratado":13249080,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Toledo, Paraná","proponente":"Viação Sorriso De Toledo Spe LTDA","empreendimento":"Euro 6 (6)","apoio":5346600,"valorContratado":5047572.3,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Viação Cidade Sorriso LTDA","empreendimento":"Euro 6 (41)","apoio":49280467.2,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"BA","municipio":"Porto Seguro","proponente":"Mundai Transportes Urbanos LTDA","empreendimento":"Euro 6 (39)","apoio":35276965.6,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"DF","municipio":"Brasília","proponente":"Consorcio Hp-Hsgp","empreendimento":"Euro 6 (197)","apoio":152807264,"valorContratado":43328580.48,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Guarulhos","proponente":"Empresa De Onibus Vila Galvao Limitada","empreendimento":"Euro 6 (93)","apoio":47500000,"valorContratado":37012500,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Ponta Grossa","proponente":"Viação Campos Gerais LTDA","empreendimento":"Euro 6 (25)","apoio":34561285,"valorContratado":26625114,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Marília","proponente":"Viação Sorriso De Marilia LTDA","empreendimento":"Euro 6 (20)","apoio":17887508.2,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Uberlândia","proponente":"Viação Sorriso De Minas LTDA","empreendimento":"Euro 6 (10)","apoio":13559312,"valorContratado":8282329.42,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Mauá","proponente":"Transportadora Turistica Suzano LTDA","empreendimento":"Euro 6 (100)","apoio":71550000,"valorContratado":67465200,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"GO","municipio":"Goiânia","proponente":"HP Mobilidade LTDA","empreendimento":"Euro 6 (100)","apoio":112765000,"valorContratado":12004815.6,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Itapecerica da Serra","proponente":"Viação Miracatiba LTDA","empreendimento":"Euro 6 (32)","apoio":26304531,"valorContratado":26304531,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"AM","municipio":"Manaus","proponente":"Vega Manaus Transporte De Passageiros LTDA","empreendimento":"Euro 6 (20)","apoio":19754300,"valorContratado":13642000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Rodap Operadora De Transportes LTDA","empreendimento":"Euro 6 (6)","apoio":4770900,"valorContratado":4713900,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"DF","municipio":"Brasília","proponente":"Auto Viação Marechal LTDA","empreendimento":"Euro 6 (292)","apoio":235936089.99,"valorContratado":18394868.7,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Viamão","proponente":"Empresa De Transporte Coletivo Viamao LTDA","empreendimento":"Euro 6 (15)","apoio":13569847.5,"valorContratado":11349175,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Paranaguá","proponente":"Viação Rocio LTDA","empreendimento":"Euro 6 (53)","apoio":49507418.4,"valorContratado":35125092.89,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"Concórdia","proponente":"Hodierna Transportes LTDA","empreendimento":"Euro 6 (6)","apoio":4750000,"valorContratado":3343525,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Viação Santo Angelo LTDA","empreendimento":"Euro 6 (46)","apoio":44102385.8,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Santa Luzia","proponente":"Territorial Transportes E Empreendimentos LTDA","empreendimento":"Euro 6 (20)","apoio":14326000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Ibirité","proponente":"Viação Sidon SA","empreendimento":"Euro 6 (12)","apoio":9690000,"valorContratado":8338872,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"AM","municipio":"Manaus","proponente":"Expresso Coroado LTDA","empreendimento":"Euro 6 (10)","apoio":8065500,"valorContratado":8038500,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Niterói","proponente":"Expresso Garcia LTDA","empreendimento":"Euro 6 (10)","apoio":9500000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Viação Do Sul LTDA","empreendimento":"Euro 6 (7)","apoio":6468550,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Guarulhos","proponente":"Viação Transdutra LTDA","empreendimento":"Euro 6 (52)","apoio":39900000,"valorContratado":39898456,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Cataguases","proponente":"Transportes Coletivos Leo LTDA","empreendimento":"Euro 6 (10)","apoio":6935000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"BA","municipio":"Ilhéus","proponente":"Viametro Transportes Urbanos LTDA","empreendimento":"Euro 6 (20)","apoio":14667050,"valorContratado":14667050,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Itaúna","proponente":"Viação Pedra Negra LTDA","empreendimento":"Euro 6 (42)","apoio":33255432.1,"valorContratado":27414216,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Osasco","proponente":"Viação Osasco LTDA","empreendimento":"Euro 6 (10)","apoio":7695000,"valorContratado":7695000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Caxias do Sul","proponente":"Viação Santa Tereza De Caxias Do Sul LTDA","empreendimento":"Euro 6 (13)","apoio":9097627.5,"valorContratado":8792250,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Niterói","proponente":"Viação Estrela S/A","empreendimento":"Euro 6 (10)","apoio":9500000,"valorContratado":5209800,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Quatro Barras","proponente":"Viação Castelo Branco LTDA","empreendimento":"Euro 6 (6)","apoio":5244000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Nova Lima","proponente":"Viação Real Transporte Urbano E Rodoviario LTDA","empreendimento":"Euro 6 (66)","apoio":57162944,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"São Gonçalo","proponente":"Icarai Auto Transportes S/A","empreendimento":"Euro 6 (30)","apoio":26220000,"valorContratado":23151262.5,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Niterói","proponente":"Viação Fortaleza LTDA","empreendimento":"Euro 6 (10)","apoio":9500000,"valorContratado":4251250,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"São Gonçalo","proponente":"Rio Ita LTDA","empreendimento":"Euro 6 (100)","apoio":87400000,"valorContratado":85386520,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"São Gonçalo","proponente":"Viação Galo Branco S/A","empreendimento":"Euro 6 (20)","apoio":19000000,"valorContratado":12156200,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Cachoeirinha","proponente":"Transbus Transportes LTDA","empreendimento":"Euro 6 (30)","apoio":22800000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"São Gonçalo","proponente":"Viação Maua S/A","empreendimento":"Euro 6 (60)","apoio":52440000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"São Gonçalo","proponente":"Auto Viação Abc S/A","empreendimento":"Euro 6 (30)","apoio":26220000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Santa Edwiges LTDA","empreendimento":"Euro 6 (25)","apoio":18763450,"valorContratado":16954688,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Nova Lima","proponente":"Via Ouro Coletivos LTDA","empreendimento":"Euro 6 (9)","apoio":6895404,"valorContratado":6433867.4,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Contagem","proponente":"Viação Fenix LTDA","empreendimento":"Euro 6 (7)","apoio":5652500,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PE","municipio":"Recife","proponente":"MobiBrasil Expresso Ltda.","empreendimento":"Euro 6 (40)","apoio":32338000,"valorContratado":32338000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"São Gonçalo","proponente":"Expresso Tanguá LTDA","empreendimento":"Euro 6 (30)","apoio":26220000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"São Gonçalo","proponente":"Auto Onibus Fagundes LTDA","empreendimento":"Euro 6 (50)","apoio":43700000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MA","municipio":"São Luís, Maranhão","proponente":"Viação Primor LTDA","empreendimento":"Euro 6 (30)","apoio":22467500,"valorContratado":22467500,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"AL","municipio":"Maceió","proponente":"Empresa São Francisco LTDA","empreendimento":"Euro 6 (30)","apoio":25650000,"valorContratado":22909060,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Porto Alegre","proponente":"Viação Teresopolis Cavalhada LTDA","empreendimento":"Euro 6 (37)","apoio":35150000,"valorContratado":6303600,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Anchieta LTDA","empreendimento":"Euro 6 (26)","apoio":19636500,"valorContratado":19504890,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Contagem","proponente":"Viação Transmoreira LTDA","empreendimento":"Euro 6 (30)","apoio":28500000,"valorContratado":5232448,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Nova Iguaçu","proponente":"Linave Transportes LTDA","empreendimento":"Euro 6 (20)","apoio":16910000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Niterói","proponente":"Santo Antonio Transportes LTDA","empreendimento":"Euro 6 (45)","apoio":50350000,"valorContratado":8502500,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Contagem","proponente":"Viação Belo Monte Transportes Coletivos S/A","empreendimento":"Euro 6 (30)","apoio":23142000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Contagem","proponente":"Empresa São Goncalo LTDA","empreendimento":"Euro 6 (30)","apoio":20840910,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"São Gonçalo","proponente":"Expresso Rio De Janeiro LTDA","empreendimento":"Euro 6 (50)","apoio":43700000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Matozinhos","proponente":"Empresa Alcino Goncalves Cotta LTDA","empreendimento":"Euro 6 (6)","apoio":4027848,"valorContratado":2395728,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Milenio Transportes LTDA","empreendimento":"Euro 6 (28)","apoio":21147000,"valorContratado":20947320,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Via Bh Coletivos LTDA","empreendimento":"Euro 6 (27)","apoio":20391750,"valorContratado":20390700,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MT","municipio":"Cuiabá","proponente":"Vpar Transportes E Servicos Spe LTDA","empreendimento":"Euro 6 (24)","apoio":18240000,"valorContratado":16157000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Topbus Transportes S/A","empreendimento":"Euro 6 (20)","apoio":15428000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Ribeirão das Neves","proponente":"Gavea Transportes E Empreendimentos LTDA","empreendimento":"Euro 6 (10)","apoio":9595000,"valorContratado":9595000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Araraquara","proponente":"Viação Paraty LTDA","empreendimento":"Euro 6 (20)","apoio":18002500,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Araraquara","proponente":"Viação Cruz Transportes Rodoviarios LTDA","empreendimento":"Euro 6 (10)","apoio":9001250,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Contagem","proponente":"Laguna Auto Onibus LTDA","empreendimento":"Euro 6 (10)","apoio":8312500,"valorContratado":2616224,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Expresso Unir LTDA","empreendimento":"Euro 6 (14)","apoio":13300000,"valorContratado":3304100,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Coletivos Boa Vista LTDA","empreendimento":"Euro 6 (19)","apoio":14349750,"valorContratado":14258760,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Contagem","proponente":"Transporte Coletivo Juatuba LTDA","empreendimento":"Euro 6 (20)","apoio":15029000,"valorContratado":14104840,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Araraquara","proponente":"Viação Paraty LTDA","empreendimento":"Euro 6 (10)","apoio":9001250,"valorContratado":6166864.2,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"CE","municipio":"Fortaleza","proponente":"Vega S/A Transporte Urbano","empreendimento":"Euro 6 (40)","apoio":34200000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Jaboticabal","proponente":"Paraty Fretamento, Turismo E Transporte LTDA","empreendimento":"Euro 6 (6)","apoio":5400750,"valorContratado":1130500,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"CE","municipio":"Fortaleza","proponente":"Maraponga Transportes LTDA","empreendimento":"Euro 6 (12)","apoio":10260000,"valorContratado":6426900,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Osasco","proponente":"Auto Viação Urubupunga LTDA","empreendimento":"Euro 6 (60)","apoio":51300000,"valorContratado":51300000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Juiz de Fora","proponente":"Empresa Auto Nossa Senhora Aparecida LTDA","empreendimento":"Euro 6 (50)","apoio":34093600,"valorContratado":34093600,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MT","municipio":"Cuiabá","proponente":"Rapido Cuiaba Transporte Urbano LTDA","empreendimento":"Euro 6 (23)","apoio":17480000,"valorContratado":16496750,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"CE","municipio":"Fortaleza","proponente":"Auto Viação São Jose LTDA","empreendimento":"Euro 6 (20)","apoio":18050000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Contagem","proponente":"Viação Novo Retiro LTDA","empreendimento":"Euro 6 (40)","apoio":38000000,"valorContratado":15191545,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"São Cristovao Transportes LTDA","empreendimento":"Euro 6 (87)","apoio":75278000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"CE","municipio":"Fortaleza","proponente":"Transportes Urbanos Alianca S/A","empreendimento":"Euro 6 (25)","apoio":21375000,"valorContratado":4260750,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Uberlândia","proponente":"Viação Sorriso De Minas LTDA","empreendimento":"Euro 6 (1)","apoio":1996615,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RO","municipio":"Porto Velho","proponente":"JTP Transportes, Servicos, Gerenciamento e Recursos Humanos LTDA","empreendimento":"Euro 6 (55)","apoio":47025000,"valorContratado":41358282.09,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"Florianópolis","proponente":"Insular Transportes Coletivos LTDA","empreendimento":"Euro 6 (10)","apoio":8265000,"valorContratado":8265000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Rio Grande do Sul","proponente":"Transpessoal Transportes LTDA","empreendimento":"Euro 6 (5)","apoio":4750000,"valorContratado":1740400,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Coletur Coletivos Urbanos Sociedade Limitada","empreendimento":"Euro 6 (10)","apoio":8151000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"São Paulo","proponente":"Abc Sistema De Transporte Spe SA","empreendimento":"Elétrico (20)","apoio":76000000,"valorContratado":73066538.06,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"Florianópolis","proponente":"Canasvieiras Transportes LTDA","empreendimento":"Euro 6 (10)","apoio":10212500,"valorContratado":10212500,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Esteio","proponente":"Fatima Transportes Turismo LTDA","empreendimento":"Euro 6 (5)","apoio":4180000,"valorContratado":3344000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"Florianópolis","proponente":"Transporte Coletivo Estrela LTDA","empreendimento":"Euro 6 (5)","apoio":4132500,"valorContratado":4132500,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Itapecerica da Serra","proponente":"Viação Miracatiba LTDA","empreendimento":"Euro 6 (40)","apoio":16149354,"valorContratado":16149354,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Francisco Morato","proponente":"Auto Ônibus Moratense LTDA","empreendimento":"Euro 6 (30)","apoio":28500000,"valorContratado":4196321,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Contagem","proponente":"Empresa Eldorado Transportes LTDA","empreendimento":"Euro 6 (5)","apoio":3800000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Carapicuíba","proponente":"Del Rey Transportes LTDA","empreendimento":"Euro 6 (30)","apoio":28500000,"valorContratado":14267491.4,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Porto Alegre","proponente":"Auto Viação Presidente Vargas LTDA","empreendimento":"Euro 6 (24)","apoio":22184400,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"CE","municipio":"Maracanaú","proponente":"Auto Viação Metropolitana LTDA","empreendimento":"Euro 6 (10)","apoio":9025000,"valorContratado":8247900,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"DF","municipio":"Brasília","proponente":"Auto Viação Marechal LTDA","empreendimento":"Euro 6 (158)","apoio":139400000,"valorContratado":139400000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Empresa Viação Getúlio Vargas Ltda","empreendimento":"Euro 6 (10)","apoio":9500000,"valorContratado":7701650,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"São Gonçalo","proponente":"Viação Rio Ouro LTDA","empreendimento":"Euro 6 (23)","apoio":19000000,"valorContratado":19000000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"GO","municipio":"Águas Lindas de Goiás","proponente":"UTB - União Transporte Brasília LTDA","empreendimento":"Euro 6 (42)","apoio":42750000,"valorContratado":35550900,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Embu das Artes","proponente":"Viação Pirajuçara LTDA","empreendimento":"Euro 6 (30)","apoio":24651531,"valorContratado":24651531,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Pindamonhangaba","proponente":"Viva Transporte Coletivo LTDA","empreendimento":"Euro 6 (17)","apoio":16150000,"valorContratado":9950860.5,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Ponta Grossa","proponente":"Viação Campos Gerais LTDA","empreendimento":"Euro 6 (30)","apoio":26848083,"valorContratado":23930100,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Viação Cidade Sorriso LTDA","empreendimento":"Euro 6 (10)","apoio":12977000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"CE","municipio":"Fortaleza","proponente":"Empresa de Transporte Santa Maria LTDA","empreendimento":"Euro 6 (10)","apoio":9500000,"valorContratado":2556450,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"ES","municipio":"Colatina","proponente":"Viação Joana D’arc SA","empreendimento":"Euro 6 (8)","apoio":6346000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PE","municipio":"Recife","proponente":"MobiBrasil Expresso Ltda.","empreendimento":"Euro 6 (55)","apoio":42845000,"valorContratado":42845000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Guarulhos","proponente":"Empresa de Ônibus Vila Galvão LTDA","empreendimento":"Euro 6 (50)","apoio":54515750,"valorContratado":37012500,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Guarulhos","proponente":"Viação Urbana Guarulhos S/A","empreendimento":"Euro 6 (40)","apoio":43612600,"valorContratado":29610000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Mogi das Cruzes","proponente":"Viação Jacareí LTDA","empreendimento":"Euro 6 (14)","apoio":13433000,"valorContratado":10028352,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Guarulhos","proponente":"Empresa de Ônibus Vila Galvão LTDA","empreendimento":"Euro 6 (43)","apoio":46883545,"valorContratado":31830750,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Viçosa","proponente":"Viação União Ltda","empreendimento":"Euro 6 (10)","apoio":7618050,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Porto Alegre","proponente":"Viação Alto Petrópolis Ltda","empreendimento":"Euro 6 (36)","apoio":33276600,"valorContratado":4227500,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Petrópolis","proponente":"Expresso Brasileiro Transportes Ltda","empreendimento":"Euro 6 (30)","apoio":23940000,"valorContratado":8317891.25,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Toledo, Paraná","proponente":"Viação Sorriso de Toledo SPE LTDA","empreendimento":"Euro 6 (16)","apoio":14978190.2,"valorContratado":4587664.7,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"São José do Rio Preto","proponente":"Circular Santa Luzia Ltda","empreendimento":"Euro 6 (30)","apoio":22800000,"valorContratado":21660000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MT","municipio":"Cuiabá","proponente":"Integração Transporte Ltda.","empreendimento":"Euro 6 (28)","apoio":21280000,"valorContratado":13590000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Globo S.A","empreendimento":"Euro 6 (15)","apoio":12953250,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"AM","municipio":"Manaus","proponente":"Vega Manaus Transporte de Passageiros LTDA","empreendimento":"Euro 6 (6)","apoio":2046300,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Ijuí","proponente":"MTU Medianeira Transporte LTDA","empreendimento":"Euro 6 (3)","apoio":4037500,"valorContratado":798000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SE","municipio":"Aracaju","proponente":"Transporte Sergipe I S.A","empreendimento":"Euro 6 (25)","apoio":18189107.31,"valorContratado":18189107.31,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PE","municipio":"Recife","proponente":"Rodotur Turismo LTDA","empreendimento":"Euro 6 (8)","apoio":9120000,"valorContratado":9020250,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Porto Alegre","proponente":"Carris Porto-Alegrense LTDA","empreendimento":"Euro 6 (14)","apoio":12635000,"valorContratado":10251782.5,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Viação Santo Ângelo Ltda","empreendimento":"Euro 6 (46)","apoio":44102385.8,"valorContratado":44102385.8,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Caieiras","proponente":"Viação Cidades de Caieiras LTDA","empreendimento":"Elétrico (30)","apoio":26790000,"valorContratado":26790000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Gramado","proponente":"Gramado Transportes Publico SPE Ltda.","empreendimento":"Euro 6 (14)","apoio":13300000,"valorContratado":8216589.9,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Pinhais","proponente":"Expresso Azul Ltda","empreendimento":"Euro 6 (9)","apoio":20189115,"valorContratado":20045970.47,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Itapecerica da Serra","proponente":"Viação Miracatiba Ltda","empreendimento":"Euro 6 (52)","apoio":44683772.5,"valorContratado":44666055,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Coletivos São Lucas Ltda","empreendimento":"Euro 6 (20)","apoio":16473000,"valorContratado":16397000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"São Paulo","proponente":"Viação Santa Brígida Ltda","empreendimento":"Elétrico (40)","apoio":38000000,"valorContratado":38000000,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Araucária","proponente":"Araucária Transporte Coletivo Ltda","empreendimento":"Euro 6 (9)","apoio":10593450,"valorContratado":10593450,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Campo Mourão","proponente":"Melissa Transportes e Turismo Ltda.","empreendimento":"Euro 6 (6)","apoio":6394450,"valorContratado":3544450,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Ubá","proponente":"Unida Mansur e Filhos Ltda","empreendimento":"Euro 6 (6)","apoio":5358000,"valorContratado":1615000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"São Paulo","proponente":"Sambaíba Transportes Urbanos LTDA.","empreendimento":"Elétrico (83)","apoio":118100338.75,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"São Paulo","proponente":"MobiBrasil Transporte São Paulo Ltda","empreendimento":"Elétrico (53)","apoio":70389074.05,"valorContratado":56576672.58,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Transcbel Transporte Coletivo Belo Horizonte Ltda.","empreendimento":"Euro 6 (6)","apoio":5700000,"valorContratado":4130880,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Getúlio Vargas Ltda.","empreendimento":"Euro 6 (12)","apoio":11400000,"valorContratado":8194700,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Nova Iguaçu","proponente":"Expresso Nossa Senhora da Glória Ltda.","empreendimento":"Euro 6 (15)","apoio":12326250,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Expresso Azul Ltda.","empreendimento":"Euro 6 (8)","apoio":6834958.54,"valorContratado":6720958.54,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"CE","municipio":"Maracanaú","proponente":"Auto Viação Metropolitana Ltda.","empreendimento":"Euro 6 (20)","apoio":19190000,"valorContratado":3661300,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Caxias do Sul","proponente":"Viação Santa Tereza de Caxias do Sul Ltda.","empreendimento":"Euro 6 (24)","apoio":20350140,"valorContratado":20350140,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"São Paulo","proponente":"MobiBrasil Transporte São Paulo Ltda.","empreendimento":"Elétrico (30)","apoio":41075302.95,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PE","municipio":"Itamaracá","proponente":"Transportadora Itamaracá Ltda","empreendimento":"Euro 6 (66)","apoio":52934950,"valorContratado":52934950,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Auto Omnibus Floramar S/A","empreendimento":"Euro 6 (15)","apoio":14250000,"valorContratado":7729200,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"Blumenau","proponente":"Blumob Concessionária de Transporte Urbano de Blumenau SPE Ltda.","empreendimento":"Euro 6 (60)","apoio":38541162.75,"valorContratado":38541162.75,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Salvadora Empresa de Transportes S/A","empreendimento":"Euro 6 (6)","apoio":7600000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"São José dos Campos","proponente":"Green Energy S.A.","empreendimento":"Elétrico (400)","apoio":879403366.08,"valorContratado":879403355.08,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PE","municipio":"Recife","proponente":"Cidade Alta Transportes e Turismo Ltda.","empreendimento":"Euro 6 (60)","apoio":49130200,"valorContratado":49130200,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Volta Redonda","proponente":"Viação Elite Ltda.","empreendimento":"Euro 6 (21)","apoio":16000000,"valorContratado":7118400,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Auto Omnibus Nova Suissa S/A","empreendimento":"Euro 6 (17)","apoio":16150000,"valorContratado":8972370,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Araucária","proponente":"Araucária Transporte Coletivo Ltda.","empreendimento":"Euro 6 (3)","apoio":4601600,"valorContratado":4548000,"situacao":"Concluído"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Auto Viação Alpha S/A","empreendimento":"Euro 6 (20)","apoio":18050000,"valorContratado":6191150,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Viação Rio Ouro Ltda.","empreendimento":"Euro 6 (14)","apoio":12635000,"valorContratado":3879000,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Guarapuava","proponente":"Transportes Coletivos Pérola do Oeste Ltda.","empreendimento":"Euro 6 (17)","apoio":12240000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Santos","proponente":"Viação Piracicabana S.A.","empreendimento":"Euro 6 (64)","apoio":38097490.9,"valorContratado":38097490.9,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Santos","proponente":"Br Mobilidade Baixada Santista S.A.","empreendimento":"Euro 6 (100)","apoio":62481880,"valorContratado":62481880,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Praia Grande","proponente":"Viação Piracicabana S.A.","empreendimento":"Euro 6 (60)","apoio":38535990,"valorContratado":38535990,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"DF","municipio":"Brasília","proponente":"Viação Piracicabana S.A.","empreendimento":"Euro 6 (148)","apoio":89890922.8,"valorContratado":89890922.8,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Porto Alegre","proponente":"Sudeste Transportes Coletivos Ltda.","empreendimento":"Euro 6 (24)","apoio":22184400,"valorContratado":10360320,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PE","municipio":"Recife","proponente":"MobiBrasil Expresso Ltda.","empreendimento":"Euro 6 (3)","apoio":5031390,"valorContratado":4960140,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Via BH Coletivos Ltda.","empreendimento":"Euro 6 (17)","apoio":14250000,"valorContratado":7880250,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Piraquara","proponente":"Viação Piraquara Ltda.","empreendimento":"Euro 6 (4)","apoio":7417600,"valorContratado":7353950,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Jacareí","proponente":"Jacareí Transporte Urbano Ltda.","empreendimento":"Euro 6 (6)","apoio":3780000,"valorContratado":3694656,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Euclasio Ltda.","empreendimento":"Euro 6 (4)","apoio":3000000,"valorContratado":1524655.44,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Milênio Transportes LTDA","empreendimento":"Euro 6 (17)","apoio":16150000,"valorContratado":5057325,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Viação Anchieta Ltda.","empreendimento":"Euro 6 (13)","apoio":12350000,"valorContratado":10244325,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Rio Ita LTDA","empreendimento":"Euro 6 (60)","apoio":52440000,"valorContratado":17165880,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"GO","municipio":"Goiânia","proponente":"Viação Reunidas LTDA","empreendimento":"Euro 6 (60)","apoio":61750000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Cianorte","proponente":"Viação Cianorte Ltda.","empreendimento":"Euro 6 (3)","apoio":2104560,"valorContratado":2104560,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Jundiaí","proponente":"J3 Mobilidade SPE Ltda.","empreendimento":"Euro 6 (74)","apoio":87324855,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Coletivos Boa Vista\nLtda.","empreendimento":"Euro 6 (7)","apoio":6650000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Milênio Transportes Ltda.","empreendimento":"Euro 6 (14)","apoio":13300000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Belo Horizonte","proponente":"Via BH Coletivos Ltda.","empreendimento":"Euro 6 (13)","apoio":12350000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"AM","municipio":"Manaus","proponente":"Expresso Coroado LTDA","empreendimento":"Euro 6 (20)","apoio":16720000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Viação Ideal S/A","empreendimento":"Euro 6 (20)","apoio":20045000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"São Bento do Sul","proponente":"Transportes Coletivos Rainha Ltda.","empreendimento":"Euro 6 (8)","apoio":4423000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"PR","municipio":"Curitiba","proponente":"Expresso Azul Ltda.","empreendimento":"Euro 6 (9)","apoio":20045970.47,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Nova Lima","proponente":"Via Ouro Coletivos Ltda.","empreendimento":"Euro 6 (20)","apoio":16634500,"valorContratado":2096403,"situacao":"Em andamento"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SP","municipio":"Mairiporã","proponente":"Empresa de Transportes Mairiporã Ltda.","empreendimento":"Euro 6 (6)","apoio":3724000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"MG","municipio":"Uberlândia","proponente":"Viação Sorriso de Minas Ltda.","empreendimento":"Euro 6 (12)","apoio":11479298.4,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RS","municipio":"Lajeado","proponente":"Expresso Azul de Transporte S/A","empreendimento":"Euro 6 (2)","apoio":1900000,"valorContratado":0,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"Florianópolis","proponente":"","empreendimento":"Euro 6 (4)","apoio":3529250,"valorContratado":null,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"RJ","municipio":"Maricá","proponente":"","empreendimento":"Euro 6 (20)","apoio":19380000,"valorContratado":null,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"Florianópolis","proponente":"","empreendimento":"Euro 6 (19)","apoio":16848250,"valorContratado":null,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"Florianópolis","proponente":"","empreendimento":"Euro 6 (15)","apoio":13453900,"valorContratado":null,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota Privado","uf":"SC","municipio":"Florianópolis","proponente":"","empreendimento":"Euro 6 (12)","apoio":10790000,"valorContratado":null,"situacao":"Em ação preparatória"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"PA","municipio":"Belém","proponente":"Prefeitura de Belém","empreendimento":"Compra de 265 ônibus para o Sistema Integrado de Transporte da Região Metropolitana de Belém (SIT/RMB), sendo 40 ônibus elétricos, 50 ônibus a gás natural e 175 ônibus a diesel","apoio":368695000,"valorContratado":366858232,"situacao":"Contratada"},{"classificacao":"Selecionada","tipo":"Refrota","uf":"RJ","municipio":"Rio de Janeiro","proponente":"Prefeitura do Rio de Janeiro","empreendimento":"AQUISICAO DE VEICULO NOVOS TIPO ONIBUS","apoio":787361900,"valorContratado":645931000,"situacao":"Contratada"}];
+</script>
+<script>
+(function () {
+    'use strict';
+
+    const DATA_ATUALIZACAO = '24/08/2026';
+
+    // ---- Colunas exibidas (espelham a aba "Lista de Projetos", colunas B..J) ----
+    const COLUNAS = [
+        { chave: 'classificacao',   titulo: 'Classificação',  tipo: 'selo',  filtravel: true },
+        { chave: 'tipo',            titulo: 'Tipo',           tipo: 'texto', filtravel: true },
+        { chave: 'uf',              titulo: 'UF',             tipo: 'uf',    filtravel: true },
+        { chave: 'municipio',       titulo: 'Município',      tipo: 'texto', filtravel: true },
+        { chave: 'proponente',      titulo: 'Proponente',     tipo: 'texto', filtravel: true },
+        { chave: 'empreendimento',  titulo: 'Empreendimento', tipo: 'texto', filtravel: true },
+        { chave: 'apoio',           titulo: 'Apoio',          tipo: 'moeda', filtravel: false },
+        { chave: 'valorContratado', titulo: 'Valor contratado', tipo: 'moeda', filtravel: false },
+        { chave: 'situacao',        titulo: 'Situação Contrato', tipo: 'selo-sit', filtravel: true }
+    ];
+
+    // Mapeia a "Situação Contrato" para a classificação da legenda — mesma
+    // regra descrita na própria planilha (bloco de legenda ao final da aba).
+    const SITUACAO_PARA_CLASSE = {
+        'Contratada': 'Contratados',
+        'Concluído': 'Contratados',
+        'Em andamento': 'Contratados',
+        'Em licitação': 'Contratados',
+        'Em ação preparatória': 'A Contratar',
+        'Desistência': 'Desistência',
+        'Cancelada': 'Desistência'
+    };
+
+    const fmtMoeda = v => v == null ? null :
+        'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtInt = v => Math.round(v).toLocaleString('pt-BR');
+    const fmtBi = v => 'R$ ' + (v / 1e9).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' bi';
+
+    // Normaliza texto para busca (sem acento, minúsculo)
+    const norm = s => (s == null ? '' : String(s))
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+    const slug = s => norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+    // ---- Estado ----
+    const filtrosAtivos = {};   // { chave: Set(valores selecionados) }
+    let buscaTexto = '';
+    let ordenacao = { chave: null, dir: 1 };
+
+    // ---- Aplicação dos filtros ----
+    function projetosFiltrados() {
+        return PROJETOS.filter(p => {
+            for (const chave in filtrosAtivos) {
+                const sel = filtrosAtivos[chave];
+                if (sel && sel.size > 0 && !sel.has(String(p[chave] ?? ''))) return false;
+            }
+            if (buscaTexto) {
+                const alvo = COLUNAS.map(c => p[c.chave]).join(' ');
+                if (!norm(alvo).includes(buscaTexto)) return false;
+            }
+            return true;
+        });
+    }
+
+    function ordenar(lista) {
+        if (!ordenacao.chave) return lista;
+        const col = COLUNAS.find(c => c.chave === ordenacao.chave);
+        return [...lista].sort((a, b) => {
+            let va = a[ordenacao.chave], vb = b[ordenacao.chave];
+            if (col && col.tipo === 'moeda') {
+                va = va == null ? -1 : va;
+                vb = vb == null ? -1 : vb;
+                return (va - vb) * ordenacao.dir;
+            }
+            return norm(va).localeCompare(norm(vb), 'pt-BR') * ordenacao.dir;
+        });
+    }
+
+    // ---- Cabeçalho com filtro por coluna ----
+    function renderCabecalho() {
+        const tr = document.getElementById('cabecalhoTabela');
+        tr.innerHTML = '';
+        COLUNAS.forEach(col => {
+            const th = document.createElement('th');
+            th.style.position = 'relative';
+
+            const cont = document.createElement('div');
+            cont.className = 'th-conteudo';
+
+            const label = document.createElement('span');
+            label.className = 'th-label';
+            const setaAtual = ordenacao.chave === col.chave ? (ordenacao.dir === 1 ? '▲' : '▼') : '⇅';
+            label.innerHTML = col.titulo + ' <span class="th-sort-icon">' + setaAtual + '</span>';
+            if (ordenacao.chave === col.chave) {
+                label.classList.add(ordenacao.dir === 1 ? 'sorted-asc' : 'sorted-desc');
+            }
+            label.addEventListener('click', () => {
+                if (ordenacao.chave === col.chave) ordenacao.dir *= -1;
+                else { ordenacao.chave = col.chave; ordenacao.dir = 1; }
+                render();
+            });
+            cont.appendChild(label);
+
+            if (col.filtravel) {
+                const btn = document.createElement('button');
+                btn.className = 'btn-filtro';
+                const temFiltro = filtrosAtivos[col.chave] && filtrosAtivos[col.chave].size > 0;
+                if (temFiltro) btn.classList.add('ativo');
+                btn.title = 'Filtrar por ' + col.titulo;
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v5l-4 2v-7L3 5z"/></svg>';
+                btn.addEventListener('click', ev => {
+                    ev.stopPropagation();
+                    abrirDropdown(col, th);
+                });
+                cont.appendChild(btn);
+            }
+
+            th.appendChild(cont);
+            tr.appendChild(th);
+        });
+    }
+
+    function fecharDropdowns() {
+        document.querySelectorAll('.filtro-dropdown').forEach(d => d.remove());
+    }
+
+    function abrirDropdown(col, th) {
+        const jaAberto = th.querySelector('.filtro-dropdown');
+        fecharDropdowns();
+        if (jaAberto) return;
+
+        // Valores disponíveis: calculados sobre os dados já filtrados pelas
+        // OUTRAS colunas, para o filtro refletir o que está realmente visível
+        const semEstaColuna = PROJETOS.filter(p => {
+            for (const chave in filtrosAtivos) {
+                if (chave === col.chave) continue;
+                const sel = filtrosAtivos[chave];
+                if (sel && sel.size > 0 && !sel.has(String(p[chave] ?? ''))) return false;
+            }
+            if (buscaTexto) {
+                const alvo = COLUNAS.map(c => p[c.chave]).join(' ');
+                if (!norm(alvo).includes(buscaTexto)) return false;
+            }
+            return true;
+        });
+
+        const contagem = {};
+        semEstaColuna.forEach(p => {
+            const v = String(p[col.chave] ?? '');
+            contagem[v] = (contagem[v] || 0) + 1;
+        });
+        const valores = Object.keys(contagem).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+        const dd = document.createElement('div');
+        dd.className = 'filtro-dropdown aberto';
+        dd.addEventListener('click', ev => ev.stopPropagation());
+
+        dd.innerHTML =
+            '<div class="fd-busca"><input type="text" placeholder="Buscar valor..." aria-label="Buscar valor no filtro"></div>' +
+            '<div class="fd-acoes"><button data-acao="todos">Selecionar todos</button><button data-acao="limpar">Limpar</button></div>' +
+            '<div class="fd-lista"></div>';
+
+        const lista = dd.querySelector('.fd-lista');
+        const selAtual = filtrosAtivos[col.chave] || new Set();
+
+        function pintarLista(filtroTexto) {
+            lista.innerHTML = '';
+            const visiveis = valores.filter(v => !filtroTexto || norm(v).includes(norm(filtroTexto)));
+            if (visiveis.length === 0) {
+                lista.innerHTML = '<div class="fd-vazio">Nenhum valor encontrado</div>';
+                return;
+            }
+            visiveis.forEach(v => {
+                const item = document.createElement('label');
+                item.className = 'fd-item';
+                const marcado = selAtual.size === 0 || selAtual.has(v);
+                item.innerHTML =
+                    '<input type="checkbox"' + (marcado ? ' checked' : '') + '>' +
+                    '<span>' + (v === '' ? '<em style="color:#aaa">(vazio)</em>' : v) + '</span>' +
+                    '<span class="fd-contagem">' + contagem[v] + '</span>';
+                item.querySelector('input').addEventListener('change', e => {
+                    // Primeira interação: parte de "todos marcados"
+                    if (selAtual.size === 0) valores.forEach(x => selAtual.add(x));
+                    if (e.target.checked) selAtual.add(v); else selAtual.delete(v);
+                    // Se tudo marcado, equivale a "sem filtro"
+                    if (selAtual.size === valores.length) filtrosAtivos[col.chave] = new Set();
+                    else filtrosAtivos[col.chave] = selAtual;
+                    render({ manterDropdown: { col, filtroTexto } });
+                });
+                lista.appendChild(item);
+            });
+        }
+
+        pintarLista('');
+
+        dd.querySelector('.fd-busca input').addEventListener('input', e => pintarLista(e.target.value));
+
+        dd.querySelector('[data-acao="todos"]').addEventListener('click', () => {
+            filtrosAtivos[col.chave] = new Set();
+            render();
+        });
+        dd.querySelector('[data-acao="limpar"]').addEventListener('click', () => {
+            // "Limpar" = nenhum valor selecionado -> usa um marcador impossível
+            filtrosAtivos[col.chave] = new Set(['\u0000__nenhum__']);
+            render();
+        });
+
+        th.appendChild(dd);
+        setTimeout(() => dd.querySelector('.fd-busca input').focus(), 30);
+    }
+
+    document.addEventListener('click', fecharDropdowns);
+
+    // ---- Corpo da tabela ----
+    function renderCorpo(lista) {
+        const tbody = document.getElementById('corpoTabela');
+        tbody.innerHTML = '';
+
+        if (lista.length === 0) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td colspan="' + COLUNAS.length + '" class="sem-resultados">' +
+                '<strong>Nenhuma proposta encontrada</strong>Ajuste os filtros ou a busca para ver resultados.</td>';
+            tbody.appendChild(tr);
+            return;
+        }
+
+        const frag = document.createDocumentFragment();
+        lista.forEach(p => {
+            const tr = document.createElement('tr');
+            COLUNAS.forEach(col => {
+                const td = document.createElement('td');
+                const v = p[col.chave];
+
+                if (col.tipo === 'moeda') {
+                    td.className = 'td-num';
+                    td.textContent = v == null ? '—' : fmtMoeda(v);
+                    if (v == null) td.classList.add('td-vazio');
+                } else if (col.tipo === 'uf') {
+                    td.className = 'td-uf';
+                    td.textContent = v || '—';
+                } else if (col.tipo === 'selo') {
+                    if (v) {
+                        const sp = document.createElement('span');
+                        sp.className = 'selo selo-' + slug(v);
+                        sp.textContent = v;
+                        td.appendChild(sp);
+                    } else td.textContent = '—';
+                } else if (col.tipo === 'selo-sit') {
+                    if (v) {
+                        const sp = document.createElement('span');
+                        sp.className = 'selo-sit sit-' + slug(v);
+                        sp.textContent = v;
+                        td.appendChild(sp);
+                    } else td.textContent = '—';
+                } else {
+                    td.textContent = v || '—';
+                    if (!v) td.classList.add('td-vazio');
+                }
+                tr.appendChild(td);
+            });
+            frag.appendChild(tr);
+        });
+        tbody.appendChild(frag);
+    }
+
+    // ---- Cards de resumo (refletem o recorte filtrado) ----
+    function renderResumo(lista) {
+        // Classificação pela situação, seguindo a legenda da planilha
+        let contratados = 0, aContratar = 0, desistencia = 0;
+        lista.forEach(p => {
+            const cls = SITUACAO_PARA_CLASSE[p.situacao];
+            if (cls === 'Contratados') contratados++;
+            else if (cls === 'A Contratar') aContratar++;
+            else if (cls === 'Desistência') desistencia++;
+        });
+
+        const cards = [
+            { classe: 'is-total', label: 'Propostas', valor: fmtInt(lista.length), sub: 'no recorte atual' },
+            { classe: 'is-contratados', label: 'Contratados', valor: fmtInt(contratados), sub: 'contratados, concluídos, em andamento e em licitação' },
+            { classe: 'is-acontratar', label: 'A Contratar', valor: fmtInt(aContratar), sub: 'em ação preparatória' },
+            { classe: 'is-desistencia', label: 'Desistência', valor: fmtInt(desistencia), sub: 'desistências e cancelados' }
+        ];
+
+        document.getElementById('resumoCards').innerHTML = cards.map(c =>
+            '<div class="resumo-card ' + c.classe + '">' +
+                '<div class="rc-label">' + c.label + '</div>' +
+                '<div class="rc-valor">' + c.valor + '</div>' +
+                '<div class="rc-sub">' + c.sub + '</div>' +
+            '</div>'
+        ).join('');
+    }
+
+    function renderRodape(lista) {
+        const totApoio = lista.reduce((s, p) => s + (p.apoio || 0), 0);
+        const totContr = lista.reduce((s, p) => s + (p.valorContratado || 0), 0);
+        document.getElementById('rodapeTotais').innerHTML =
+            '<span>Apoio (soma): <strong>' + fmtBi(totApoio) + '</strong></span>' +
+            '<span>Valor contratado (soma): <strong>' + fmtBi(totContr) + '</strong></span>';
+    }
+
+    // ---- Render geral ----
+    function render(opts) {
+        const filtrados = ordenar(projetosFiltrados());
+        renderCabecalho();
+        renderCorpo(filtrados);
+        renderResumo(filtrados);
+        renderRodape(filtrados);
+
+        const totalFiltros = Object.values(filtrosAtivos).filter(s => s && s.size > 0).length;
+        document.getElementById('contadorResultados').innerHTML =
+            '<strong>' + fmtInt(filtrados.length) + '</strong> de ' + fmtInt(PROJETOS.length) + ' propostas' +
+            (totalFiltros > 0 ? ' · ' + totalFiltros + ' filtro' + (totalFiltros > 1 ? 's' : '') + ' ativo' + (totalFiltros > 1 ? 's' : '') : '');
+
+        // Reabre o dropdown se a mudança veio de dentro dele
+        if (opts && opts.manterDropdown) {
+            const idx = COLUNAS.findIndex(c => c.chave === opts.manterDropdown.col.chave);
+            const th = document.getElementById('cabecalhoTabela').children[idx];
+            if (th) abrirDropdown(opts.manterDropdown.col, th);
+        }
+    }
+
+    // ---- Busca global ----
+    let debounce;
+    document.getElementById('buscaGlobal').addEventListener('input', e => {
+        clearTimeout(debounce);
+        const v = e.target.value;
+        debounce = setTimeout(() => { buscaTexto = norm(v); render(); }, 180);
+    });
+
+    // ---- Limpar filtros ----
+    document.getElementById('btnLimparFiltros').addEventListener('click', () => {
+        for (const k in filtrosAtivos) delete filtrosAtivos[k];
+        buscaTexto = '';
+        document.getElementById('buscaGlobal').value = '';
+        render();
+    });
+
+    // ---- Exportar CSV (respeita o recorte filtrado) ----
+    document.getElementById('btnExportarCSV').addEventListener('click', () => {
+        const lista = ordenar(projetosFiltrados());
+        const linhas = [COLUNAS.map(c => c.titulo)];
+        lista.forEach(p => {
+            linhas.push(COLUNAS.map(c => {
+                const v = p[c.chave];
+                if (v == null) return '';
+                if (c.tipo === 'moeda') return String(v).replace('.', ',');
+                return String(v);
+            }));
+        });
+        const csv = linhas.map(l =>
+            l.map(cel => '"' + String(cel).replace(/"/g, '""') + '"').join(';')
+        ).join('\r\n');
+        // BOM para o Excel reconhecer acentuação corretamente
+        const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'propostas-refrota-' + new Date().toISOString().slice(0, 10) + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    // ---- Init ----
+    document.getElementById('dataAtualizacao').textContent = 'Atualizado ' + DATA_ATUALIZACAO;
+    render();
+})();
+</script>
+
+</body>
+</html>
