@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "gerado_em": "2026-08-24T10:21:55-03:00",
+    "gerado_em": "2026-08-31T10:00:34-03:00",
     "planilha_origem": "Dados_Refrota_Contratações.xlsx",
     "gerado_por": "gerar_dados.py",
     "versao_estrutura": 2
@@ -10,7 +10,7 @@
     "destaque": null,
     "veiculos": {
       "eletricos": 1050,
-      "euro6": 5445,
+      "euro6": 5446,
       "trilhos": 47
     },
     "veiculosSelecionados": {
@@ -20,7 +20,7 @@
     },
     "veiculosEntregues": {
       "eletricos": 399,
-      "euro6": 3705,
+      "euro6": 3707,
       "trilhos": 2
     },
     "regioes": [
@@ -51,8 +51,8 @@
       {
         "nome": "Sul",
         "propostas": 43,
-        "veiculos": 676,
-        "investimento": 1020432545.85
+        "veiculos": 677,
+        "investimento": 1021268545.85
       }
     ],
     "anos": [
@@ -71,8 +71,8 @@
       {
         "ano": 2025,
         "propostas": 118,
-        "veiculos": 2627,
-        "investimento": 2127732122.79
+        "veiculos": 2628,
+        "investimento": 2128568122.79
       },
       {
         "ano": 2026,
@@ -160,7 +160,7 @@
       "PI": 97145413.21,
       "RJ": 1170622517,
       "RN": 0,
-      "RS": 629371724.4,
+      "RS": 630207724.4,
       "RO": 41358282.09,
       "RR": 10013157,
       "SC": 73793287.75,
@@ -205,18 +205,18 @@
       },
       "contratados": {
         "propostas": 213,
-        "veiculos": 6542,
-        "investimento": 8235874089.79
+        "veiculos": 6543,
+        "investimento": 8236710089.79
       },
       "status": {
         "contratados": {
           "qtd": 213,
-          "veiculos": 6542,
+          "veiculos": 6543,
           "valor": 9796156806.66
         },
         "emPreparacao": {
           "qtd": 72,
-          "veiculos": 3442,
+          "veiculos": 3441,
           "valor": 2662586301.37
         },
         "aCancelar": {
@@ -490,7 +490,7 @@
     "destaque": 1,
     "veiculos": {
       "eletricos": 596,
-      "euro6": 4452,
+      "euro6": 4453,
       "trilhos": 0
     },
     "veiculosSelecionados": {
@@ -500,7 +500,7 @@
     },
     "veiculosEntregues": {
       "eletricos": 134,
-      "euro6": 3098,
+      "euro6": 3100,
       "trilhos": 0
     },
     "regioes": [
@@ -531,8 +531,8 @@
       {
         "nome": "Sul",
         "propostas": 41,
-        "veiculos": 572,
-        "investimento": 557035058.85
+        "veiculos": 573,
+        "investimento": 557871058.85
       }
     ],
     "anos": [
@@ -551,8 +551,8 @@
       {
         "ano": 2025,
         "propostas": 118,
-        "veiculos": 2627,
-        "investimento": 2127732122.79
+        "veiculos": 2628,
+        "investimento": 2128568122.79
       },
       {
         "ano": 2026,
@@ -640,7 +640,7 @@
       "PI": 0,
       "RJ": 429351517,
       "RN": 0,
-      "RS": 165974237.4,
+      "RS": 166810237.4,
       "RO": 41358282.09,
       "RR": 10013157,
       "SC": 73793287.75,
@@ -685,18 +685,18 @@
       },
       "contratados": {
         "propostas": 196,
-        "veiculos": 5048,
-        "investimento": 4612513140.58
+        "veiculos": 5049,
+        "investimento": 4613349140.58
       },
       "status": {
         "contratados": {
           "qtd": 196,
-          "veiculos": 5048,
+          "veiculos": 5049,
           "valor": 6006528189.45
         },
         "emPreparacao": {
           "qtd": 67,
-          "veiculos": 3138,
+          "veiculos": 3137,
           "valor": 1617246301.37
         },
         "aCancelar": {
@@ -725,9 +725,14 @@
       "percentual": 0.4366
     }
   },
+  "_dados_inconsistentes": [
+    "Reconciliação meta2026.realizado: Consolidado (2183) ≠ Público+Privado (2283)",
+    "Reconciliação veiculosEntregues.eletricos: Consolidado (399) ≠ Público+Privado (359)",
+    "Reconciliação veiculosEntregues.euro6: Consolidado (3707) ≠ Público+Privado (3482)"
+  ],
   "_comparativo": {
     "dataAnterior": "2026-07-31T09:52:47-03:00",
-    "dataAtual": "2026-08-24T10:21:55-03:00",
+    "dataAtual": "2026-08-31T10:00:34-03:00",
     "metricas": [
       {
         "rotulo": "Projetos contratados",
@@ -739,13 +744,13 @@
         "rotulo": "Veículos contratados",
         "formato": "int",
         "anterior": 5468,
-        "atual": 6542
+        "atual": 6543
       },
       {
         "rotulo": "Investimento contratado",
         "formato": "moeda",
         "anterior": 6773974615.26,
-        "atual": 8235874089.79
+        "atual": 8236710089.79
       },
       {
         "rotulo": "Projetos selecionados",
@@ -773,15 +778,10 @@
       }
     ],
     "destaques": [
-      "Foram registradas 16 novas contratações — 14 na Refrota Privado e 2 na Refrota Público, somando 1.074 veículos e R$ 1.461,9 milhões em investimento.",
+      "Foram registradas 16 novas contratações — 14 na Refrota Privado e 2 na Refrota Público, somando 1.075 veículos e R$ 1.462,7 milhões em investimento.",
       "A carteira em preparação caiu de 78 para 72 projetos, confirmando o avanço de propostas já selecionadas para a fase de contratação.",
       "Entraram 10 novos projetos selecionados, elevando o investimento selecionado em R$ 117,8 milhões.",
-      "A participação de ônibus elétricos na frota contratada subiu de 10,2% para 16,1%."
+      "A participação de ônibus elétricos na frota contratada subiu de 10,2% para 16,0%."
     ]
-  },
-  "_dados_inconsistentes": [
-    "Reconciliação meta2026.realizado: Consolidado (2183) ≠ Público+Privado (2283)",
-    "Reconciliação veiculosEntregues.eletricos: Consolidado (399) ≠ Público+Privado (359)",
-    "Reconciliação veiculosEntregues.euro6: Consolidado (3705) ≠ Público+Privado (3480)"
-  ]
+  }
 }
