@@ -1489,7 +1489,7 @@
                     <span class="pill-dot"></span>
                     <span id="dataHoraAtualizacao" class="pill-label">Atualizado --/--/---- às --:--</span>
                 </div>
-                <a href="propostas.html" class="btn-propostas" title="Acompanhamento de Propostas — listagem detalhada dos projetos">
+                <a href="propostas.html" class="btn-propostas" title="Acompanhamento de Propostas — listagem detalhada das propostas">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
                     Propostas
                 </a>
@@ -1531,7 +1531,7 @@
         <div class="charts-row">
             <!-- Donut Chart - Distribuição de Projetos Selecionados -->
             <div class="chart-item">
-                <h3 class="chart-title">Distribuição dos Projetos Selecionados</h3>
+                <h3 class="chart-title">Distribuição das Propostas Selecionadas</h3>
                 <div class="donut-wrapper">
                     <div class="donut-chart">
                         <canvas id="resourcesDonutChart"></canvas>
@@ -1542,7 +1542,7 @@
                         <div style="display: flex; align-items: flex-start;">
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; font-size: 13px; margin-bottom: 4px;">Refrota Público</div>
-                                <div id="legProjPublicoSelecionado" style="font-size: 12px; color: #666; margin-bottom: 8px;">R$ 12,05 bi · 80 projetos</div>
+                                <div id="legProjPublicoSelecionado" style="font-size: 12px; color: #666; margin-bottom: 8px;">R$ 12,05 bi · 80 propostas</div>
                             </div>
                         </div>
                         <div style="margin-left: 0; display: flex; flex-direction: column; gap: 6px;">
@@ -1560,16 +1560,16 @@
                         <div class="legend-color" style="background: #0d9488;"></div>
                         <div>
                             <div style="font-weight: 600;">Refrota Privado</div>
-                            <div id="legProjPrivadoSelecionado" style="font-size: 12px; color: #666;">R$ 7,34 bi · 245 projetos</div>
+                            <div id="legProjPrivadoSelecionado" style="font-size: 12px; color: #666;">R$ 7,34 bi · 245 propostas</div>
                         </div>
                     </div>
                 </div>
-                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">*Considerando todos os projetos já selecionados pela SEMOB.</p>
+                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">*Considerando todas as propostas já selecionadas pela SEMOB.</p>
             </div>
 
             <!-- Donut Chart - Distribuição de Projetos Contratados -->
             <div class="chart-item">
-                <h3 class="chart-title">Distribuição dos Projetos Contratados</h3>
+                <h3 class="chart-title">Distribuição das Propostas Contratadas</h3>
                 <div class="donut-wrapper">
                     <div class="donut-chart">
                         <canvas id="contractedProjectsChart"></canvas>
@@ -1580,14 +1580,14 @@
                         <div class="legend-color" style="background: #0052cc;"></div>
                         <div>
                             <div style="font-weight: 600;">Refrota Público</div>
-                            <div id="legProjPublicoContratado" style="font-size: 12px; color: #666;">R$ 2,97 bi · 14 projetos · 1.332 veículos</div>
+                            <div id="legProjPublicoContratado" style="font-size: 12px; color: #666;">R$ 2,97 bi · 14 propostas · 1.332 veículos</div>
                         </div>
                     </div>
                     <div class="legend-item" data-serie="privado">
                         <div class="legend-color" style="background: #0d9488;"></div>
                         <div>
                             <div style="font-weight: 600;">Refrota Privado</div>
-                            <div id="legProjPrivadoContratado" style="font-size: 12px; color: #666;">R$ 3,23 bi · 179 projetos · 3.900 veículos</div>
+                            <div id="legProjPrivadoContratado" style="font-size: 12px; color: #666;">R$ 3,23 bi · 179 propostas · 3.900 veículos</div>
                         </div>
                     </div>
                 </div>
@@ -1755,18 +1755,18 @@
                         <div id="metasProgressTooltip" class="canvas-tooltip">Meta: <span id="metaTooltipValor">5.000</span> veículos</div>
                     </div>
                 </div>
-                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">*Meta: <span id="metaRodapeValor">5.000</span> unidades</p>
+                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">Meta: <span id="metaRodapeValor">5.000</span> unidades de veículos selecionados para o Refrota Privado</p>
             </div>
         </div>
         <!-- Seletor: Projetos Selecionados | Projetos Contratados
              Controla, ao mesmo tempo: as tabelas/gráficos de Região e Ano
              (abaixo) e o mapa de Investimento por Estado. -->
         <div class="tipo-projeto-bar">
-            <div class="segmented-control segmented-2" role="group" aria-label="Tipo de projeto exibido nos painéis de região, ano e no mapa">
+            <div class="segmented-control segmented-2" role="group" aria-label="Tipo de proposta exibido nos painéis de região, ano e no mapa">
                 <input type="radio" name="map-tipo-group" id="map-tipo-selecionados">
-                <label for="map-tipo-selecionados">Projetos Selecionados</label>
+                <label for="map-tipo-selecionados">Propostas Selecionadas</label>
                 <input type="radio" name="map-tipo-group" id="map-tipo-contratados" checked>
-                <label for="map-tipo-contratados">Projetos Contratados</label>
+                <label for="map-tipo-contratados">Propostas Contratadas</label>
                 <div class="selection-slider"></div>
             </div>
         </div>
@@ -2698,24 +2698,24 @@
 
             // --- Legendas (texto ao lado dos donuts) ---
             const legPub = document.getElementById('legProjPublicoSelecionado');
-            if (legPub) legPub.textContent = `${fmtBi(projetosAtuais.frentePublico.investimento)} · ${fmtInt(projetosAtuais.frentePublico.propostas)} projetos`;
+            if (legPub) legPub.textContent = `${fmtBi(projetosAtuais.frentePublico.investimento)} · ${fmtInt(projetosAtuais.frentePublico.propostas)} propostas`;
             const legPriv = document.getElementById('legProjPrivadoSelecionado');
-            if (legPriv) legPriv.textContent = `${fmtBi(projetosAtuais.frentePrivado.investimento)} · ${fmtInt(projetosAtuais.frentePrivado.propostas)} projetos`;
+            if (legPriv) legPriv.textContent = `${fmtBi(projetosAtuais.frentePrivado.investimento)} · ${fmtInt(projetosAtuais.frentePrivado.propostas)} propostas`;
             const legDesist = document.getElementById('legDesistencias');
             const desistProjetos = projetosAtuais.status.aCancelar.qtd + projetosAtuais.status.cancelados.qtd;
-            if (legDesist) legDesist.textContent = `Desistências - ${fmtBi(desistencias)} · ${fmtInt(desistProjetos)} projetos`;
+            if (legDesist) legDesist.textContent = `Desistências - ${fmtBi(desistencias)} · ${fmtInt(desistProjetos)} propostas`;
             const legSelAtivo = document.getElementById('legSelecionadosAtivo');
             const selAtivoProjetos = projetosAtuais.frentePublico.propostas - desistProjetos;
-            if (legSelAtivo) legSelAtivo.textContent = `Selecionados - ${fmtBi(selecionadosAtivo)} · ${fmtInt(selAtivoProjetos)} projetos`;
+            if (legSelAtivo) legSelAtivo.textContent = `Selecionados - ${fmtBi(selecionadosAtivo)} · ${fmtInt(selAtivoProjetos)} propostas`;
 
             const contrPrivadoInv = sum(Object.values(DADOS.privado.ufsContratados));
             const contrPublicoInv = sum(Object.values(DADOS.publico.ufsContratados));
             const contrPublicoVeic = DADOS.publico.veiculos.eletricos + DADOS.publico.veiculos.euro6 + DADOS.publico.veiculos.trilhos;
             const contrPrivadoVeic = DADOS.privado.veiculos.eletricos + DADOS.privado.veiculos.euro6 + DADOS.privado.veiculos.trilhos;
             const legContrPub = document.getElementById('legProjPublicoContratado');
-            if (legContrPub) legContrPub.textContent = `${fmtBi(contrPublicoInv)} · ${fmtInt(DADOS.publico.projetos.contratados.propostas)} projetos · ${fmtInt(contrPublicoVeic)} veículos`;
+            if (legContrPub) legContrPub.textContent = `${fmtBi(contrPublicoInv)} · ${fmtInt(DADOS.publico.projetos.contratados.propostas)} propostas · ${fmtInt(contrPublicoVeic)} veículos`;
             const legContrPriv = document.getElementById('legProjPrivadoContratado');
-            if (legContrPriv) legContrPriv.textContent = `${fmtBi(contrPrivadoInv)} · ${fmtInt(DADOS.privado.projetos.contratados.propostas)} projetos · ${fmtInt(contrPrivadoVeic)} veículos`;
+            if (legContrPriv) legContrPriv.textContent = `${fmtBi(contrPrivadoInv)} · ${fmtInt(DADOS.privado.projetos.contratados.propostas)} propostas · ${fmtInt(contrPrivadoVeic)} veículos`;
 
             if (typeof chartMetasProgress !== 'undefined' && chartMetasProgress) {
                 chartMetasProgress.data.datasets[0].data = [metaAtual.percentual * 100, 100 - metaAtual.percentual * 100];
@@ -2785,7 +2785,7 @@
         "dataAtual": "2026-09-01T11:34:58-03:00",
         "metricas": [
                 {
-                        "rotulo": "Projetos contratados",
+                        "rotulo": "Propostas contratadas",
                         "formato": "int",
                         "anterior": 197,
                         "atual": 213
@@ -2803,7 +2803,7 @@
                         "atual": 8248786454.79
                 },
                 {
-                        "rotulo": "Projetos selecionados",
+                        "rotulo": "Propostas selecionadas",
                         "formato": "int",
                         "anterior": 333,
                         "atual": 346
@@ -2829,8 +2829,8 @@
         ],
         "destaques": [
                 "Foram registradas 16 novas contratações — 14 na Refrota Privado e 2 na Refrota Público, somando 1.075 veículos e R$ 1.474,8 milhões em investimento.",
-                "A carteira em preparação caiu de 78 para 75 projetos, confirmando o avanço de propostas já selecionadas para a fase de contratação.",
-                "Entraram 13 novos projetos selecionados, elevando o investimento selecionado em R$ 171,0 milhões.",
+                "A carteira em preparação caiu de 78 para 75 propostas, confirmando o avanço de propostas já selecionadas para a fase de contratação.",
+                "Entraram 13 novas propostas selecionadas, elevando o investimento selecionado em R$ 171,0 milhões.",
                 "A participação de ônibus elétricos na frota contratada subiu de 10,2% para 16,0%."
         ]
 };
@@ -2919,8 +2919,8 @@
                     const con = e.projetos.contratados;
                     const m = e.meta2026;
                     const graficos = [
-                        {id: 'resourcesDonutChart', label: `Gráfico de distribuição de projetos selecionados. Total de ${fmtInt(sel.propostas)} projetos, ${fmtInt(sel.veiculos)} veículos, com ${fmtBi(sel.investimento)} de investimento.`},
-                        {id: 'contractedProjectsChart', label: `Gráfico de distribuição de projetos contratados. Total de ${fmtInt(con.propostas)} projetos, ${fmtInt(con.veiculos)} veículos, com ${fmtBi(con.investimento)} de investimento.`},
+                        {id: 'resourcesDonutChart', label: `Gráfico de distribuição de propostas selecionadas. Total de ${fmtInt(sel.propostas)} propostas, ${fmtInt(sel.veiculos)} veículos, com ${fmtBi(sel.investimento)} de investimento.`},
+                        {id: 'contractedProjectsChart', label: `Gráfico de distribuição de propostas contratadas. Total de ${fmtInt(con.propostas)} propostas, ${fmtInt(con.veiculos)} veículos, com ${fmtBi(con.investimento)} de investimento.`},
                         {id: 'mainDonutChart', label: 'Gráfico de distribuição de veículos contratados.'},
                         {id: 'deliveredDonutChart', label: 'Gráfico de distribuição de veículos entregues, por tipo: elétricos, Euro 6 e sobre trilhos.'},
                         {id: 'yearChart', label: 'Gráfico combinado da evolução de contratações por ano: barras azuis com os veículos contratados em cada ano e linha verde com o total acumulado.'},
@@ -3108,13 +3108,13 @@
                 if (projetosAtuais) {
                     if (cenarioAtual === 'publico') {
                         valorTxt = fmtBi(projetosAtuais.frentePublico.investimento);
-                        subTxt = fmtInt(projetosAtuais.frentePublico.propostas) + ' projetos';
+                        subTxt = fmtInt(projetosAtuais.frentePublico.propostas) + ' propostas';
                     } else if (cenarioAtual === 'privado') {
                         valorTxt = fmtBi(projetosAtuais.frentePrivado.investimento);
-                        subTxt = fmtInt(projetosAtuais.frentePrivado.propostas) + ' projetos';
+                        subTxt = fmtInt(projetosAtuais.frentePrivado.propostas) + ' propostas';
                     } else {
                         valorTxt = fmtBi(projetosAtuais.selecionados.investimento);
-                        subTxt = fmtInt(projetosAtuais.selecionados.propostas) + ' projetos';
+                        subTxt = fmtInt(projetosAtuais.selecionados.propostas) + ' propostas';
                     }
                 }
 
@@ -3154,14 +3154,14 @@
                     if (cenarioAtual === 'publico') {
                         const contrPublicoInv = sum(Object.values(DADOS.publico.ufsContratados));
                         valorTxt = fmtBi(contrPublicoInv);
-                        subTxt = fmtInt(DADOS.publico.projetos.contratados.propostas) + ' projetos';
+                        subTxt = fmtInt(DADOS.publico.projetos.contratados.propostas) + ' propostas';
                     } else if (cenarioAtual === 'privado') {
                         const contrPrivadoInv = sum(Object.values(DADOS.privado.ufsContratados));
                         valorTxt = fmtBi(contrPrivadoInv);
-                        subTxt = fmtInt(DADOS.privado.projetos.contratados.propostas) + ' projetos';
+                        subTxt = fmtInt(DADOS.privado.projetos.contratados.propostas) + ' propostas';
                     } else {
                         valorTxt = fmtBi(projetosAtuais.contratados.investimento);
-                        subTxt = fmtInt(projetosAtuais.contratados.propostas) + ' projetos';
+                        subTxt = fmtInt(projetosAtuais.contratados.propostas) + ' propostas';
                     }
                 }
 
@@ -3384,8 +3384,8 @@
                                 return [
                                     fmtBi(privadoSel),
                                     'Participação dos recursos: ' + fmtPct(privadoSel/total*100),
-                                    'Projetos: ' + fmtInt(p.frentePrivado.propostas),
-                                    'Participação dos projetos: ' + fmtPct(p.frentePrivado.propostas/totalProjetos*100)
+                                    'Propostas: ' + fmtInt(p.frentePrivado.propostas),
+                                    'Participação das propostas: ' + fmtPct(p.frentePrivado.propostas/totalProjetos*100)
                                 ];
                             },
                             labelTextColor: function() {
@@ -3459,8 +3459,8 @@
                                 return [
                                     investments[index],
                                     'Participação dos recursos: ' + percentages[index] + '%',
-                                    'Projetos: ' + projects[index],
-                                    'Participação dos projetos: ' + projectPercentages[index] + '%'
+                                    'Propostas: ' + projects[index],
+                                    'Participação das propostas: ' + projectPercentages[index] + '%'
                                 ];
                             },
                             labelTextColor: function() {
