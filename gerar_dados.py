@@ -558,7 +558,7 @@ def montar_comparativo(dados_novos, caminho_anterior):
         return v["eletricos"] + v["euro6"] + v["trilhos"]
 
     metricas = [
-        {"rotulo": "Projetos contratados", "formato": "int",
+        {"rotulo": "Propostas contratadas", "formato": "int",
          "anterior": ac["projetos"]["contratados"]["propostas"],
          "atual": nc["projetos"]["contratados"]["propostas"]},
         {"rotulo": "Veículos contratados", "formato": "int",
@@ -566,7 +566,7 @@ def montar_comparativo(dados_novos, caminho_anterior):
         {"rotulo": "Investimento contratado", "formato": "moeda",
          "anterior": ac["projetos"]["contratados"]["investimento"],
          "atual": nc["projetos"]["contratados"]["investimento"]},
-        {"rotulo": "Projetos selecionados", "formato": "int",
+        {"rotulo": "Propostas selecionadas", "formato": "int",
          "anterior": ac["projetos"]["selecionados"]["propostas"],
          "atual": nc["projetos"]["selecionados"]["propostas"]},
         {"rotulo": "Veículos selecionados", "formato": "int",
@@ -606,7 +606,7 @@ def montar_comparativo(dados_novos, caminho_anterior):
         )
     elif d_contr < 0:
         destaques.append(
-            f"O total de projetos contratados recuou em {br(abs(d_contr))} — "
+            f"O total de propostas contratadas recuou em {br(abs(d_contr))} — "
             f"vale conferir na base se houve cancelamento ou ajuste."
         )
 
@@ -615,7 +615,7 @@ def montar_comparativo(dados_novos, caminho_anterior):
     if d_contr > 0 and d_prep < 0:
         destaques.append(
             f"A carteira em preparação caiu de {br(ac['projetos']['status']['emPreparacao']['qtd'])} "
-            f"para {br(nc['projetos']['status']['emPreparacao']['qtd'])} projetos, confirmando o avanço "
+            f"para {br(nc['projetos']['status']['emPreparacao']['qtd'])} propostas, confirmando o avanço "
             f"de propostas já selecionadas para a fase de contratação."
         )
 
@@ -624,7 +624,7 @@ def montar_comparativo(dados_novos, caminho_anterior):
     if d_sel > 0:
         d_inv_sel = nc["projetos"]["selecionados"]["investimento"] - ac["projetos"]["selecionados"]["investimento"]
         destaques.append(
-            f"Entraram {br(d_sel)} novos projetos selecionados, elevando o investimento "
+            f"Entraram {br(d_sel)} novas propostas selecionadas, elevando o investimento "
             f"selecionado em R$ {br(d_inv_sel/1e6,1)} milhões."
         )
 
