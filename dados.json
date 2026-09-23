@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "gerado_em": "2026-09-10T11:41:42-03:00",
+    "gerado_em": "2026-09-23T12:06:43-03:00",
     "planilha_origem": "Dados_Refrota_Contratações.xlsx",
     "gerado_por": "gerar_dados.py",
     "versao_estrutura": 2
@@ -10,17 +10,17 @@
     "destaque": null,
     "veiculos": {
       "eletricos": 1050,
-      "euro6": 5529,
+      "euro6": 5608,
       "trilhos": 47
     },
     "veiculosSelecionados": {
       "eletricos": 3129,
-      "euro6": 11144,
+      "euro6": 11371,
       "trilhos": 47
     },
     "veiculosEntregues": {
       "eletricos": 399,
-      "euro6": 3866,
+      "euro6": 4080,
       "trilhos": 2
     },
     "regioes": [
@@ -34,25 +34,25 @@
         "nome": "Nordeste",
         "propostas": 29,
         "veiculos": 1147,
-        "investimento": 1804031420.52
+        "investimento": 1842900670.52
       },
       {
         "nome": "Centro-Oeste",
         "propostas": 11,
         "veiculos": 649,
-        "investimento": 453682312.98
+        "investimento": 463154527.38
       },
       {
         "nome": "Sudeste",
-        "propostas": 123,
-        "veiculos": 3705,
-        "investimento": 4522886882.45
+        "propostas": 126,
+        "veiculos": 3731,
+        "investimento": 4569567441.81
       },
       {
         "nome": "Sul",
-        "propostas": 44,
-        "veiculos": 686,
-        "investimento": 1044164516.32
+        "propostas": 48,
+        "veiculos": 739,
+        "investimento": 1091542251.32
       }
     ],
     "anos": [
@@ -65,20 +65,20 @@
       {
         "ano": 2024,
         "propostas": 43,
-        "veiculos": 1747,
-        "investimento": 3009947492.23
+        "veiculos": 1753,
+        "investimento": 3053735697.23
       },
       {
         "ano": 2025,
         "propostas": 118,
         "veiculos": 2628,
-        "investimento": 2128568122.79
+        "investimento": 2138040337.19
       },
       {
         "ano": 2026,
-        "propostas": 51,
-        "veiculos": 1710,
-        "investimento": 2189739356.34
+        "propostas": 58,
+        "veiculos": 1783,
+        "investimento": 2278878695.7
       }
     ],
     "regioesSelecionados": [
@@ -90,9 +90,9 @@
       },
       {
         "nome": "Nordeste",
-        "propostas": 55,
-        "veiculos": 3029,
-        "investimento": 4474432046.13
+        "propostas": 56,
+        "veiculos": 3209,
+        "investimento": 4569432046.13
       },
       {
         "nome": "Centro-Oeste",
@@ -102,15 +102,15 @@
       },
       {
         "nome": "Sudeste",
-        "propostas": 188,
-        "veiculos": 7073,
-        "investimento": 9781532773.33
+        "propostas": 189,
+        "veiculos": 7113,
+        "investimento": 9816682773.33
       },
       {
         "nome": "Sul",
-        "propostas": 72,
-        "veiculos": 1909,
-        "investimento": 3041047608.66
+        "propostas": 73,
+        "veiculos": 1916,
+        "investimento": 3052317272.66
       }
     ],
     "anosSelecionados": [
@@ -134,9 +134,9 @@
       },
       {
         "ano": 2026,
-        "propostas": 77,
-        "veiculos": 2419,
-        "investimento": 2920488221.5
+        "propostas": 80,
+        "veiculos": 2646,
+        "investimento": 3061907885.5
       }
     ],
     "ufsContratados": {
@@ -144,15 +144,15 @@
       "AL": 22909060,
       "AP": 0,
       "AM": 44855750,
-      "BA": 1000257550,
+      "BA": 1039126800,
       "CE": 25153300,
       "DF": 291014371.98,
-      "ES": 267809358.45,
-      "GO": 116424191,
+      "ES": 299092858.45,
+      "GO": 125896405.4,
       "MA": 22467500,
       "MT": 46243750,
       "MS": 0,
-      "MG": 891302036.26,
+      "MG": 906699095.62,
       "PA": 366858232,
       "PB": 47798300,
       "PR": 340163504.17,
@@ -160,10 +160,10 @@
       "PI": 97145413.21,
       "RJ": 1170622517,
       "RN": 0,
-      "RS": 630207724.4,
+      "RS": 632963959.4,
       "RO": 41358282.09,
       "RR": 10013157,
-      "SC": 73793287.75,
+      "SC": 118414787.75,
       "SP": 2193152970.74,
       "SE": 54189107.31,
       "TO": 0
@@ -173,7 +173,7 @@
       "AL": 370990000,
       "AP": 271764454.4,
       "AM": 70540350,
-      "BA": 2199042730.6,
+      "BA": 2294042730.6,
       "CE": 341600000,
       "DF": 618034276.79,
       "ES": 344284500,
@@ -184,10 +184,10 @@
       "MG": 2239076650.5,
       "PA": 634715991.52,
       "PB": 331603105.01,
-      "PR": 1270059602.41,
+      "PR": 1281329266.41,
       "PE": 674282190,
       "PI": 192485413.21,
-      "RJ": 3129746087,
+      "RJ": 3164896087,
       "RN": 0,
       "RS": 1412619343.5,
       "RO": 47025000,
@@ -199,25 +199,25 @@
     },
     "projetos": {
       "selecionados": {
-        "propostas": 347,
-        "veiculos": 14320,
-        "investimento": 19797681047.49
+        "propostas": 350,
+        "veiculos": 14547,
+        "investimento": 19939100711.49
       },
       "contratados": {
-        "propostas": 215,
-        "veiculos": 6626,
-        "investimento": 8354850553.36
+        "propostas": 222,
+        "veiculos": 6705,
+        "investimento": 8497250312.12
       },
       "status": {
         "contratados": {
-          "qtd": 215,
-          "veiculos": 6626,
-          "valor": 9903527632.13
+          "qtd": 222,
+          "veiculos": 6705,
+          "valor": 9997628430.53
         },
         "emPreparacao": {
-          "qtd": 74,
-          "veiculos": 3494,
-          "valor": 2676815575.9
+          "qtd": 70,
+          "veiculos": 3642,
+          "valor": 2724134441.5
         },
         "aCancelar": {
           "qtd": 12,
@@ -231,18 +231,18 @@
         }
       },
       "frentePublico": {
-        "propostas": 80,
-        "investimento": 12052306456.67
+        "propostas": 81,
+        "investimento": 12147306456.67
       },
       "frentePrivado": {
-        "propostas": 267,
-        "investimento": 7745374590.82
+        "propostas": 269,
+        "investimento": 7791794254.82
       }
     },
     "meta2026": {
       "meta": 5000,
-      "realizado": 2319,
-      "percentual": 0.4638
+      "realizado": 2366,
+      "percentual": 0.4732
     }
   },
   "publico": {
@@ -255,12 +255,12 @@
     },
     "veiculosSelecionados": {
       "eletricos": 2412,
-      "euro6": 3539,
+      "euro6": 3719,
       "trilhos": 47
     },
     "veiculosEntregues": {
       "eletricos": 225,
-      "euro6": 531,
+      "euro6": 572,
       "trilhos": 2
     },
     "regioes": [
@@ -330,9 +330,9 @@
       },
       {
         "nome": "Nordeste",
-        "propostas": 25,
-        "veiculos": 1874,
-        "investimento": 3590566468.22
+        "propostas": 26,
+        "veiculos": 2054,
+        "investimento": 3685566468.22
       },
       {
         "nome": "Centro-Oeste",
@@ -374,9 +374,9 @@
       },
       {
         "ano": 2026,
-        "propostas": 1,
-        "veiculos": 100,
-        "investimento": 320000000
+        "propostas": 2,
+        "veiculos": 280,
+        "investimento": 415000000
       }
     ],
     "ufsContratados": {
@@ -413,7 +413,7 @@
       "AL": 345340000,
       "AP": 271764454.4,
       "AM": 0,
-      "BA": 1988988000,
+      "BA": 2083988000,
       "CE": 220000000,
       "DF": 0,
       "ES": 150000000,
@@ -439,9 +439,9 @@
     },
     "projetos": {
       "selecionados": {
-        "propostas": 80,
-        "veiculos": 5998,
-        "investimento": 12052306456.67
+        "propostas": 81,
+        "veiculos": 6178,
+        "investimento": 12147306456.67
       },
       "contratados": {
         "propostas": 17,
@@ -455,9 +455,9 @@
           "valor": 3789628617.21
         },
         "emPreparacao": {
-          "qtd": 5,
-          "veiculos": 304,
-          "valor": 1045340000
+          "qtd": 6,
+          "veiculos": 484,
+          "valor": 1140340000
         },
         "aCancelar": {
           "qtd": 12,
@@ -471,18 +471,18 @@
         }
       },
       "frentePublico": {
-        "propostas": 80,
-        "investimento": 12052306456.67
+        "propostas": 81,
+        "investimento": 12147306456.67
       },
       "frentePrivado": {
-        "propostas": 267,
-        "investimento": 7745374590.82
+        "propostas": 269,
+        "investimento": 7791794254.82
       }
     },
     "meta2026": {
       "meta": 5000,
-      "realizado": 100,
-      "percentual": 0.02
+      "realizado": 280,
+      "percentual": 0.056
     }
   },
   "privado": {
@@ -490,17 +490,17 @@
     "destaque": 1,
     "veiculos": {
       "eletricos": 596,
-      "euro6": 4536,
+      "euro6": 4615,
       "trilhos": 0
     },
     "veiculosSelecionados": {
       "eletricos": 717,
-      "euro6": 7605,
+      "euro6": 7652,
       "trilhos": 0
     },
     "veiculosEntregues": {
       "eletricos": 134,
-      "euro6": 3110,
+      "euro6": 3283,
       "trilhos": 0
     },
     "regioes": [
@@ -514,25 +514,25 @@
         "nome": "Nordeste",
         "propostas": 24,
         "veiculos": 660,
-        "investimento": 470886007.31
+        "investimento": 509755257.31
       },
       {
         "nome": "Centro-Oeste",
         "propostas": 11,
         "veiculos": 649,
-        "investimento": 453682312.98
+        "investimento": 463154527.38
       },
       {
         "nome": "Sudeste",
-        "propostas": 115,
-        "veiculos": 3118,
-        "investimento": 3129927065.45
+        "propostas": 118,
+        "veiculos": 3144,
+        "investimento": 3176607624.81
       },
       {
         "nome": "Sul",
-        "propostas": 42,
-        "veiculos": 582,
-        "investimento": 580767029.32
+        "propostas": 46,
+        "veiculos": 635,
+        "investimento": 628144764.32
       }
     ],
     "anos": [
@@ -545,20 +545,20 @@
       {
         "ano": 2024,
         "propostas": 29,
-        "veiculos": 872,
-        "investimento": 719375775.02
+        "veiculos": 878,
+        "investimento": 763163980.02
       },
       {
         "ano": 2025,
         "propostas": 118,
         "veiculos": 2628,
-        "investimento": 2128568122.79
+        "investimento": 2138040337.19
       },
       {
         "ano": 2026,
-        "propostas": 50,
-        "veiculos": 1610,
-        "investimento": 1869739356.34
+        "propostas": 57,
+        "veiculos": 1683,
+        "investimento": 1958878695.7
       }
     ],
     "regioesSelecionados": [
@@ -582,15 +582,15 @@
       },
       {
         "nome": "Sudeste",
-        "propostas": 159,
-        "veiculos": 4724,
-        "investimento": 4699765740.8
+        "propostas": 160,
+        "veiculos": 4764,
+        "investimento": 4734915740.8
       },
       {
         "nome": "Sul",
-        "propostas": 57,
-        "veiculos": 1000,
-        "investimento": 967283098.66
+        "propostas": 58,
+        "veiculos": 1007,
+        "investimento": 978552762.66
       }
     ],
     "anosSelecionados": [
@@ -614,9 +614,9 @@
       },
       {
         "ano": 2026,
-        "propostas": 76,
-        "veiculos": 2319,
-        "investimento": 2600488221.5
+        "propostas": 78,
+        "veiculos": 2366,
+        "investimento": 2646907885.5
       }
     ],
     "ufsContratados": {
@@ -624,15 +624,15 @@
       "AL": 22909060,
       "AP": 0,
       "AM": 44855750,
-      "BA": 120257550,
+      "BA": 159126800,
       "CE": 25153300,
       "DF": 291014371.98,
-      "ES": 117809358.45,
-      "GO": 116424191,
+      "ES": 149092858.45,
+      "GO": 125896405.4,
       "MA": 22467500,
       "MT": 46243750,
       "MS": 0,
-      "MG": 478925219.26,
+      "MG": 494322278.62,
       "PA": 0,
       "PB": 47798300,
       "PR": 340163504.17,
@@ -640,10 +640,10 @@
       "PI": 0,
       "RJ": 429351517,
       "RN": 0,
-      "RS": 166810237.4,
+      "RS": 169566472.4,
       "RO": 41358282.09,
       "RR": 10013157,
-      "SC": 73793287.75,
+      "SC": 118414787.75,
       "SP": 2103840970.74,
       "SE": 18189107.31,
       "TO": 0
@@ -664,10 +664,10 @@
       "MG": 994459833.5,
       "PA": 0,
       "PB": 79190050,
-      "PR": 508997663.41,
+      "PR": 520267327.41,
       "PE": 214282190,
       "PI": 0,
-      "RJ": 936344263.25,
+      "RJ": 971494263.25,
       "RN": 0,
       "RS": 328339772.5,
       "RO": 47025000,
@@ -679,25 +679,25 @@
     },
     "projetos": {
       "selecionados": {
-        "propostas": 267,
-        "veiculos": 8322,
-        "investimento": 7745374590.82
+        "propostas": 269,
+        "veiculos": 8369,
+        "investimento": 7791794254.82
       },
       "contratados": {
-        "propostas": 198,
-        "veiculos": 5132,
-        "investimento": 4731489604.15
+        "propostas": 205,
+        "veiculos": 5211,
+        "investimento": 4873889362.91
       },
       "status": {
         "contratados": {
-          "qtd": 198,
-          "veiculos": 5132,
-          "valor": 6113899014.92
+          "qtd": 205,
+          "veiculos": 5211,
+          "valor": 6207999813.32
         },
         "emPreparacao": {
-          "qtd": 69,
-          "veiculos": 3190,
-          "valor": 1631475575.9
+          "qtd": 64,
+          "veiculos": 3158,
+          "valor": 1583794441.5
         },
         "aCancelar": {
           "qtd": 0,
@@ -711,77 +711,77 @@
         }
       },
       "frentePublico": {
-        "propostas": 80,
-        "investimento": 12052306456.67
+        "propostas": 81,
+        "investimento": 12147306456.67
       },
       "frentePrivado": {
-        "propostas": 267,
-        "investimento": 7745374590.82
+        "propostas": 269,
+        "investimento": 7791794254.82
       }
     },
     "meta2026": {
       "meta": 5000,
-      "realizado": 2319,
-      "percentual": 0.4638
+      "realizado": 2366,
+      "percentual": 0.4732
     }
   },
   "_comparativo": {
     "dataAnterior": "2026-07-31T09:52:47-03:00",
-    "dataAtual": "2026-09-10T11:41:42-03:00",
+    "dataAtual": "2026-09-23T12:06:43-03:00",
     "metricas": [
       {
         "rotulo": "Propostas contratadas",
         "formato": "int",
         "anterior": 197,
-        "atual": 215
+        "atual": 222
       },
       {
         "rotulo": "Veículos contratados",
         "formato": "int",
         "anterior": 5468,
-        "atual": 6626
+        "atual": 6705
       },
       {
         "rotulo": "Investimento contratado",
         "formato": "moeda",
         "anterior": 6773974615.26,
-        "atual": 8354850553.36
+        "atual": 8497250312.12
       },
       {
         "rotulo": "Propostas selecionadas",
         "formato": "int",
         "anterior": 333,
-        "atual": 347
+        "atual": 350
       },
       {
         "rotulo": "Veículos selecionados",
         "formato": "int",
         "anterior": 14065,
-        "atual": 14320
+        "atual": 14547
       },
       {
         "rotulo": "Investimento selecionado",
         "formato": "moeda",
         "anterior": 19558295778.62,
-        "atual": 19797681047.49
+        "atual": 19939100711.49
       },
       {
         "rotulo": "Meta 2026 (veículos)",
         "formato": "int",
         "anterior": 2064,
-        "atual": 2319
+        "atual": 2366
       }
     ],
     "destaques": [
-      "Foram registradas 18 novas contratações — 16 na Refrota Privado e 2 na Refrota Público, somando 1.158 veículos e R$ 1.580,9 milhões em investimento.",
-      "A carteira em preparação caiu de 78 para 74 propostas, confirmando o avanço de propostas já selecionadas para a fase de contratação.",
-      "Entraram 14 novas propostas selecionadas, elevando o investimento selecionado em R$ 239,4 milhões.",
-      "A participação de ônibus elétricos na frota contratada subiu de 10,2% para 15,8%."
+      "Foram registradas 25 novas contratações — 23 na Refrota Privado e 2 na Refrota Público, somando 1.237 veículos e R$ 1.723,3 milhões em investimento.",
+      "A carteira em preparação caiu de 78 para 70 propostas, confirmando o avanço de propostas já selecionadas para a fase de contratação.",
+      "Entraram 17 novas propostas selecionadas, elevando o investimento selecionado em R$ 380,8 milhões.",
+      "A participação de ônibus elétricos na frota contratada subiu de 10,2% para 15,7%."
     ]
   },
   "_dados_inconsistentes": [
-    "Reconciliação meta2026.realizado: Consolidado (2319) ≠ Público+Privado (2419)",
+    "Reconciliação meta2026.realizado: Consolidado (2366) ≠ Público+Privado (2646)",
     "Reconciliação veiculosEntregues.eletricos: Consolidado (399) ≠ Público+Privado (359)",
-    "Reconciliação veiculosEntregues.euro6: Consolidado (3866) ≠ Público+Privado (3641)"
+    "Reconciliação veiculosEntregues.euro6: Consolidado (4080) ≠ Público+Privado (3855)"
   ]
 }
