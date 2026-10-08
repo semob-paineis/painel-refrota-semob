@@ -4434,6 +4434,23 @@
 
         // Calcula o ponto de corte (em px do canvas) imediatamente antes do
         // painel "Investimento Total por Estado", garantindo que ele inicie a 2ª página.
+        // Faixa horizontal que contém o conteúdo do painel (CSS px, relativa ao documento).
+        // A página é centralizada em um container de até 1400px; capturar o <body> inteiro
+        // inclui as laterais vazias de telas largas e deixa o PDF/imagem com bordas em branco.
+        // Recortar a captura nessa faixa faz o conteúdo ocupar toda a largura útil.
+        function limitesConteudoExportacao() {
+            const alvos = document.querySelectorAll('.gov-bar-inner, .top-header-inner, .container');
+            let esq = Infinity, dir = -Infinity;
+            alvos.forEach(el => {
+                const r = el.getBoundingClientRect();
+                if (r.width > 0) { esq = Math.min(esq, r.left); dir = Math.max(dir, r.right); }
+            });
+            if (!isFinite(esq) || dir <= esq) return {};
+            const x = Math.max(0, Math.floor(esq + window.scrollX));
+            const width = Math.min(Math.ceil(dir - esq), Math.ceil(document.documentElement.scrollWidth - x));
+            return { x, width };
+        }
+
         function calcularCorteMapa(scale) {
             const mapa = document.querySelector('.map-section');
             if (!mapa) return null;
@@ -4461,7 +4478,8 @@
                         backgroundColor: '#f5f7fa',
                         scale: scale,
                         allowTaint: true,
-                        useCORS: true
+                        useCORS: true,
+                        ...limitesConteudoExportacao()
                     });
                 } finally {
                     document.body.classList.remove('exportando-captura');
@@ -4530,7 +4548,8 @@
                         backgroundColor: '#f5f7fa',
                         scale: scale,
                         allowTaint: true,
-                        useCORS: true
+                        useCORS: true,
+                        ...limitesConteudoExportacao()
                     });
                 } finally {
                     document.body.classList.remove('exportando-captura');
@@ -4545,7 +4564,7 @@
 
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
-                const margem = 10;
+                const margem = 4; // margem mínima: o conteúdo ocupa quase toda a largura da folha
                 const imgWidth = pdfWidth - margem * 2;
                 const dataStr = new Date().toLocaleDateString('pt-BR');
 
