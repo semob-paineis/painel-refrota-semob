@@ -602,7 +602,7 @@ def montar_comparativo(dados_novos, caminho_baseline):
         d_inv = nc["projetos"]["contratados"]["investimento"] - base["investimentoContratado"]
         destaques.append(
             f"Foram registradas {br(d_contr)} novas contratações{detalhe}, "
-            f"somando {br(d_veic)} veículos e R$ {br(d_inv/1e6,1)} milhões em investimento."
+            f"somando {br(d_veic)} veículos e R$ {br(d_inv/1e9,2)} {"bilhão" if round(d_inv/1e9,2)==1 else "bilhões"} em investimento."
         )
     elif d_contr < 0:
         destaques.append(
@@ -626,7 +626,7 @@ def montar_comparativo(dados_novos, caminho_baseline):
         d_inv_sel = nc["projetos"]["selecionados"]["investimento"] - base["investimentoSelecionado"]
         destaques.append(
             f"Entraram {br(d_sel)} novas propostas selecionadas, elevando o investimento "
-            f"selecionado em R$ {br(d_inv_sel/1e6,1)} milhões."
+            f"selecionado em R$ {br(d_inv_sel/1e9,2)} {"bilhão" if round(d_inv_sel/1e9,2)==1 else "bilhões"}."
         )
 
     # 4) Mudanca no ranking regional (top 3 por veiculos contratados)

@@ -1898,7 +1898,7 @@
                     <div style="width: 40px; background: #0052cc;"></div>
                     <div style="width: 40px; background: #08306b;"></div>
                 </div>
-                <span id="mapLegendMax">R$ 994 Mi</span>
+                <span id="mapLegendMax">R$ 0,99 bi</span>
             </div>
             
             <!-- State Investment Table -->
@@ -2718,7 +2718,9 @@
         // ---------- Helpers de formatação (padrão brasileiro) ----------
         const fmtInt = v => Math.round(v).toLocaleString('pt-BR');
         const fmtPct = (v, casas = 1) => v.toFixed(casas).replace('.', ',');
-        const fmtMi = v => 'R$ ' + (v / 1e6).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' Mi';
+        // Padrão financeiro do painel: sempre em R$ bilhões, com duas casas decimais.
+        // (fmtMi é mantido como apelido de fmtBi para os pontos que ainda o chamam.)
+        const fmtMi = v => fmtBi(v);
         const fmtBi = v => 'R$ ' + (v / 1e9).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' bi';
 
         // ---------- Estado dos donuts de "Projetos" e da Meta 2026 ----------
@@ -2804,8 +2806,8 @@
                 if (el) el.textContent = txt;
             };
 
-            const biFloor = v => 'R$ ' + (Math.floor(v / 1e8) / 10)
-                .toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' bilhões';
+            const biFloor = v => 'R$ ' + (Math.floor(v / 1e7) / 100)
+                .toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' bilhões';
             const biRound = v => 'R$ ' + (v / 1e9)
                 .toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' bilhões';
 
@@ -2889,9 +2891,9 @@
                 }
         ],
         "destaques": [
-                "Foram registradas 33 novas contratações — 30 na Refrota Privado e 3 na Refrota Público, somando 1.614 veículos e R$ 1.963,2 milhões em investimento.",
+                "Foram registradas 33 novas contratações — 30 na Refrota Privado e 3 na Refrota Público, somando 1.614 veículos e R$ 1,96 bilhão em investimento.",
                 "A carteira em preparação caiu de 78 para 69 propostas, confirmando o avanço de propostas já selecionadas para a fase de contratação.",
-                "Entraram 24 novas propostas selecionadas, elevando o investimento selecionado em R$ 582,9 milhões.",
+                "Entraram 24 novas propostas selecionadas, elevando o investimento selecionado em R$ 0,58 bilhão.",
                 "A participação de ônibus elétricos na frota contratada subiu de 10,2% para 14,8%."
         ]
 };
@@ -3515,8 +3517,8 @@
                                 const totalProj = contrPublicoProj + contrPrivadoProj;
 
                                 const investments = [
-                                    'R$ ' + Math.round(contrPublicoInv).toLocaleString('pt-BR'),
-                                    'R$ ' + Math.round(contrPrivadoInv).toLocaleString('pt-BR')
+                                    fmtBi(contrPublicoInv),
+                                    fmtBi(contrPrivadoInv)
                                 ];
                                 const percentages = [
                                     fmtPct(contrPublicoInv/totalInv*100),
@@ -4240,14 +4242,14 @@
             const linhas = ranking.map(([uf, v], i) => {
                 const pos = (i + 1) + 'º';
                 const pct = fmtPct(v / total * 100, 2);
-                const titulo = `${pos} lugar — ${NOMES_UF[uf]} (${uf}): R$ ${fmtInt(v)} (${pct}% do total)`;
+                const titulo = `${pos} lugar — ${NOMES_UF[uf]} (${uf}): ${fmtBi(v)} (${pct}% do total)`;
                 const largura = (v / maxVal * 100).toFixed(1);
                 const estiloValor = i === 0 ? `style="font-weight:600; color:${corDestaque};"` : 'class="value-secondary"';
                 return `
                     <tr title="${titulo}">
                         <td><strong>${pos}</strong></td>
                         <td><strong>${NOMES_UF[uf]}</strong> <span style="color:#999; font-size:11px;">(${uf})</span></td>
-                        <td ${estiloValor}>R$ ${fmtInt(v)} (${pct}%)</td>
+                        <td ${estiloValor}>${fmtBi(v)} (${pct}%)</td>
                         <td><div style="background: ${corDestaque}; height: 8px; border-radius: 4px; width: ${largura}%; transition: width 0.4s ease, background 0.4s ease;" title="${titulo}"></div></td>
                     </tr>`;
             }).join('');
@@ -4255,7 +4257,7 @@
             document.getElementById('ufRankingBody').innerHTML = linhas + `
                     <tr style="background: #f0f4f8; font-weight: 600;">
                         <td colspan="2"><strong>Total</strong></td>
-                        <td style="font-weight:600; color:${corDestaque};">R$ ${fmtInt(total)}</td>
+                        <td style="font-weight:600; color:${corDestaque};">${fmtBi(total)}</td>
                         <td></td>
                     </tr>`;
 
@@ -4642,8 +4644,7 @@
 
         function formatBRL(v) {
             if (v === 0) return 'Sem investimento';
-            if (v >= 1e9) return 'R$ ' + (v / 1e9).toFixed(2).replace('.', ',') + ' Bi';
-            return 'R$ ' + (v / 1e6).toFixed(1).replace('.', ',') + ' Mi';
+            return fmtBi(v);   // sempre em R$ bilhões, duas casas decimais
         }
 
         function drawBrazilMap() {
