@@ -1817,6 +1817,31 @@
             </div>
         </div>
 
+        <!-- Agentes Financeiros — acompanha Consolidado/Público/Privado e Selecionadas/Contratadas -->
+        <div class="table-section" style="grid-template-columns: 1fr;" id="secaoAgentes">
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title" id="tituloAgentes">🏦 Contratações por Agente Financeiro</h3>
+                    <span class="tipo-badge" id="badgeAgentes">Contratados</span>
+                </div>
+                <div id="agentesResumo" style="font-size:13px; color:#555; margin: -4px 0 14px;"></div>
+                <table id="table-agentes">
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">#</th>
+                            <th>Agente financeiro</th>
+                            <th>Propostas</th>
+                            <th>Veículos</th>
+                            <th id="thInvAgentes">Valor contratado</th>
+                            <th style="width:150px;">Participação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agentesBody"></tbody>
+                </table>
+                <p id="agentesNota" style="font-size:11px; color:#888; margin-top:12px;"></p>
+            </div>
+        </div>
+
         <!-- Map Section -->
         <div class="map-section">
             <div class="table-header">
@@ -1902,6 +1927,7 @@
     </div>
 
     <!-- Chart.js Scripts -->
+    <script src="base_agente.js"></script>
     <script>
         /* =========================================================================
            ESTADO DINÂMICO DO PAINEL — Consolidado | Refrota Público | Refrota Privado
@@ -4120,6 +4146,96 @@
             document.getElementById('mapLegendMax').textContent = formatBRL(maxVal);
         }
 
+        // --- Agentes Financeiros (calculado da base por contrato, base_agente.js) ---
+        // Segue os mesmos seletores do painel: cenário (Consolidado/Público/Privado)
+        // e tipo de proposta (Selecionadas/Contratadas). Contratadas usam o valor
+        // contratado e as quantidades contratadas; Selecionadas usam o apoio previsto
+        // do Novo PAC e as quantidades selecionadas (exclui "Habilitada", como o painel).
+        const AGENTES_BASE = (function () {
+            const B = window.BASE_AGENTE;
+            if (!B || !B.linhas) return null;
+            const ix = {}; B.colunas.forEach((c, n) => ix[c] = n);
+            return B.linhas.map(l => {
+                const g = k => l[ix[k]];
+                const n = k => +g(k) || 0;
+                return {
+                    ref: /refrota/i.test(g('tipo') || ''),
+                    privado: /privado/i.test(g('tipo') || ''),
+                    cat: g('cat'),
+                    agente: g('agente') || 'Não informado',
+                    contratada: g('cat') === 'contratada',
+                    selecionada: g('cat') !== 'habilitada',
+                    velC: n('qtdContr'), invC: n('valorContr'),
+                    velS: n('elSel') + n('e6Sel') + n('trSel'), invS: n('apoio')
+                };
+            }).filter(r => r.ref);
+        })();
+
+        function agentesAtuais() {
+            if (!AGENTES_BASE) return null;
+            const sel = tipoProjetoMapa === 'selecionados';
+            const mapa = {};
+            AGENTES_BASE.forEach(r => {
+                if (cenarioAtual === 'privado' && !r.privado) return;
+                if (cenarioAtual === 'publico' && r.privado) return;
+                if (sel ? !r.selecionada : !r.contratada) return;
+                const a = mapa[r.agente] || (mapa[r.agente] = { nome: r.agente, propostas: 0, veiculos: 0, investimento: 0 });
+                a.propostas += 1;
+                a.veiculos += sel ? r.velS : r.velC;
+                a.investimento += sel ? r.invS : r.invC;
+            });
+            return Object.values(mapa).filter(a => a.propostas > 0)
+                .sort((a, b) => b.investimento - a.investimento || b.propostas - a.propostas);
+        }
+
+        function renderAgentes() {
+            const secao = document.getElementById('secaoAgentes');
+            const lista = agentesAtuais();
+            if (!lista) { if (secao) secao.style.display = 'none'; return; }
+            const sel = tipoProjetoMapa === 'selecionados';
+            const cor = sel ? '#6d3fb0' : '#0052cc';
+            const total = lista.reduce((t, a) => ({ p: t.p + a.propostas, v: t.v + a.veiculos, i: t.i + a.investimento }), { p: 0, v: 0, i: 0 });
+            const maxI = lista.length ? lista[0].investimento : 1;
+            const rot = { consolidado: 'Consolidado', publico: 'Refrota Público', privado: 'Refrota Privado' }[cenarioAtual];
+            const palavra = sel ? 'Seleções' : 'Contratações';
+            const set = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+            set('tituloAgentes', `🏦 ${palavra} por Agente Financeiro`);
+            set('badgeAgentes', sel ? 'Selecionados' : 'Contratados');
+            const badge = document.getElementById('badgeAgentes'); if (badge) badge.classList.toggle('is-selecionados', sel);
+            set('thInvAgentes', sel ? 'Apoio previsto (Novo PAC)' : 'Valor contratado');
+
+            const resumo = document.getElementById('agentesResumo');
+            if (!lista.length) {
+                document.getElementById('agentesBody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:#888;">Sem propostas neste recorte.</td></tr>';
+                resumo.textContent = rot; return;
+            }
+            const top = lista[0], top3 = lista.slice(0, 3).reduce((t, a) => t + a.investimento, 0);
+            resumo.innerHTML = `${rot}: <strong>${top.nome}</strong> lidera com <strong>${fmtPct(top.investimento / total.i * 100, 1)}%</strong> do investimento; ` +
+                `os 3 maiores somam <strong>${fmtPct(top3 / total.i * 100, 1)}%</strong>. ${lista.length} agente${lista.length > 1 ? 's' : ''} no recorte.`;
+
+            document.getElementById('agentesBody').innerHTML = lista.map((a, i) => {
+                const p = a.investimento / total.i * 100;
+                const titulo = `${i + 1}º — ${a.nome}: ${fmtMi(a.investimento)} (${fmtPct(p, 2)}%), ${fmtInt(a.propostas)} propostas, ${fmtInt(a.veiculos)} veículos`;
+                const est = i === 0 ? `style="font-weight:600; color:${cor};"` : 'class="value-secondary"';
+                return `<tr title="${titulo}">
+                        <td><strong>${i + 1}º</strong></td>
+                        <td><strong>${a.nome}</strong></td>
+                        <td class="value-secondary">${fmtInt(a.propostas)}</td>
+                        <td class="value-secondary">${fmtInt(a.veiculos)}</td>
+                        <td ${est}>${fmtMi(a.investimento)} (${fmtPct(p, 2)}%)</td>
+                        <td><div style="background:${cor}; height:8px; border-radius:4px; width:${(a.investimento / maxI * 100).toFixed(1)}%; min-width:2px; transition: width .4s ease, background .4s ease;" title="${titulo}"></div></td>
+                    </tr>`;
+            }).join('') + `<tr style="background:#f0f4f8; font-weight:600;">
+                        <td colspan="2"><strong>Total</strong></td>
+                        <td style="font-weight:600; color:${cor};">${fmtInt(total.p)}</td>
+                        <td style="font-weight:600; color:${cor};">${fmtInt(total.v)}</td>
+                        <td style="font-weight:600; color:${cor};">${fmtMi(total.i)} (100%)</td>
+                        <td></td></tr>`;
+            document.getElementById('agentesNota').textContent = sel
+                ? 'Propostas selecionadas = todas, exceto as habilitadas. Valor = apoio previsto do Novo PAC; veículos = quantidades selecionadas.'
+                : 'Propostas contratadas = situação Contratada, Em licitação, Em andamento ou Concluída. Valor = valor contratado; veículos = quantidades contratadas.';
+        }
+
         // --- Aplica um cenário a todos os componentes do painel ---
         // Exceção: o "Resumo Executivo" permanece estático em todos os cenários.
         function aplicarCenario(cenario) {
@@ -4133,6 +4249,7 @@
             renderRegioes();
             renderAnos();
             renderRankingUF();
+            renderAgentes();
             atualizarRotulosTipoProjeto();
             if (typeof drawBrazilMap === 'function') drawBrazilMap();
             if (typeof A11yManager !== 'undefined') A11yManager.adicionarAriaLabels();
@@ -4173,6 +4290,7 @@
             renderRegioes();
             renderAnos();
             renderRankingUF();
+            renderAgentes();
             atualizarRotulosTipoProjeto();
             if (typeof drawBrazilMap === 'function') drawBrazilMap();
         }
