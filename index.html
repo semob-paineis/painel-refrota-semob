@@ -1437,6 +1437,9 @@
            resultando num efeito "esfumaçado". Esta classe é aplicada só
            durante a captura (ver downloadAsImage/downloadAsPDF) e remove
            qualquer animação ou transição em andamento no instante do print. */
+        /* Avisos flutuantes (ex.: "Painel atualizado") não entram no PDF/imagem */
+        body.exportando-captura .notification { display: none !important; }
+
         body.exportando-captura *,
         body.exportando-captura *::before,
         body.exportando-captura *::after {
@@ -4596,20 +4599,21 @@
                     bctx.fillRect(0, 0, blocoCanvas.width, blocoCanvas.height);
                     bctx.drawImage(canvas, 0, bloco.yInicio, canvas.width, bloco.altura, 0, 0, canvas.width, bloco.altura);
 
-                    const imgData = blocoCanvas.toDataURL('image/png');
+                    const imgData = blocoCanvas.toDataURL('image/jpeg', 0.92); // JPEG: arquivo ~10x menor que PNG, sem perda visível em texto/gráficos
+                    const alias = 'bloco' + indice; // mesma imagem reutilizada nas páginas seguintes sem duplicar bytes
                     const imgHeight = (blocoCanvas.height * imgWidth) / blocoCanvas.width;
 
                     const alturaUtil = pdfHeight - margem * 2;
                     let heightLeft = imgHeight;
                     let position = margem;
 
-                    pdf.addImage(imgData, 'PNG', margem, position, imgWidth, imgHeight);
+                    pdf.addImage(imgData, 'JPEG', margem, position, imgWidth, imgHeight, alias, 'FAST');
                     heightLeft -= alturaUtil;
 
                     while (heightLeft > 0) {
                         position = heightLeft - imgHeight + margem;
                         pdf.addPage();
-                        pdf.addImage(imgData, 'PNG', margem, position, imgWidth, imgHeight);
+                        pdf.addImage(imgData, 'JPEG', margem, position, imgWidth, imgHeight, alias, 'FAST');
                         heightLeft -= alturaUtil;
                     }
                 });
