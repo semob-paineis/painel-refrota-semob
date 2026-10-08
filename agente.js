@@ -118,6 +118,23 @@
   });
   var AGENTES = {};
   R.forEach(function (r) { if (r.agente) AGENTES[norm(r.agente)] = r.agente; });
+  // apelidos: "Banco Mercedes Benz do Brasil S/A" também responde a "Mercedes Benz", "Mercedes"; "BTG Pactual" a "BTG"
+  (function () {
+    var todos = Object.keys(AGENTES), apelidos = {};
+    todos.forEach(function (k) {
+      var nome = AGENTES[k];
+      var x = k.replace(/\b(do brasil|s a|sa|ltda)\b/g, ' ').replace(/\s+/g, ' ').trim();
+      var y = x.replace(/^banco (do estado d[oa] |d[oae] )?/, '').trim();
+      [x, y, y.split(' ')[0], y.split(' ').slice(-1)[0]].forEach(function (a) {
+        if (!a || a === k || a.length < 3 || ['banco', 'brasil', 'estado', 'rio', 'sul', 'grande', 'luso'].indexOf(a) >= 0) return;
+        (apelidos[a] = apelidos[a] || {})[nome] = 1;
+      });
+    });
+    Object.keys(apelidos).forEach(function (a) {
+      var donos = Object.keys(apelidos[a]);
+      if (donos.length === 1 && !AGENTES[a]) AGENTES[a] = donos[0];
+    });
+  })();
 
   function consumir(n, frase) { return (' ' + n + ' ').split(' ' + frase + ' ').join('  ').replace(/\s+/g, ' ').trim(); }
 
@@ -166,7 +183,7 @@
     });
     (n.match(/\b20(2[2-9]|3\d)\b/g) || []).forEach(function (a) { if (e.anos.indexOf(+a) < 0) e.anos.push(+a); });
 
-    Object.keys(AGENTES).forEach(function (a) { if (a.length >= 4 && tem(n, a)) e.agentes.push(AGENTES[a]); });
+    Object.keys(AGENTES).sort(function (a, b) { return b.length - a.length; }).forEach(function (a) { if (a.length >= 3 && tem(n, a) && e.agentes.indexOf(AGENTES[a]) < 0) e.agentes.push(AGENTES[a]); });
     if (tem(n, 'bndes') && !e.agentes.length) R.forEach(function (r) { if (/bndes/i.test(r.agente) && e.agentes.indexOf(r.agente) < 0) e.agentes.push(r.agente); });
 
     // Frente
@@ -198,8 +215,8 @@
       if (tem(resto, m[0]) || tem(resto, m[0].slice(0, 3) + ' ' + '20')) { if (e.meses.indexOf(m[1]) < 0) e.meses.push(m[1]); }
     });
     e.selecionada = !!temAlgum(n, ['selecionada', 'selecionadas', 'selecionado', 'selecionados', 'selecao', 'carteira']);
-    e.entregue = !!temAlgum(n, ['entregue', 'entregues', 'entrega', 'entregas', 'em operacao', 'rodando']);
-    e.desembolso = !!temAlgum(n, ['desembolsado', 'desembolsados', 'desembolso', 'liberado', 'liberados', 'liberacao', 'pago', 'pagos']);
+    e.entregue = !!temAlgum(n, ['entregue', 'entregues', 'entrega', 'entregas', 'entregaram', 'entregou', 'entregar', 'em operacao', 'rodando']);
+    e.desembolso = !!temAlgum(n, ['desembolsado', 'desembolsados', 'desembolsada', 'desembolsadas', 'desembolso', 'desembolsos', 'desembolsou', 'desembolsaram', 'desembolsar', 'liberado', 'liberados', 'liberou', 'liberacao', 'pago', 'pagos', 'pagou', 'repassou']);
     return e;
   }
 
@@ -260,13 +277,24 @@
     if (t === 'tr') return c ? r.trContr : r.trSel;
     return 0;
   }
-  function invLinha(r, s) { return usaContratado(s) ? r.valorContr : r.apoio; }
+  /** Fatia (0..1) do tipo de veículo pedido dentro da linha. Sem tipo => 1. forcaC: usa colunas "contratado". */
+  function compTipo(r, s, forcaC) {
+    if (!s.veic) return 1;
+    var c = forcaC || usaContratado(s);
+    var el = c ? r.elContr : r.elSel, e6 = c ? r.e6Contr : r.e6Sel, tr = c ? r.trContr : r.trSel;
+    var tot = el + e6 + tr; if (!tot) return 0;
+    var q = s.veic === 'el' ? el : s.veic === 'e6' ? e6 : s.veic === 'tr' ? tr : s.veic === 'ambos' ? el + e6 : 0;
+    return q / tot;
+  }
+  /** Valor da linha. Com tipo de veículo, o valor do contrato é rateado pela fatia desse tipo (só 2 contratos são mistos). */
+  function invLinha(r, s) { return (usaContratado(s) ? r.valorContr : r.apoio) * compTipo(r, s); }
   function soma(linhas, f) { var t = 0; linhas.forEach(function (r) { t += f(r); }); return t; }
 
   /** Agrega um conjunto de linhas conforme o recorte (única fonte dos números). */
   function agrega(L, s) {
     var contr = soma(L, function (r) { return r.qtdContr; });
-    return {
+    var cT = function (r) { return compTipo(r, s, true); };
+    var a = {
       linhas: L,
       propostas: L.length,
       veiculos: soma(L, function (r) { return veicLinha(r, s); }),
@@ -278,8 +306,25 @@
       valorContr: soma(L, function (r) { return r.valorContr; }),
       contr: contr,
       liberado: soma(L, function (r) { return r.liberado; }),
-      entregues: soma(L, function (r) { return r.qtdEntregue; })
+      entregues: soma(L, function (r) { return r.qtdEntregue; }),
+      // versões "do tipo pedido" (iguais às totais quando não há tipo de veículo no recorte)
+      valorContrTipo: soma(L, function (r) { return r.valorContr * cT(r); }),
+      contrTipo: soma(L, function (r) { return r.qtdContr * cT(r); }),
+      entreguesTipo: soma(L, function (r) { return r.qtdEntregue * cT(r); }),
+      liberadoTipo: soma(L, function (r) { return r.liberado * cT(r); }),
+      mistos: s.veic ? L.filter(function (r) { var f = cT(r); return f > 0 && f < 1; }).length : 0
     };
+    // Entregas: contratos com veículo entregue e valor proporcional (valor contratado x % entregue)
+    var E = L.filter(function (r) { return r.qtdEntregue > 0 && cT(r) > 0; });
+    a.entContratos = E.length;
+    a.entValorContratos = soma(E, function (r) { return r.valorContr * cT(r); });
+    a.entValorProporcional = soma(E, function (r) { return r.qtdContr ? r.valorContr * cT(r) * Math.min(r.qtdEntregue / r.qtdContr, 1) : 0; });
+    a.entLiberado = soma(E, function (r) { return r.liberado * cT(r); });
+    var P = E.filter(function (r) { return r.qtdEntregue >= r.qtdContr; });
+    a.entContratosPlenos = P.length;
+    a.entValorPlenos = soma(P, function (r) { return r.valorContr * cT(r); });
+    a.pendentes = soma(L, function (r) { return Math.max(r.qtdContr - r.qtdEntregue, 0) * cT(r); });
+    return a;
   }
   function totais(s, ignorar) { return agrega(filtra(s, ignorar), s); }
 
@@ -322,6 +367,7 @@
     contrato:  { chave: function (r) { return r.proposta + ' · ' + r.proponente + ' — ' + (r.empreend || '') + ' (' + r.uf + ')'; }, rotulo: 'Proposta', singular: 'proposta', nome: function (k) { return k.replace(/^[^·]*· /, ''); } },
     tipoProp:  { chave: function (r) { return r.tipoProp || 'não informado'; }, rotulo: 'Tipo de proponente', singular: 'tipo de proponente', nome: function (k) { return k; } },
     mes:       { chave: function (r) { var m = /^(\d{4})-(\d{2})/.exec(r.assinatura || ''); return m ? m[1] + '-' + m[2] : 'sem data de assinatura'; }, rotulo: 'Mês de assinatura', singular: 'mês de assinatura', nome: function (k) { var m = /^(\d{4})-(\d{2})$/.exec(k); return m ? m[2] + '/' + m[1] : k; } },
+    execucao:  { chave: function (r) { return r.execucao || 'não informada'; }, rotulo: 'Situação da execução', singular: 'situação da execução', nome: function (k) { return k; } },
     fonte:     { chave: function (r) { return r.fonte || 'não informada'; }, rotulo: 'Fonte', singular: 'fonte de recursos', nome: function (k) { return k; } }
   };
 
@@ -332,11 +378,13 @@
     tr:          { rotulo: 'veículos sobre trilhos', f: function (t) { return t.tr; }, fmt: int },
     investimento:{ rotulo: 'investimento', f: function (t) { return t.investimento; }, fmt: moeda },
     propostas:   { rotulo: 'propostas', f: function (t) { return t.propostas; }, fmt: int },
-    entregues:   { rotulo: 'veículos entregues', f: function (t) { return t.entregues; }, fmt: int },
-    liberado:    { rotulo: 'valor desembolsado', f: function (t) { return t.liberado; }, fmt: moeda },
-    taxaEntrega: { rotulo: 'taxa de entrega (veículos entregues ÷ contratados)', f: function (t) { return t.contr ? t.entregues / t.contr : 0; }, fmt: pct, ratio: true, den: function (t) { return t.contr; }, contratada: true },
-    taxaDesembolso: { rotulo: 'taxa de desembolso (valor liberado ÷ valor contratado)', f: function (t) { return t.valorContr ? t.liberado / t.valorContr : 0; }, fmt: pct, ratio: true, den: function (t) { return t.valorContr; }, contratada: true },
-    medio:       { rotulo: 'valor contratado médio por veículo', f: function (t) { return t.contr ? t.valorContr / t.contr : 0; }, fmt: moeda, ratio: true, den: function (t) { return t.contr; }, contratada: true }
+    entregues:   { rotulo: 'veículos entregues', f: function (t) { return t.entreguesTipo; }, fmt: int },
+    pendentes:   { rotulo: 'veículos contratados ainda não entregues', f: function (t) { return t.pendentes; }, fmt: int, contratada: true },
+    valorEntregue: { rotulo: 'valor proporcional aos veículos entregues', f: function (t) { return t.entValorProporcional; }, fmt: moeda, contratada: true },
+    liberado:    { rotulo: 'valor desembolsado', f: function (t) { return t.liberadoTipo; }, fmt: moeda },
+    taxaEntrega: { rotulo: 'taxa de entrega (veículos entregues ÷ contratados)', f: function (t) { return t.contrTipo ? t.entreguesTipo / t.contrTipo : 0; }, fmt: pct, ratio: true, den: function (t) { return t.contrTipo; }, contratada: true },
+    taxaDesembolso: { rotulo: 'taxa de desembolso (valor liberado ÷ valor contratado)', f: function (t) { return t.valorContrTipo ? t.liberadoTipo / t.valorContrTipo : 0; }, fmt: pct, ratio: true, den: function (t) { return t.valorContrTipo; }, contratada: true },
+    medio:       { rotulo: 'valor contratado médio por veículo', f: function (t) { return t.contrTipo ? t.valorContrTipo / t.contrTipo : 0; }, fmt: moeda, ratio: true, den: function (t) { return t.contrTipo; }, contratada: true }
   };
 
   function dimensaoDaPergunta(n) {
@@ -351,19 +399,24 @@
     if (temAlgum(n, ['agente financeiro', 'agentes financeiros', 'agente', 'agentes', 'banco', 'bancos'])) return 'agente';
     if (temAlgum(n, ['frente', 'frentes', 'publico ou privado'])) return 'frente';
     if (temAlgum(n, ['fonte', 'fontes', 'fonte de recursos'])) return 'fonte';
+    if (temAlgum(n, ['situacao da execucao', 'execucao', 'andamento das obras', 'fase de entrega'])) return 'execucao';
     if (temAlgum(n, ['situacao', 'situacoes', 'status'])) return 'situacao';
     return null;
   }
-  function metricaDaPergunta(n, e) {
-    if (/\b(taxa|percentual|indice|ritmo) de entrega|\bmais atrasad|\batraso/.test(n)) return 'taxaEntrega';
-    if (/\b(taxa|percentual|indice) de (desembolso|liberacao)/.test(n)) return 'taxaDesembolso';
-    if (/\b(custo|preco|valor|ticket) medio|\bpor (veiculo|onibus)\b|\bmais caro|\bmais barato/.test(n)) return 'medio';
-    if (e.entregue) return 'entregues';
+  function pedeValor(n, original) { return /\b(invest\w*|valor\w*|recurso\w*|reais|dinheiro|bilho\w*|milho\w*|apoio|gast\w*|custo\w*|custa\w*|custou|orcamento|montante)\b/.test(n) || /r\$/i.test(original || ''); }
+  function metricaDaPergunta(n, e, original) {
+    if (/\b(taxa|percentual|indice|ritmo|proporcao|porcentagem) (de |dos? )?(entreg\w*)|\bmais atrasad|\batraso/.test(n)) return 'taxaEntrega';
+    if (/\b(faltam?|falta|restam?|resta|pendentes?|saldo|ainda)\b.*\b(ser )?entreg\w*|\ba entregar\b|\bnao entregues?\b|\bainda nao (foram |foi )?entreg\w*/.test(n) && !/\bmeta\b/.test(n)) return 'pendentes';
+    if (/\b(taxa|percentual|indice|proporcao|porcentagem) (de |do |da )?(desembols\w*|liberad\w*|liberacao)/.test(n) || (e.desembolso && /\b(percentual|taxa|proporcao|porcentagem|quanto representa|representa|sobre o valor contratado|do total contratado|do valor contratado|do contratado)\b/.test(n) && !/\b(banco|agente|caixa|bndes)\b/.test(n) && /contratad/.test(n))) return 'taxaDesembolso';
+    if (/\b(custo|preco|valor|ticket) medio|\bpor (veiculo|onibus)\b|\bmais caro|\bmais barato|\bquanto custa\b/.test(n)) return 'medio';
+    var valor = pedeValor(n, original);
     if (e.desembolso) return 'liberado';
+    if (valor && e.entregue) return 'valorEntregue';
+    if (valor) return 'investimento';           // tipo de veículo vira filtro (valor rateado por tipo)
+    if (e.entregue) return 'entregues';
     if (e.veic === 'el') return 'el';
     if (e.veic === 'e6') return 'e6';
     if (e.veic === 'tr') return 'tr';
-    if (/\b(invest\w*|valor\w*|recurso\w*|reais|dinheiro|bilho\w*|milho\w*|apoio|gast\w*|financ\w*|custo\w*|orcamento)\b/.test(n)) return 'investimento';
     if (/\b(propostas?|contratos?|projetos?|empreendimentos?)\b/.test(n) && !/\b(veiculos?|onibus|frota)\b/.test(n)) return 'propostas';
     return 'veiculos';
   }
@@ -564,6 +617,7 @@
     return p.length ? lista(p) : null;
   }
 
+  function rotuloTipo(t) { return { el: 'ônibus elétricos', e6: 'ônibus Euro 6', tr: 'veículos sobre trilhos', ambos: 'ônibus elétricos e Euro 6' }[t] || 'veículos'; }
   function respostaValor(e, n, metrica, participacao) {
     var s = escopo(e), M = METRICAS[metrica];
     if (M.contratada && !s.situacaoTexto) s.cat = 'contratada';
@@ -594,14 +648,17 @@
         html = '<p>' + (rotEnt ? '<b>' + esc(rotEnt.charAt(0).toUpperCase() + rotEnt.slice(1)) + '</b> representa' : 'Este recorte representa') + ' <b>' + pct(v / vb) + '</b> do total de ' + esc(M.rotulo) + ' do programa: <b>' + M.fmt(v) + '</b> de <b>' + M.fmt(vb) + '</b>, em <b>' + plural(nProp, 'proposta', 'propostas') + '</b>.</p>' + mini;
       } else if (M.ratio) {
         html = '<p>' + esc(M.rotulo.split(' (')[0].charAt(0).toUpperCase() + M.rotulo.split(' (')[0].slice(1)) + ': <b>' + M.fmt(v) + '</b>' + (geo ? ' (' + esc(geo) + ')' : '') + '.' + ctxTxt + '</p>';
-        if (metrica === 'taxaEntrega') html += '<p class="agente__mini">' + int(t.entregues) + ' veículos entregues de ' + int(t.contr) + ' contratados.</p>';
-        if (metrica === 'taxaDesembolso') html += '<p class="agente__mini">' + moeda(t.liberado) + ' liberados de ' + moeda(t.valorContr) + ' contratados.</p>';
-        if (metrica === 'medio') html += '<p class="agente__mini">' + moeda(t.valorContr) + ' contratados para ' + int(t.contr) + ' veículos. Contratos com mais de um tipo de veículo entram no total.</p>';
+        if (metrica === 'taxaEntrega') html += '<p class="agente__mini">' + int(t.entreguesTipo) + ' veículos entregues de ' + int(t.contrTipo) + ' contratados.</p>';
+        if (metrica === 'taxaDesembolso') html += '<p class="agente__mini">' + moeda(t.liberadoTipo) + ' liberados de ' + moeda(t.valorContrTipo) + ' contratados.</p>';
+        if (metrica === 'medio') html += '<p class="agente__mini">' + moeda(t.valorContrTipo) + ' contratados para ' + int(t.contrTipo) + ' veículos' + (s.veic ? ' (valor rateado por tipo nos ' + t.mistos + ' contratos mistos)' : '') + '.</p>';
       } else if (metrica === 'propostas') {
         html = '<p>São <b>' + plural(t.propostas, 'proposta', 'propostas') + '</b>' + (geo ? ' (' + esc(geo) + ')' : '') + ' neste recorte, somando <b>' + int(t.veiculos) + '</b> veículos e <b>' + moeda(t.investimento) + '</b>.' + ctxTxt + '</p>';
       } else {
-        html = '<p>' + (metrica === 'investimento' ? 'O investimento é de ' : 'São ') + '<b>' + M.fmt(v) + '</b>' +
+        html = '<p>' + (metrica === 'investimento' ? 'O investimento' + (s.veic ? ' em ' + rotuloTipo(s.veic) : '') + ' é de ' : 'São ') + '<b>' + M.fmt(v) + '</b>' +
           (metrica === 'investimento' ? '' : ' ' + esc(M.rotulo)) + (geo ? ' — ' + esc(geo) : '') + ', em <b>' + plural(nProp, 'proposta', 'propostas') + '</b>.' + ctxTxt + '</p>';
+        if (metrica === 'investimento' && s.veic) {
+          html += '<p class="agente__mini">' + (usaContratado(s) ? 'Valor contratado' : 'Apoio previsto') + ' dos contratos com ' + esc(rotuloTipo(s.veic)) + ', rateado pela fatia desse tipo de veículo' + (t.mistos ? ' (' + plural(t.mistos, 'contrato misto', 'contratos mistos') + ')' : '; nenhum contrato misto neste recorte') + '. Isso dá ' + moeda(t.veiculos ? v / t.veiculos : 0) + ' por veículo.</p>';
+        }
         if (!s.veic && metrica === 'veiculos') {
           html += '<p class="agente__mini">Composição: ' + int(t.el) + ' elétricos · ' + int(t.e6) + ' Euro 6 · ' + int(t.tr) + ' sobre trilhos.</p>';
         }
@@ -610,6 +667,7 @@
         }
       }
       html += rodape(s);
+      if (metrica === 'taxaEntrega' || metrica === 'entregues') html += notaPainelEntregas(s);
     }
     return { html: html, fatos: { valor: v, propostas: t.propostas, propostasComTipo: nProp, veiculos: t.veiculos, el: t.el, e6: t.e6, tr: t.tr, investimento: t.investimento, entregues: t.entregues, liberado: t.liberado, base: vb, metrica: metrica },
              acoes: acoesRadar(s), sugestoes: SUGESTOES_BASE };
@@ -777,8 +835,414 @@
   }
 
   /* ======================================================================
+     6b. O PAINEL EM SI — cards, números exibidos, entregas, metas
+     O agente conhece cada card (o que mostra, regra, valor atual) e sabe
+     reconhecer um número citado ("esses 4.550 veículos") como parte do painel.
+     ====================================================================== */
+  var NOME_CEN = { consolidado: 'Consolidado', publico: 'Refrota Público', privado: 'Refrota Privado' };
+  function dpainel() { return (typeof DADOS !== 'undefined' && DADOS) ? DADOS : null; }
+  function cenarioPainel() { try { return (typeof cenarioAtual !== 'undefined' && cenarioAtual) || 'consolidado'; } catch (x) { return 'consolidado'; } }
+  function seletorPainel() { try { return (typeof tipoProjetoMapa !== 'undefined' && tipoProjetoMapa) || 'contratados'; } catch (x) { return 'contratados'; } }
+  function metaEntrega() { try { return (typeof META_ENTREGA !== 'undefined' && META_ENTREGA) || 5000; } catch (x) { return 5000; } }
+  function somaTipos(v) { return (v ? (v.eletricos || 0) + (v.euro6 || 0) + (v.trilhos || 0) : 0); }
+  function frenteDoCenario(c) { return c === 'privado' ? 'Privado' : c === 'publico' ? 'Público' : null; }
+  /** Números do painel para um cenário (vêm do dados.json que alimenta os cards). */
+  function painel(c) {
+    var d = dpainel(), x = d && d[c];
+    if (!x) return null;
+    return { cen: c, ent: x.veiculosEntregues || { eletricos: 0, euro6: 0, trilhos: 0 }, vc: x.veiculos, vs: x.veiculosSelecionados,
+             proj: x.projetos, meta: x.meta2026 };
+  }
+  function cenarioEscolhido(e, citou) {
+    var f = e && e.frente;
+    if (f === 'Privado') return 'privado';
+    if (f === 'Público') return 'publico';
+    return citou ? cenarioPainel() : 'consolidado';
+  }
+  function linhasDoCenario(c) {
+    var f = frenteDoCenario(c);
+    return R.filter(function (r) { return r.cat === 'contratada' && (!f || r.frente === f); });
+  }
+  function pctf(v) { return pct(v); }
+
+  /* ---------- Números do painel (para reconhecer "esses 4.550 veículos") ---------- */
+  var _numCache = null;
+  function numerosDoPainel() {
+    if (_numCache) return _numCache;
+    var lista = [];
+    ['consolidado', 'publico', 'privado'].forEach(function (c) {
+      var P = painel(c); if (!P) return;
+      var add = function (valor, rotulo, card, force) { if (valor >= 100) lista.push({ valor: Math.round(valor), rotulo: rotulo, card: card, cen: c, force: force || {} }); };
+      add(somaTipos(P.ent), 'veículos entregues', 'metaEntregas', { entregue: true });
+      add(P.ent.eletricos, 'ônibus elétricos entregues', 'metaEntregas', { entregue: true, veic: 'el' });
+      add(P.ent.euro6, 'ônibus Euro 6 entregues', 'metaEntregas', { entregue: true, veic: 'e6' });
+      add(somaTipos(P.vc), 'veículos contratados', 'veiculosContratados', { cat: 'contratada' });
+      add(P.vc.eletricos, 'ônibus elétricos contratados', 'veiculosContratados', { cat: 'contratada', veic: 'el' });
+      add(P.vc.euro6, 'ônibus Euro 6 contratados', 'veiculosContratados', { cat: 'contratada', veic: 'e6' });
+      add(somaTipos(P.vs), 'veículos selecionados', 'funil', { cat: 'selecionada' });
+      add(P.proj.contratados.propostas, 'propostas contratadas', 'contratadas', { cat: 'contratada', tipo: 'propostas' });
+      add(P.proj.selecionados.propostas, 'propostas selecionadas', 'selecionadas', { cat: 'selecionada', tipo: 'propostas' });
+      add(P.meta && P.meta.realizado, 'veículos selecionados no ano de 2026 (Refrota Privado)', 'metaSelecionados', { meta: 'selecionados' });
+    });
+    _numCache = lista; return lista;
+  }
+  /** Acha números do texto que correspondem a um número exibido no painel. */
+  function resolverNumeros(original, n, cenAtivo) {
+    var achados = [];
+    var re = /\d{1,3}(?:\.\d{3})+|\d{3,}/g, m;
+    while ((m = re.exec(original))) {
+      var v = parseInt(m[0].replace(/\./g, ''), 10);
+      if (v >= 2022 && v <= 2035 && m[0].indexOf('.') < 0) continue;      // ano
+      var cand = numerosDoPainel().filter(function (x) { return x.valor === v; });
+      if (!cand.length) continue;
+      // desempate: palavras do rótulo presentes na pergunta; depois, o cenário ativo no painel
+      var pontua = function (x) {
+        var p = 0;
+        norm(x.rotulo).split(' ').forEach(function (w) { if (w.length > 3 && tem(n, w)) p += 2; if (w.length > 4 && n.indexOf(w.slice(0, 5)) >= 0) p += 1; });
+        if (x.cen === cenAtivo) p += 1.5;
+        if (x.cen === 'consolidado') p += 0.5;
+        return p;
+      };
+      cand.sort(function (a, b) { return pontua(b) - pontua(a); });
+      achados.push({ texto: m[0], valor: v, item: cand[0] });
+    }
+    return achados;
+  }
+
+  /* ---------- Cards do painel ---------- */
+  function listaVal(c) { var P = painel(c); return P; }
+  var CARTOES = [
+    { id: 'metaEntregas', titulo: 'Meta Quantidade de Veículos Entregues',
+      chaves: ['meta quantidade de veiculos entregues', 'meta de veiculos entregues', 'meta de entregas', 'meta de entrega', 'meta das entregas', 'card de entregas', 'indicador de entregas'],
+      mostra: 'Quantos veículos já foram entregues em relação à meta de 5.000 unidades. O percentual no centro é “entregues ÷ meta”; ao passar o mouse sobre o anel azul aparece a divisão por tipo de veículo (elétricos, Euro 6 e sobre trilhos).',
+      calculo: 'Soma de veículos entregues (“Qtd. entregue” de cada contrato) no cenário escolhido (Consolidado, Público ou Privado), dividida pela meta de 5.000 unidades. A divisão por tipo usa os ajustes manuais do painel (Norte).' },
+    { id: 'metaSelecionados', titulo: 'Meta Quantidade de Veículos Selecionados - Refrota Privado - Ano 2026',
+      chaves: ['meta quantidade de veiculos selecionados', 'meta de veiculos selecionados', 'meta 2026', 'meta de 2026', 'meta do ano'],
+      mostra: 'Quantos veículos do Refrota Privado foram selecionados em 2026 em relação à meta de 5.000 unidades.',
+      calculo: 'Soma dos veículos selecionados do Refrota Privado com portaria em 2026, exceto habilitadas — mesma conta nos três cenários.' },
+    { id: 'veiculosContratados', titulo: 'Distribuição de Veículos Contratados',
+      chaves: ['distribuicao de veiculos contratados', 'grafico de veiculos contratados', 'card de veiculos contratados'],
+      mostra: 'O total de veículos das propostas contratadas, dividido em ônibus elétricos, ônibus Euro 6 e veículos sobre trilhos.',
+      calculo: 'Soma de veículos contratados (colunas “contratado” da base) por tipo, no cenário escolhido.' },
+    { id: 'selecionadas', titulo: 'Distribuição das Propostas Selecionadas',
+      chaves: ['distribuicao das propostas selecionadas', 'propostas selecionadas card', 'card de propostas selecionadas', 'card das propostas selecionadas'],
+      mostra: 'O investimento (apoio previsto do Novo PAC) e o número de propostas da carteira selecionada, separados em Desistências, Selecionados e Refrota Privado.',
+      calculo: 'Selecionadas = todas as propostas, exceto as habilitadas (contratadas + em preparação + a cancelar + canceladas). Valor = apoio previsto.' },
+    { id: 'contratadas', titulo: 'Distribuição das Propostas Contratadas',
+      chaves: ['distribuicao das propostas contratadas', 'card de propostas contratadas', 'card das propostas contratadas'],
+      mostra: 'O investimento contratado e o número de propostas contratadas, por frente (Refrota Público e Refrota Privado).',
+      calculo: 'Contratada = situação Contratada, Em licitação, Em andamento ou Concluída. O valor exibido é o valor contratado.' },
+    { id: 'funil', titulo: 'Funil de Conversão',
+      chaves: ['funil de conversao', 'funil'],
+      mostra: 'Da carteira selecionada até a entrega: quanto virou contrato, quanto ainda está a contratar, quanto é desistência e quanto já foi entregue (em R$ e em veículos).',
+      calculo: 'Selecionados → Contratados / A contratar / Desistência; só os contratados seguem até Entregues. O funil em R$ não tem estágio “Entregues”, porque a planilha não registra valor por veículo entregue.' },
+    { id: 'regiao', titulo: 'Contratações por Região',
+      chaves: ['contratacoes por regiao', 'selecoes por regiao', 'card de regiao', 'tabela de regiao', 'tabela por regiao'],
+      mostra: 'Propostas, veículos e investimento por região, com a participação de cada uma no valor total. Segue os seletores Selecionadas/Contratadas e Consolidado/Público/Privado.',
+      calculo: 'Soma das propostas por região do proponente.' },
+    { id: 'ano', titulo: 'Evolução de Contratações por Ano',
+      chaves: ['evolucao de contratacoes por ano', 'evolucao de selecoes por ano', 'card de ano', 'grafico por ano'],
+      mostra: 'Propostas, veículos e investimento por ano, com a linha de acumulado de veículos.',
+      calculo: 'O ano é o da portaria de seleção, não o da assinatura do contrato.' },
+    { id: 'agentes', titulo: 'Contratações por Agente Financeiro',
+      chaves: ['contratacoes por agente financeiro', 'selecoes por agente financeiro', 'card de agentes financeiros', 'card de agente financeiro', 'card dos agentes financeiros'],
+      mostra: 'Ranking dos agentes financeiros (CAIXA, BNDES, Banco Mercedes-Benz etc.) com propostas, veículos, valor e participação.',
+      calculo: 'Contratadas: valor contratado e veículos contratados. Selecionadas: apoio previsto e veículos selecionados, sem as habilitadas.' },
+    { id: 'mapa', titulo: 'Investimento Total por Estado',
+      chaves: ['investimento total por estado', 'mapa do brasil', 'card do mapa', 'mapa de investimento'],
+      mostra: 'O valor por UF em mapa de intensidade e em ranking.',
+      calculo: 'Valor contratado (ou apoio previsto, nas selecionadas) somado por UF.' },
+    { id: 'evolucao', titulo: 'Evolução desde a Data de Referência',
+      chaves: ['evolucao desde a data de referencia', 'evolucao desde a ultima atualizacao', 'card de evolucao'],
+      mostra: 'Compara os indicadores de hoje com os de 31/07/2026 (data de referência fixa).',
+      calculo: 'Diferença entre o dados.json atual e o baseline de 31/07/2026.' },
+    { id: 'destaques', titulo: 'Destaques do Período',
+      chaves: ['destaques do periodo', 'card de destaques'],
+      mostra: 'Frases-resumo do que mudou desde a data de referência (novas contratações, queda da carteira em preparação etc.).',
+      calculo: 'Calculados sobre a mesma data de referência do card de Evolução (31/07/2026).' },
+    { id: 'resumo', titulo: 'Resumo Executivo',
+      chaves: ['resumo executivo'],
+      mostra: 'Texto corrido com os principais números do programa.',
+      calculo: 'Preenchido a partir do cenário consolidado do dados.json.' }
+  ];
+  function achaCartao(n) {
+    var melhor = null, pts = 0, chave = null;
+    CARTOES.forEach(function (c) {
+      c.chaves.forEach(function (k) { var kk = norm(k); if (tem(n, kk)) { var p = kk.split(' ').length * 10 + kk.length; if (p > pts) { pts = p; melhor = c; chave = kk; } } });
+    });
+    if (melhor) melhor = Object.assign({ _chave: chave }, melhor);
+    return melhor;
+  }
+
+  /** Valores atuais de um card, no cenário informado. Devolve HTML. */
+  function valoresDoCartao(card, c) {
+    var P = painel(c), cn = NOME_CEN[c];
+    if (!P) return '';
+    var li = function (t) { return '<li>' + t + '</li>'; };
+    var tipos = function (v) { var tt = somaTipos(v); return int(v.eletricos) + ' elétricos (' + pct(tt ? v.eletricos / tt : 0) + ') · ' + int(v.euro6) + ' Euro 6 (' + pct(tt ? v.euro6 / tt : 0) + ') · ' + int(v.trilhos) + ' sobre trilhos'; };
+    var h = '';
+    switch (card.id) {
+      case 'metaEntregas': { var tot = somaTipos(P.ent), m = metaEntrega();
+        h = li('Entregues: <b>' + int(tot) + '</b> de <b>' + int(m) + '</b> (<b>' + pct(Math.min(tot / m, 1)) + '</b>) — ' + tipos(P.ent)); break; }
+      case 'metaSelecionados':
+        h = li('Realizado: <b>' + int(P.meta.realizado) + '</b> de <b>' + int(P.meta.meta) + '</b> (<b>' + pct(P.meta.percentual) + '</b>)'); break;
+      case 'veiculosContratados': h = li('Total: <b>' + int(somaTipos(P.vc)) + '</b> — ' + tipos(P.vc)); break;
+      case 'selecionadas': h = li('<b>' + moeda(P.proj.selecionados.investimento) + '</b> em <b>' + int(P.proj.selecionados.propostas) + '</b> propostas · ' + int(P.proj.selecionados.veiculos) + ' veículos'); break;
+      case 'contratadas': h = li('<b>' + moeda(P.proj.contratados.investimento) + '</b> em <b>' + int(P.proj.contratados.propostas) + '</b> propostas · ' + int(P.proj.contratados.veiculos) + ' veículos'); break;
+      case 'funil': { var st = P.proj.status, sel = somaTipos(P.vs), con = somaTipos(P.vc), ent = somaTipos(P.ent);
+        h = li('Veículos: <b>' + int(sel) + '</b> selecionados → <b>' + int(con) + '</b> contratados (' + pct(sel ? con / sel : 0) + ') → <b>' + int(ent) + '</b> entregues (' + pct(sel ? ent / sel : 0) + ' dos selecionados; ' + pct(con ? ent / con : 0) + ' dos contratados)') +
+            li('Valor (apoio previsto): ' + moeda(st.contratados.valor) + ' contratados · ' + moeda(st.emPreparacao.valor) + ' a contratar · ' + moeda(st.aCancelar.valor + st.cancelados.valor) + ' em desistências/canceladas'); break; }
+      default: return '';
+    }
+    return '<ul class="agente__lista">' + h + '</ul>';
+  }
+
+  function respostaCartao(card, c) {
+    var h = '<p><b>' + esc(card.titulo) + '</b></p><p>' + esc(card.mostra) + '</p>';
+    var v = valoresDoCartao(card, c);
+    if (v) h += '<p class="agente__mini">Agora, na visão <b>' + NOME_CEN[c] + '</b>:</p>' + v;
+    h += '<div class="agente__fonte"><b>Como é calculado:</b> ' + esc(card.calculo) + '</div>';
+    return { html: h, fatos: { cartao: card.id, cenario: c }, acoes: [], sugestoes: SUGESTOES_BASE };
+  }
+
+  /* ---------- Dados que a base não tem ---------- */
+  function temaIndisponivel(n) {
+    if (/\b(prazo|tempo|dias|duracao)\b.*\b(entrega|entregue|execucao|obra)\b|\bdata (de|da|das) entrega|\bquando (foi|foram|sera|serao) entreg\w*|\bprevisao de entrega|\bcronograma|\bprazo (medio|contratual)/.test(n))
+      return { tema: 'datas e prazos de entrega', tem: 'a data de assinatura do contrato, a situação da execução (por exemplo, “Equipamento em aquisição” ou “Entregue”) e a quantidade entregue', pergunta: ['Quais contratos assinados há mais tempo ainda não tiveram entrega?', 'Qual a situação da execução dos contratos?', 'Qual a taxa de entrega por região?'] };
+    if (/\b(fabricante|montadora|marca|modelo|chassi|carroceria|encarrocadora)\b/.test(n))
+      return { tema: 'fabricante ou modelo dos veículos', tem: 'o tipo de veículo (elétrico, Euro 6 ou sobre trilhos) e o agente financeiro de cada contrato', pergunta: ['Quantos ônibus elétricos foram contratados?', 'Qual agente financeiro contratou mais?'] };
+    if (/\b(populacao|habitantes|pib|renda|passageiros|emissao|emissoes|co2|tarifa|km rodados|quilometr\w*|idade da frota)\b/.test(n))
+      return { tema: 'indicadores externos ao programa (população, passageiros, emissões, tarifa, idade da frota)', tem: 'apenas dados de contratação e entrega do Refrota', pergunta: ['Qual estado tem mais veículos contratados?', 'Qual o investimento por região?'] };
+    return null;
+  }
+  function respostaIndisponivel(t) {
+    return { html: '<p>Essa informação não está na base do painel: <b>' + esc(t.tema) + '</b>. A base traz ' + esc(t.tem) + '. Prefiro não estimar um número que a planilha não registra.</p><p class="agente__mini">Posso responder, por exemplo:</p>',
+             fatos: { indisponivel: t.tema }, acoes: [], sugestoes: t.pergunta };
+  }
+
+  /* ---------- Diferença entre dois números do painel ---------- */
+  function respostaDiferencaNumeros(nums) {
+    var A = nums[0].item, B = nums[1].item, va = nums[0].valor, vb = nums[1].valor;
+    var maior = va >= vb ? A : B, menor = va >= vb ? B : A, vMaior = Math.max(va, vb), vMenor = Math.min(va, vb), dif = vMaior - vMenor;
+    var par = [A.rotulo, B.rotulo].join('|');
+    var h = '<p>' + esc(cap(A.rotulo)) + ' (' + NOME_CEN[A.cen] + '): <b>' + int(va) + '</b> · ' + esc(B.rotulo) + ' (' + NOME_CEN[B.cen] + '): <b>' + int(vb) + '</b> → diferença de <b>' + int(dif) + '</b> (' + esc(menor.rotulo) + ' = ' + pct(vMaior ? vMenor / vMaior : 0) + ' de ' + esc(maior.rotulo) + ').</p>';
+    var P = painel('consolidado');
+    var tem2 = function (a, b) { return par.indexOf(a) >= 0 && par.indexOf(b) >= 0; };
+    if (tem2('veículos contratados', 'veículos entregues') && P) {
+      var base = linhasDoCenario('consolidado');
+      var pend = soma(base, function (r) { return Math.max(r.qtdContr - r.qtdEntregue, 0); });
+      var nPend = base.filter(function (r) { return r.qtdContr > r.qtdEntregue; }).length;
+      var semEnt = base.filter(function (r) { return !r.qtdEntregue; });
+      h += '<p>É o <b>saldo a entregar</b>: veículos que já estão em contratos assinados, mas ainda não foram entregues — <b>' + int(pend) + '</b> veículos em ' + plural(nPend, 'contrato', 'contratos') + ' (' + plural(semEnt.length, 'deles ainda sem nenhuma entrega', 'deles ainda sem nenhuma entrega') + ', somando ' + int(soma(semEnt, function (r) { return r.qtdContr; })) + ' veículos).</p>';
+    } else if (tem2('veículos selecionados', 'veículos contratados') && P) {
+      var st = P.proj.status;
+      h += '<p>A diferença é o que foi selecionado e <b>ainda não virou contrato</b>: ' + int(st.emPreparacao.veiculos) + ' veículos em preparação (a contratar), ' + int(st.aCancelar.veiculos) + ' em desistências (a cancelar) e ' + int(st.cancelados.veiculos) + ' em propostas canceladas.</p>';
+    } else if (tem2('propostas selecionadas', 'propostas contratadas') && P) {
+      var st2 = P.proj.status;
+      h += '<p>As propostas selecionadas que não estão contratadas: ' + int(st2.emPreparacao.qtd) + ' em preparação, ' + int(st2.aCancelar.qtd) + ' a cancelar (desistências) e ' + int(st2.cancelados.qtd) + ' canceladas.</p>';
+    }
+    return { html: h, fatos: { a: va, b: vb, diferenca: dif }, acoes: [], sugestoes: SUGESTOES_BASE };
+  }
+  function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
+
+  /* ---------- Por que Consolidado não fecha com Público + Privado ---------- */
+  function respostaReconciliacao() {
+    var C = painel('consolidado'), U = painel('publico'), V = painel('privado');
+    if (!C || !U || !V) return null;
+    var linhas = [
+      ['Propostas contratadas', C.proj.contratados.propostas, U.proj.contratados.propostas, V.proj.contratados.propostas, int],
+      ['Veículos contratados', somaTipos(C.vc), somaTipos(U.vc), somaTipos(V.vc), int],
+      ['Veículos entregues', somaTipos(C.ent), somaTipos(U.ent), somaTipos(V.ent), int],
+      ['Ônibus elétricos entregues', C.ent.eletricos, U.ent.eletricos, V.ent.eletricos, int],
+      ['Ônibus Euro 6 entregues', C.ent.euro6, U.ent.euro6, V.ent.euro6, int],
+      ['Meta 2026 (selecionados)', C.meta.realizado, U.meta.realizado, V.meta.realizado, int]
+    ];
+    var h = '<p>Comparando o <b>Consolidado</b> com a soma de <b>Público + Privado</b>, nos números dos cards:</p><table class="agente__tab"><thead><tr><th>Indicador</th><th class="n">Consolidado</th><th class="n">Público</th><th class="n">Privado</th><th class="n">Pub. + Priv.</th><th class="n">Dif.</th></tr></thead><tbody>';
+    linhas.forEach(function (l) {
+      var soma2 = l[2] + l[3], d = l[1] - soma2;
+      h += '<tr><td>' + esc(l[0]) + '</td><td class="n">' + l[4](l[1]) + '</td><td class="n">' + l[4](l[2]) + '</td><td class="n">' + l[4](l[3]) + '</td><td class="n">' + l[4](soma2) + '</td><td class="n">' + (d ? '<b>' + (d > 0 ? '+' : '') + l[4](d) + '</b>' : '—') + '</td></tr>';
+    });
+    h += '</tbody></table><ul class="agente__lista">' +
+      '<li><b>Meta 2026:</b> é regra do painel (confirmada) — o Consolidado conta só os veículos selecionados do Refrota Privado em 2026; por isso não soma com o Público.</li>' +
+      '<li><b>Entregues:</b> o total do Consolidado (' + int(somaTipos(C.ent)) + ') bate com a base; já a visão Privado mostra ' + int(somaTipos(V.ent)) + ' e a Pública ' + int(somaTipos(U.ent)) + '. Os ajustes manuais do Norte (−40 elétricos e −225 Euro 6) aparecem em todas as visões, e o contrato misto do Governo do Pará (Refrota Público) é contado como elétrico e Euro 6 ao mesmo tempo antes do ajuste. Vale conferir na planilha se o ajuste cabe em todas as visões.</li></ul>';
+    return { html: h, fatos: { reconciliacao: linhas.map(function (l) { return [l[0], l[1], l[2] + l[3]]; }) }, acoes: [], sugestoes: ['Qual a divisão por tipo dos veículos entregues?', 'Quanto falta para a meta de entregas?', 'O que é a Meta 2026?'] };
+  }
+
+  /* ---------- Entregas ---------- */
+  /** Compara o painel com a base: total e divisão por tipo dos entregues (dados-chave para quem lê o card). */
+  function estimativaTipoEntregues(c) {
+    var L = linhasDoCenario(c);
+    var f = function (campo) { return soma(L, function (r) { return r.qtdContr ? r.qtdEntregue * r[campo] / r.qtdContr : 0; }); };
+    return { el: f('elContr'), e6: f('e6Contr'), tr: f('trContr'), total: soma(L, function (r) { return r.qtdEntregue; }) };
+  }
+  function avisoEntregas(c) {
+    var P = painel(c); if (!P) return '';
+    var est = estimativaTipoEntregues(c), tot = somaTipos(P.ent), partes = [];
+    if (Math.abs(est.total - tot) >= 1) {
+      partes.push('O card mostra <b>' + int(tot) + '</b>, mas a soma de “Qtd. entregue” na base é <b>' + int(est.total) + '</b> (diferença de ' + int(Math.abs(est.total - tot)) + ' veículos, vinda dos ajustes manuais do painel).');
+    }
+    if (Math.abs(est.el - P.ent.eletricos) >= 5) {
+      var pa = c !== 'privado';
+      partes.push('Divisão por tipo: o painel mostra <b>' + int(P.ent.eletricos) + '</b> elétricos e <b>' + int(P.ent.euro6) + '</b> Euro 6; pela composição de cada contrato (colunas “Elétricos/Euro 6 contratados”) seria cerca de <b>' + int(est.el) + '</b> e <b>' + int(est.e6) + '</b>. ' +
+        (pa ? 'A diferença está no contrato do Governo do Pará (265 entregues = 40 elétricos + 225 Euro 6), de item principal “Elétrico e Euro 6”, que o painel trata com os ajustes manuais do Norte (−40 elétricos e −225 Euro 6): conferir na planilha se esses ajustes estão no sentido certo.'
+            : 'Essa visão aplica os mesmos ajustes manuais do Norte (−40 elétricos e −225 Euro 6), embora o contrato do Pará seja do Refrota Público — por isso Público + Privado (' + int(somaTipos(painel('publico').ent) + somaTipos(painel('privado').ent)) + ') não fecha com o Consolidado (' + int(somaTipos(painel('consolidado').ent)) + '). Vale conferir na planilha.'));
+    }
+    return partes.length ? '<div class="agente__fonte"><b>Atenção:</b> ' + partes.join('<br>') + '</div>' : '';
+  }
+  function notaPainelEntregas(s) {
+    if (s.ufs.length || s.regioes.length || s.cidades.length || s.proponentes.length || s.agentes.length || s.anos.length || s.assin || s.situacaoTexto || s.veic) return '';
+    var c = s.frente === 'Privado' ? 'privado' : s.frente === 'Público' ? 'publico' : 'consolidado';
+    var P = painel(c); if (!P) return '';
+    var est = estimativaTipoEntregues(c).total, tot = somaTipos(P.ent);
+    if (Math.abs(est - tot) < 1) return '';
+    return '<p class="agente__mini">No card de entregas (' + NOME_CEN[c] + ') o total exibido é ' + int(tot) + ', porque o painel aplica ajustes manuais; a soma bruta da base é ' + int(est) + '.</p>';
+  }
+
+  function respostaMetaEntregas(e, citou) {
+    var c = cenarioEscolhido(e, citou), P = painel(c), m = metaEntrega();
+    var base = linhasDoCenario(c);
+    var tot = P ? somaTipos(P.ent) : soma(base, function (r) { return r.qtdEntregue; });
+    var v = P ? P.ent : { eletricos: soma(base, function (r) { return r.elContr * (r.qtdContr ? r.qtdEntregue / r.qtdContr : 0); }), euro6: 0, trilhos: 0 };
+    var falta = Math.max(m - tot, 0);
+    var pend = soma(base, function (r) { return Math.max(r.qtdContr - r.qtdEntregue, 0); });
+    var nPend = base.filter(function (r) { return r.qtdContr > r.qtdEntregue; }).length;
+    var porUF = {}; base.forEach(function (r) { var d = Math.max(r.qtdContr - r.qtdEntregue, 0); if (d) porUF[r.uf] = (porUF[r.uf] || 0) + d; });
+    var topUF = Object.keys(porUF).sort(function (a, b) { return porUF[b] - porUF[a]; }).slice(0, 3);
+    var h = '<p>No card <b>Meta Quantidade de Veículos Entregues</b> (visão <b>' + NOME_CEN[c] + '</b>) foram entregues <b>' + int(tot) + '</b> veículos de uma meta de <b>' + int(m) + '</b> unidades: <b>' + pct(Math.min(tot / m, 1)) + '</b> da meta' +
+      (falta ? ', faltando <b>' + int(falta) + '</b>.' : ' — a meta foi <b>atingida</b>' + (tot > m ? ' (excedida em ' + int(tot - m) + ')' : '') + '.') + '</p>';
+    h += '<ul class="agente__lista"><li><b>Por tipo (tooltip do card):</b> ' + int(v.eletricos) + ' ônibus elétricos (' + pct(tot ? v.eletricos / tot : 0) + ') · ' + int(v.euro6) + ' ônibus Euro 6 (' + pct(tot ? v.euro6 / tot : 0) + ') · ' + int(v.trilhos) + ' sobre trilhos</li>';
+    h += '<li><b>Contratados e ainda não entregues:</b> ' + int(pend) + ' veículos em ' + plural(nPend, 'contrato', 'contratos') +
+      (falta ? (pend >= falta ? ' — mais do que o necessário para fechar a meta (' + int(falta) + '), então ela depende só de entregas de contratos já assinados' : ' — menos do que falta para a meta (' + int(falta) + '); será preciso contratar mais') : '') + '.</li>';
+    if (topUF.length) h += '<li><b>Maiores saldos a entregar:</b> ' + topUF.map(function (u) { return esc(nomeUF(u)) + ' (' + int(porUF[u]) + ')'; }).join(', ') + '.</li>';
+    h += '</ul>';
+    var notas = '“Entregues” = “Qtd. entregue” de cada contrato (só existem em propostas contratadas). A meta de ' + int(m) + ' unidades vale para o programa; nas visões Público e Privado cada frente é comparada com a mesma meta.';
+    h += '<div class="agente__fonte">' + esc(notas) + '</div>' + avisoEntregas(c);
+    return { html: h, fatos: { cartao: 'metaEntregas', entregues: tot, meta: m, faltam: falta, pendentes: pend, cenario: c }, acoes: [],
+             sugestoes: ['Qual valor representa os veículos entregues?', 'Quais estados mais entregaram veículos?', 'Qual a taxa de entrega por região?', 'Quanto falta entregar em São Paulo?'] };
+  }
+
+  function nomeUF(sigla) { return NOME_COMPLETO[sigla] || sigla; }
+
+  /** Qualquer pergunta sobre entregas que não seja ranking/taxa por dimensão. */
+  function respostaEntregas(e, n, original, citou, card) {
+    var s = escopo(e); if (!s.situacaoTexto) s.cat = 'contratada';
+    s.entregue = true;
+    var pedeVal0 = pedeValor(n, original) || /\bequivale\w*|\bvale\b|\bsaiu\b/.test(n);
+    var pedeTipo0 = !s.veic && /\b(tipo|tipos|composicao|divisao|distribuicao|detalh\w*)\b/.test(n);
+    var fraseMeta = /\bmeta\b|(?!\bfaltam? (ser )?entreg)\bfalta\w*\b|\batingi\w*|\balcanc\w*|\bobjetivo\b/.test(n) || !!(card && /^meta/.test(card.id) && !pedeVal0 && !pedeTipo0);
+    var semFiltro = !(s.ufs.length || s.regioes.length || s.cidades.length || s.proponentes.length || s.agentes.length || s.anos.length || s.assin || s.situacaoTexto);
+    if (fraseMeta && semFiltro && !s.veic) return respostaMetaEntregas(e, citou);
+    var t = totais(s);
+    var geo = nomeDoRecorteGeo(s);
+    var rot0 = s.veic ? rotuloTipo(s.veic) : 'veículos';
+    var lugar0 = geo ? ' — ' + esc(geo) : (s.frente ? ' — Refrota ' + s.frente : '');
+    var pedeVal = pedeValor(n, original) || /\bequivale\w*|\brepresenta\w*\b.*\bvalor|\bvale\b|\bsaiu\b/.test(n);
+    var pedeTipo = !s.veic && /\b(tipo|tipos|composicao|divisao|distribuicao|detalh\w*)\b/.test(n);
+    var rot = s.veic ? rotuloTipo(s.veic) : 'veículos';
+    var EN = t.entreguesTipo;
+    var lugar = geo ? ' — ' + esc(geo) : (s.frente ? ' — Refrota ' + s.frente : '');
+    // Perguntas específicas sobre contratos e entregas
+    var Lc = t.linhas;
+    var pedePart = /\b(particip\w*|represent\w*|fatia|proporcao|percentual|porcentagem)\b/.test(n) && !pedeVal0 && (s.agentes.length || s.ufs.length || s.regioes.length || s.proponentes.length || s.cidades.length || s.frente);
+    if (/\b(100|cem)\b.*\bentreg\w*|\b(totalmente|integralmente|completamente|plenamente|inteiramente)\b.*\bentreg\w*|\bentreg\w*\b.*\b(totalmente|integralmente|completamente|plenamente|por completo)\b/.test(n) && /\b(contratos?|propostas?|empreendimentos?)\b/.test(n)) {
+      var P1 = Lc.filter(function (r) { return r.qtdEntregue > 0 && r.qtdEntregue >= r.qtdContr; });
+      var hh = '<p><b>' + plural(P1.length, 'contrato está', 'contratos estão') + '</b> com 100% dos veículos entregues, somando <b>' + int(soma(P1, function (r) { return r.qtdEntregue; })) + '</b> veículos e <b>' + moeda(soma(P1, function (r) { return r.valorContr; })) + '</b> em valor contratado. Há ainda ' + plural(t.entContratos - P1.length, 'contrato', 'contratos') + ' com entrega parcial.</p>';
+      return { html: hh + rodape(s), fatos: { valor: P1.length, contratos: P1.length }, acoes: acoesRadar(s), sugestoes: SUGESTOES_BASE };
+    }
+    if (/\b(sem|nenhuma|nenhum|nao tiveram|nao tem|ainda nao (tiveram|receberam|tem)|zero)\b.*\b(entrega|entregas|entregue|entregues)\b|\bnao (receberam|tiveram) (nenhum|nenhuma)?\s*(veiculo|entrega)/.test(n) && /\b(contratos?|propostas?|empreendimentos?|proponentes?|municipios?|cidades?)\b/.test(n)) {
+      var Z = Lc.filter(function (r) { return !r.qtdEntregue; }).sort(function (a, b) { return String(a.assinatura || '9999').localeCompare(String(b.assinatura || '9999')); });
+      var hz = '<p><b>' + plural(Z.length, 'contrato ainda não teve', 'contratos ainda não tiveram') + '</b> nenhuma entrega, com <b>' + int(soma(Z, function (r) { return r.qtdContr; })) + '</b> veículos contratados e <b>' + moeda(soma(Z, function (r) { return r.valorContr; })) + '</b> em valor. Os mais antigos (pela data de assinatura):</p>' +
+        '<table class="agente__tab"><thead><tr><th>Proponente</th><th>UF</th><th>Assinatura</th><th>Execução</th><th class="n">Veíc.</th></tr></thead><tbody>' +
+        Z.slice(0, 6).map(function (r) { return '<tr><td>' + esc(r.proponente) + '</td><td>' + esc(r.uf) + '</td><td>' + esc(r.assinatura ? r.assinatura.split('-').reverse().join('/') : '—') + '</td><td>' + esc(r.execucao || '—') + '</td><td class="n">' + int(r.qtdContr) + '</td></tr>'; }).join('') + '</tbody></table>';
+      return { html: hz + rodape(s), fatos: { valor: Z.length, contratos: Z.length }, acoes: acoesRadar(s), sugestoes: SUGESTOES_BASE };
+    }
+    if (/\b(media|medio|medias)\b/.test(n) && /\b(contrato|contratos|proposta|propostas)\b/.test(n) && t.entContratos) {
+      return { html: '<p>Em média, cada contrato com entrega recebeu <b>' + int(Math.round(t.entreguesTipo / t.entContratos)) + '</b> veículos (' + int(t.entreguesTipo) + ' entregues em ' + plural(t.entContratos, 'contrato', 'contratos') + '). Considerando todos os ' + plural(t.propostas, 'contrato', 'contratos') + ' contratados do recorte, a média é de <b>' + int(Math.round(t.entreguesTipo / t.propostas)) + '</b> por contrato.</p>' + rodape(s),
+               fatos: { valor: t.entreguesTipo / t.entContratos }, acoes: acoesRadar(s), sugestoes: SUGESTOES_BASE };
+    }
+    if (pedePart) {
+      var sb = {}; Object.keys(s).forEach(function (k) { sb[k] = s[k]; });
+      sb.ufs = []; sb.regioes = []; sb.cidades = []; sb.proponentes = []; sb.agentes = []; sb.frente = null;
+      var tb = totais(sb), parte = t.entreguesTipo, todo = tb.entreguesTipo;
+      var quem = nomeDoRecorteGeo(s) || (s.agentes.length ? s.agentes.join(', ') : '') || (s.frente ? 'Refrota ' + s.frente : '') || 'Este recorte';
+      return { html: '<p><b>' + esc(quem) + '</b> responde por <b>' + pct(todo ? parte / todo : 0) + '</b> dos veículos entregues: <b>' + int(parte) + '</b> de <b>' + int(todo) + '</b>' + (s.veic ? ' (' + esc(rotuloTipo(s.veic)) + ')' : '') + ', em ' + plural(t.entContratos, 'contrato', 'contratos') + '.</p>' + rodape(s),
+               fatos: { valor: parte, base: todo }, acoes: acoesRadar(s), sugestoes: SUGESTOES_BASE };
+    }
+    if (/\b(faltam?|falta|restam?|resta|pendentes?|saldo|ainda)\b.*\b(ser )?entreg\w*|\ba entregar\b|\bnao entregues?\b|\bainda nao (foram |foi )?entreg\w*/.test(n) && !/\bmeta\b/.test(n)) {
+      var rk = ranking(s, 'uf', 'pendentes', false);
+      var hp = '<p>Faltam entregar <b>' + int(t.pendentes) + '</b> ' + esc(rot) + ' já contratados' + lugar + ' (' + pct(t.contrTipo ? t.pendentes / t.contrTipo : 0) + ' dos ' + int(t.contrTipo) + ' contratados), em ' + plural(Lc.filter(function (r) { return r.qtdContr > r.qtdEntregue; }).length, 'contrato', 'contratos') + '.</p>';
+      if (!s.ufs.length) hp += tabelaRanking(rk, 5, true);
+      if (semFiltro && !s.veic) hp += '<p class="agente__mini">Para a meta de ' + int(metaEntrega()) + ' entregas, faltam ' + int(Math.max(metaEntrega() - somaTipos((painel(cenarioEscolhido(e, citou)) || { ent: {} }).ent), 0)) + ' (veja “Quanto falta para a meta de entregas?”).</p>';
+      return { html: hp + rodape(s), fatos: { valor: t.pendentes, itens: rk.linhas.map(function (x) { return [x.chave, x.valor]; }) }, acoes: acoesRadar(s), sugestoes: ['Quanto falta para a meta de entregas?', 'Quais contratos ainda não tiveram nenhuma entrega?', 'Qual a taxa de entrega por região?'] };
+    }
+    var h = '';
+    if (!t.propostas || !EN) {
+      h += '<p>Não há ' + esc(rot) + ' entregues neste recorte.</p>' + rodape(s);
+      return { html: h, fatos: { valor: 0, entregues: 0 }, acoes: acoesRadar(s), sugestoes: SUGESTOES_BASE };
+    }
+    var perc = t.contrTipo ? EN / t.contrTipo : 0;
+    if (pedeVal) {
+      var prop = t.entValorProporcional, contratos = t.entValorContratos, lib = t.entLiberado;
+      var totContr = t.valorContrTipo;
+      if (e.desembolso) {
+        h += '<p>Nos contratos que já têm veículos entregues' + lugar + ' (' + plural(t.entContratos, 'contrato', 'contratos') + ', <b>' + int(EN) + '</b> ' + esc(rot) + ' entregues) já foram desembolsados <b>' + moeda(lib) + '</b>' + (contratos ? ' — ' + pct(lib / contratos) + ' dos ' + moeda(contratos) + ' contratados nesses contratos' : '') + '.</p>';
+      } else {
+        h += '<p>Os <b>' + int(EN) + '</b> ' + esc(rot) + ' entregues' + lugar + ' representam, em valor contratado, aproximadamente <b>' + moeda(prop) + '</b>' + (totContr ? ' (' + pct(prop / totContr) + ' dos ' + moeda(totContr) + ' contratados no recorte)' : '') + ', ou cerca de <b>' + moeda(prop / EN) + '</b> por veículo.</p>';
+      }
+      h += '<table class="agente__tab"><thead><tr><th>Medida</th><th class="n">Valor</th></tr></thead><tbody>' +
+        '<tr><td><b>Proporcional aos veículos entregues</b><br><span class="agente__mini">valor de cada contrato × (veículos entregues ÷ contratados)</span></td><td class="n"><b>' + moeda(prop) + '</b></td></tr>' +
+        '<tr><td>Valor contratado dos ' + plural(t.entContratos, 'contrato que já tem', 'contratos que já têm') + ' entrega<br><span class="agente__mini">inclui a parte ainda não entregue</span></td><td class="n">' + moeda(contratos) + '</td></tr>' +
+        '<tr><td>Já desembolsado nesses contratos</td><td class="n">' + moeda(lib) + '</td></tr>' +
+        '<tr><td>Contratos 100% entregues (' + int(t.entContratosPlenos) + ')</td><td class="n">' + moeda(t.entValorPlenos) + '</td></tr></tbody></table>';
+      h += '<div class="agente__fonte"><b>Como ler:</b> a planilha não registra um valor por veículo entregue — só o valor de cada contrato e a quantidade entregue. Por isso o valor dos veículos entregues é uma <b>estimativa proporcional</b>: um contrato de R$ 100 mi com metade dos veículos entregues conta R$ 50 mi. ' + (s.veic ? 'Com tipo de veículo, o valor de cada contrato é rateado pela fatia do tipo. ' : '') + 'O funil em R$ do painel não tem o estágio “Entregues” justamente por isso.<br>' + esc(definicaoDoRecorte(s)) + '</div>' + notaPainelEntregas(s);
+      return { html: h, fatos: { valor: prop, entregues: EN, valorContratos: contratos, liberado: lib, contratosComEntrega: t.entContratos, contratosPlenos: t.entContratosPlenos }, acoes: acoesRadar(s), sugestoes: ['Quanto falta para a meta de entregas?', 'Quais estados mais entregaram veículos?', 'Qual a taxa de entrega por região?', 'Quanto foi desembolsado no total?'] };
+    }
+    // Composição por tipo: números do painel quando o recorte é um cenário inteiro; estimativa por contrato nos demais
+    var cen = cenarioEscolhido(e, citou);
+    var P = semFiltro ? painel(cen) : null;
+    var est = {
+      el: soma(t.linhas, function (r) { return r.qtdContr ? r.qtdEntregue * r.elContr / r.qtdContr : 0; }),
+      e6: soma(t.linhas, function (r) { return r.qtdContr ? r.qtdEntregue * r.e6Contr / r.qtdContr : 0; }),
+      tr: soma(t.linhas, function (r) { return r.qtdContr ? r.qtdEntregue * r.trContr / r.qtdContr : 0; })
+    };
+    var fatoTipo = { el: 'eletricos', e6: 'euro6', tr: 'trilhos' };
+    var tot = EN, v = { eletricos: est.el, euro6: est.e6, trilhos: est.tr }, usouPainel = false;
+    if (P && !s.veic) { v = P.ent; tot = somaTipos(P.ent); usouPainel = true; }
+    if (P && s.veic) { tot = P.ent[fatoTipo[s.veic]] || 0; usouPainel = true; }
+    h += '<p>Foram entregues <b>' + int(tot) + '</b> ' + esc(rot) + lugar + (usouPainel ? ' (número do card, visão ' + NOME_CEN[cen] + ')' : '') + ', em <b>' + plural(t.entContratos, 'contrato', 'contratos') + '</b>' + (t.contrTipo ? ' — ' + pct(tot / t.contrTipo) + ' dos ' + int(t.contrTipo) + ' contratados no recorte' : '') + '.</p>';
+    if (!s.veic) h += '<ul class="agente__lista"><li>' + int(v.eletricos) + ' ônibus elétricos (' + pct(tot ? v.eletricos / tot : 0) + ') · ' + int(v.euro6) + ' ônibus Euro 6 (' + pct(tot ? v.euro6 / tot : 0) + ') · ' + int(v.trilhos) + ' sobre trilhos' + (usouPainel ? '' : ' <span class="agente__mini">(estimativa pela composição de cada contrato)</span>') + '</li></ul>';
+    if (s.veic && P) h += '<p class="agente__mini">Pela composição de cada contrato, a estimativa seria de ' + int(EN) + ' ' + esc(rot) + ' entregues.</p>';
+    if (!pedeTipo) h += '<p class="agente__mini">Valor proporcional aos veículos entregues: ' + moeda(t.entValorProporcional) + ' · desembolsado nesses contratos: ' + moeda(t.entLiberado) + '. Saldo contratado a entregar: ' + int(t.pendentes) + ' veículos.</p>';
+    h += rodape(s) + (P ? avisoEntregas(cen) : notaPainelEntregas(s));
+    var sug = ['Qual valor representa os veículos entregues?', 'Quanto falta para a meta de entregas?', 'Quais estados mais entregaram veículos?'];
+    return { html: h, fatos: { valor: tot, entregues: tot, propostas: t.entContratos, valorProporcional: t.entValorProporcional, estimativaPorContrato: EN }, acoes: acoesRadar(s), sugestoes: sug };
+  }
+
+  /** Metas: decide qual card de meta o usuário quer (ou mostra os dois). */
+  function respostaMetas(e, n, citou) {
+    var qEnt = /\bentreg\w*|\brecebid\w*/.test(n);
+    var qSel = /\bselecion\w*|\b2026\b|\bprivad\w*|\bportaria\b|\bano\b/.test(n);
+    if (qEnt && !qSel) return respostaMetaEntregas(e, citou);
+    if (qSel && !qEnt) return respostaMeta();
+    var a = respostaMetaEntregas(e, citou), b = respostaMeta();
+    return { html: '<p>O painel tem <b>duas metas de 5.000 unidades</b>, uma para cada card:</p>' + a.html + '<hr class="agente__sep">' + b.html,
+             fatos: { entregas: a.fatos, selecionados: b.fatos }, acoes: [], sugestoes: SUGESTOES_BASE };
+  }
+
+  /* ======================================================================
      7. DECISÃO
      ====================================================================== */
+  var MEM = null;     // última pergunta entendida (para "e no Nordeste?")
+  function ehSeguimento(n) { return /^(e|e se|e quanto|e quantos|e quantas|e em|e no|e na|e nos|e nas|e para|e do|e da|e o|e a|e os|e as|agora|e entao|tambem|idem|mesma pergunta)\b/.test(n) && n.split(' ').length <= 9; }
+  function fundir(prev, nov) {
+    var r = JSON.parse(JSON.stringify(prev));
+    var geo = ['ufs', 'regioes', 'cidades', 'proponentes'];
+    geo.forEach(function (k) { if (nov[k] && nov[k].length) { geo.forEach(function (o) { if (o !== k && o !== 'proponentes') r[o] = []; }); r[k] = nov[k]; } });
+    ['agentes', 'anos', 'meses'].forEach(function (k) { if (nov[k] && nov[k].length) r[k] = nov[k]; });
+    ['frente', 'veic', 'cat', 'situacaoTexto'].forEach(function (k) { if (nov[k]) r[k] = nov[k]; });
+    ['assin', 'selecionada', 'entregue', 'desembolso'].forEach(function (k) { if (nov[k]) r[k] = true; });
+    return r;
+  }
   function responder(texto) {
     var original = String(texto || '').trim();
     var n = norm(original);
@@ -786,13 +1250,98 @@
     if (/^(oi|ola|bom dia|boa tarde|boa noite|ajuda|help|menu|o que voce faz|o que voce sabe|como funciona)\b/.test(n)) return respostaAjuda('');
 
     var e = extrairEntidades(original);
+    var seguimento = false;
+    if (MEM && ehSeguimento(n)) {
+      seguimento = true;
+      e = fundir(MEM.e, e);
+      n = MEM.n + ' ' + n.replace(/^(e se|e quanto|e quantos|e quantas|e entao|e|agora|tambem|idem|mesma pergunta)\s+/, '');
+    }
+    var nBase = n, eBase = JSON.parse(JSON.stringify(e));
+    var resp = rotear(original, n, e);
+    if (resp && resp.fatos && !resp.fatos.ajuda) MEM = { n: nBase, e: eBase };
+    return resp;
+  }
+  function rotear(original, n, e) {
+    // 1) O que o usuário citou do painel: números exibidos ("esses 4.550 veículos") e nomes de cards
+    var nums = resolverNumeros(original, n, cenarioPainel());
+    var card = achaCartao(n);
+    var prefacio = '';
+    if (nums.length) {
+      var it = nums[0].item;
+      prefacio = '<p class="agente__mini">O número <b>' + esc(nums[0].texto) + '</b> corresponde a <b>' + esc(it.rotulo) + '</b> (visão ' + NOME_CEN[it.cen] + ')' +
+        (it.card && !card ? ' — card “' + esc((CARTOES.filter(function (c) { return c.id === it.card; })[0] || {}).titulo || '') + '”' : '') + '.</p>';
+      var f = it.force || {};
+      if (f.entregue) e.entregue = true;
+      if (f.veic && !e.veic) e.veic = f.veic;
+      if (f.cat && !e.cat) e.cat = f.cat;
+      if (f.cat === 'selecionada') { e.selecionada = true; }
+      if (it.cen !== 'consolidado' && !e.frente) e.frente = frenteDoCenario(it.cen);
+      if (!card) card = CARTOES.filter(function (c) { return c.id === it.card; })[0] || null;
+      if (f.meta) card = CARTOES.filter(function (c) { return c.id === 'metaSelecionados'; })[0];
+    }
+    if (card) {
+      if (card.id === 'metaEntregas') e.entregue = true;
+      if (card.id === 'veiculosContratados' && !e.cat) e.cat = 'contratada';
+      if (card.id === 'contratadas' && !e.cat) e.cat = 'contratada';
+      if (card.id === 'selecionadas' && !e.cat) { e.cat = 'selecionada'; e.selecionada = true; }
+    }
+    var citou = !!(card || nums.length);
+    // O nome do card ("Meta Quantidade de Veículos Entregues") não conta como intenção da pergunta
+    var nCompleto = n;
+    if (card && card._chave) n = (' ' + n + ' ').replace(' ' + card._chave + ' ', ' ').replace(/\s+/g, ' ').trim();
+    var r = rotear2(original, n, e, card, citou, nums, nCompleto);
+    if (prefacio && r && r.html && !r.fatos.ajuda) r.html = prefacio + r.html;
+    return r;
+  }
+  function rotear2(original, n, e, card, citou, nums, nCompleto) {
     var superlativoMax = temAlgum(n, ['mais', 'maior', 'maiores', 'principal', 'principais', 'lidera', 'lider', 'top', 'ranking', 'primeiro', 'primeiros', 'concentra', 'concentram']);
     var superlativoMin = temAlgum(n, ['menos', 'menor', 'menores', 'ultimo', 'ultimos', 'pior']);
     var dim = dimensaoDaPergunta(n);
-    var metrica = metricaDaPergunta(n, e);
+    var metrica = metricaDaPergunta(n, e, original);
 
-    // Meta
-    if (temAlgum(n, ['meta 2026', 'meta de 2026', 'a meta', 'meta']) && !dim) return respostaMeta();
+    // Pergunta sobre o próprio card ("o que mostra...", "como é calculado...")
+    if (card && /\bo que (e|mostra|representa|significa|ha)\b|\bcomo (e|foi|sao) (calculad|feit|obtid)\w*|\bcomo calcula\w*|\bexplique\b|\bde onde vem\b|\bqual a regra\b|\bdescreva\b|\bpara que serve\b/.test(n) && !/\bvalor\b.*\brepresenta|\bquanto\b/.test(n)) {
+      return respostaCartao(card, cenarioEscolhido(e, true));
+    }
+    var sobra = n.split(' ').filter(function (w) { return w && ['o', 'a', 'os', 'as', 'do', 'da', 'de', 'dos', 'das', 'card', 'cards', 'painel', 'grafico', 'indicador', 'quadro', 'no', 'na', 'sobre', 'me', 'fale', 'mostre', 'veja'].indexOf(w) < 0; });
+    if (card && !sobra.length && !nums.length) return respostaCartao(card, cenarioEscolhido(e, true));
+
+    // Valor/quantidade de desistências (status do painel)
+    if (/\bdesistenc\w*/.test(n) && /\b(valor|quanto|quantos|quantas|total|somam|investimento|apoio)\b/.test(n) && !/\bo que\b/.test(n)) {
+      var Pd = painel('consolidado');
+      if (Pd) { var ad = Pd.proj.status.aCancelar;
+        return { html: '<p>Hoje há <b>' + plural(ad.qtd, 'proposta', 'propostas') + '</b> em desistência (a cancelar), com <b>' + int(ad.veiculos) + '</b> veículos e <b>' + moeda(ad.valor) + '</b> de apoio previsto (Novo PAC). Esse valor sai da carteira selecionada assim que o cancelamento for formalizado.</p>',
+                 fatos: { valor: ad.valor, propostas: ad.qtd, veiculos: ad.veiculos }, acoes: [], sugestoes: ['O que é a carteira a cancelar?', 'Qual o valor das propostas canceladas?', 'Qual a diferença entre proposta selecionada e contratada?'] }; }
+    }
+    // Diferença entre selecionada e contratada
+    if (/\bdiferenca\b|\bdiferem\b/.test(n) && /\bselecionad\w*\b/.test(n) && /\bcontratad\w*\b/.test(n) && !nums.length) {
+      var Ps = painel('consolidado');
+      if (Ps) { var st = Ps.proj.status;
+        return { html: '<p><b>Selecionada</b> é a proposta aprovada na carteira do programa; <b>contratada</b> é a que já virou contrato assinado. Toda contratada é selecionada, mas nem toda selecionada está contratada.</p><p>No Consolidado hoje: <b>' + int(st.contratados.propostas || st.contratados.qtd) + '</b> contratadas, <b>' + int(st.emPreparacao.qtd) + '</b> em preparação (a contratar), <b>' + int(st.aCancelar.qtd) + '</b> a cancelar (desistências) e <b>' + int(st.cancelados.qtd) + '</b> canceladas — as quatro formam a carteira selecionada. Em valor, as selecionadas usam o apoio previsto (Novo PAC) e as contratadas o valor do contrato.</p>',
+                 fatos: { ajuda: 'diferenca-sel-contr' }, acoes: [], sugestoes: ['Quantas propostas estão em preparação?', 'Qual o valor das desistências?', 'Qual o valor contratado total?'] }; }
+    }
+    // Diferença entre dois números digitados ("diferença entre 5.000 e 4.550")
+    var dn = /diferen[cç]a entre ([\d.,]+) e ([\d.,]+)/i.exec(original.replace(/(\d)\.(\d{3})/g, '$1$2'));
+    if (dn) { var x = parseFloat(dn[1].replace(',', '.')), y = parseFloat(dn[2].replace(',', '.'));
+      if (isFinite(x) && isFinite(y)) return { html: '<p>A diferença entre ' + int(x) + ' e ' + int(y) + ' é <b>' + int(Math.abs(x - y)) + '</b>' + ((x === 5000 || y === 5000) && Math.abs(x - y) < 5000 ? ' (a meta de entregas é 5.000: esse é o quanto falta ou excede)' : '') + '.</p>', fatos: { valor: Math.abs(x - y) }, acoes: [], sugestoes: SUGESTOES_BASE }; }
+    // Diferença entre contratados e entregues = saldo a entregar
+    if (/\bdiferenca\b/.test(n) && /\bcontratad\w*\b/.test(n) && /\bentregue\w*\b/.test(n)) { e.entregue = true; n = n + ' faltam ser entregues'; }
+    // Dados que a base não registra
+    var ind = temaIndisponivel(n); if (ind) return respostaIndisponivel(ind);
+    // Diferença entre dois números citados do painel
+    if (nums.length >= 2 && /\bdiferenca\b|\bdiferem\b|\bpara\b.*\bfaltam?\b|\bentre\b/.test(n)) return respostaDiferencaNumeros(nums);
+    // Por que os cenários não fecham entre si
+    if (/\b(consolidado)\b/.test(n) && /\b(publico)\b/.test(n) && /\b(privado)\b/.test(n) && /\b(soma|somam|fecha\w*|bate\w*|batem|confere\w*|diverg\w*|diferenca|inconsist\w*|igual|iguais)\b/.test(n)) { var rc = respostaReconciliacao(); if (rc) return rc; }
+    if (/\b(soma|somando|somar)\b.*\b(publico)\b.*\b(privado)\b|\bpor que\b.*\b(nao )?(fecha\w*|bate\w*|soma\w*)\b|\b(inconsistenc\w*|divergenc\w*)\b/.test(n)) { var rc2 = respostaReconciliacao(); if (rc2) return rc2; }
+    // Entregas e meta de entregas (inclui "qual valor representam os veículos entregues")
+    var rankingIntent = dim && (superlativoMax || superlativoMin || temAlgum(n, ['por', 'cada', 'ranking', 'distribuicao', 'divisao']) || temAlgum(n, ['qual', 'quais']));
+    var pedeMeta = /\bmeta\b/.test(n);
+    if (e.entregue && !(rankingIntent && !/\bmeta\b/.test(n)) && metrica !== 'taxaEntrega' && !/\bquant[oa]s? (estados?|municipios?|cidades?|proponentes?)\b/.test(n)) {
+      return respostaEntregas(e, n, original, citou, card);
+    }
+    if (pedeMeta && (!dim || (card && /^meta/.test(card.id)))) return respostaMetas(e, n, citou);
+    if (card && card.id === 'metaSelecionados') return respostaMeta();
+
     // Evolução
     if (temAlgum(n, ['o que mudou', 'mudou', 'evolucao', 'desde 31 07', 'desde a data de referencia', 'novas contratacoes', 'crescimento', 'variacao', 'destaques'])) {
       var ev = respostaEvolucao(); if (ev) return ev;
@@ -969,7 +1518,7 @@
     } catch (err) { console.warn('[Agente] conferência não executada', err); }
   }
 
-  window.Agente = { responder: responder, base: R, totais: totais, extrairEntidades: extrairEntidades, escopo: escopo };
+  window.Agente = { limparContexto: function () { MEM = null; }, responder: responder, base: R, totais: totais, extrairEntidades: extrairEntidades, escopo: escopo };
   function iniciar() { montarUI(); autoConferir(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 })();

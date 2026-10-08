@@ -108,6 +108,39 @@ for r in rows:
     if contratada(r): prop[r[8]] += g(r,23)
 casos.append(("Quais proponentes contrataram mais veículos?", 'ranking', {k:v for k,v in prop.items() if v>0}, None))
 
+
+# ---- Entregas, valor por tipo e metas ----
+DADOS_JSON = json.load(open(os.path.join(PASTA, 'dados.json'), encoding='utf-8'))
+def ent(r): return g(r, 27)
+def share(r, k):   # fatia do tipo k (24 el, 25 e6, 26 tr) no contrato
+    tot = g(r,24) + g(r,25) + g(r,26)
+    return g(r, k) / tot if tot else 0
+for uf in NOME:
+    exp = sum(ent(r) for r in rows if contratada(r) and r[6] == uf)
+    casos.append((f"Quantos veículos foram entregues em {NOME[uf]}?" if uf != 'PA' else "Quantos veículos foram entregues no estado do Pará?", 'total', exp, 'ent'))
+for rg in REGIOES:
+    exp = sum(ent(r) for r in rows if contratada(r) and r[7] == rg)
+    casos.append((f"Quantos veículos foram entregues no {rg}?" if rg != 'Centro-Oeste' else "Quantos veículos foram entregues no Centro-Oeste?", 'total', exp, 'ent'))
+# entregas no programa e por frente (números do card)
+casos.append(("Quantos veículos foram entregues?", 'total', DADOS_JSON['consolidado']['veiculosEntregues']['eletricos'] + DADOS_JSON['consolidado']['veiculosEntregues']['euro6'] + DADOS_JSON['consolidado']['veiculosEntregues']['trilhos'], 'ent'))
+for fr, ch in (('Público', 'publico'), ('Privado', 'privado')):
+    v = DADOS_JSON[ch]['veiculosEntregues']
+    casos.append((f"Quantos veículos foram entregues no Refrota {fr}?", 'total', v['eletricos'] + v['euro6'] + v['trilhos'], 'ent'))
+# valor dos entregues (proporcional ao contrato)
+casos.append(("Qual valor representa os veículos entregues?", 'total', sum(g(r,21) * min(ent(r) / g(r,23), 1) for r in rows if contratada(r) and ent(r) > 0 and g(r,23)), 'val'))
+casos.append(("Qual valor representa os 4.550 veículos entregues no card Meta Quantidade de Veículos Entregues?", 'total', sum(g(r,21) * min(ent(r) / g(r,23), 1) for r in rows if contratada(r) and ent(r) > 0 and g(r,23)), 'val'))
+for uf in ('SP','MG','RJ','BA','PE'):
+    casos.append((f"Qual valor representam os veículos entregues em {NOME[uf]}?", 'total', sum(g(r,21) * min(ent(r) / g(r,23), 1) for r in rows if contratada(r) and r[6] == uf and ent(r) > 0 and g(r,23)), 'val'))
+# valor por tipo de veículo
+for k, nome in ((24, 'ônibus elétricos'), (25, 'ônibus Euro 6')):
+    casos.append((f"Quanto foi investido em {nome}?", 'total', sum(g(r,21) * share(r,k) for r in rows if contratada(r)), 'inv'))
+    for rg in REGIOES:
+        art = {'Norte':'no Norte','Nordeste':'no Nordeste','Centro-Oeste':'no Centro-Oeste','Sudeste':'no Sudeste','Sul':'no Sul'}[rg]
+        casos.append((f"Quanto foi investido em {nome} {art}?", 'total', sum(g(r,21) * share(r,k) for r in rows if contratada(r) and r[7] == rg), 'inv'))
+# metas
+casos.append(("Quanto falta para a meta de veículos entregues?", 'meta', 5000 - (DADOS_JSON['consolidado']['veiculosEntregues']['eletricos'] + DADOS_JSON['consolidado']['veiculosEntregues']['euro6'] + DADOS_JSON['consolidado']['veiculosEntregues']['trilhos']), 'faltam'))
+casos.append(("Como está a meta de veículos selecionados em 2026?", 'meta', DADOS_JSON['consolidado']['meta2026']['realizado'], 'realizado'))
+
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path='/opt/pw-browsers/chromium'); pg = await b.new_page()
@@ -118,6 +151,9 @@ async def main():
         for (q, tipo, exp, m), r in zip(casos, res):
             ok, got = False, None
             if 'erro' in r: got = r['erro']
+            elif tipo == 'meta':
+                got = r['f'].get(m)
+                ok = got is not None and abs(got - exp) < 0.5
             elif tipo == 'ranking':
                 itens = {k: v for k, v in (r['f'].get('itens') or []) if v > 0}
                 got = itens
