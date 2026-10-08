@@ -698,6 +698,24 @@ const PROJETOS = [{"classificacao":"Selecionada","tipo":"Refrota","uf":"PA","mun
         URL.revokeObjectURL(url);
     });
 
+    // ---- Filtros vindos do endereço (usados pelo Agente de Dúvidas) ----
+    // Ex.: propostas.html?uf=MG&situacao=Em%20a%C3%A7%C3%A3o%20preparat%C3%B3ria&tipo=Refrota%20Privado&busca=Salvador
+    (function aplicarParametros() {
+        try {
+            const q = new URLSearchParams(location.search);
+            ['uf', 'situacao', 'tipo', 'municipio'].forEach(chave => {
+                const v = q.get(chave);
+                if (!v) return;
+                const valores = v.split(',').map(x => x.trim()).filter(Boolean);
+                const existentes = new Set(PROJETOS.map(p => p[chave]));
+                const validos = valores.filter(x => existentes.has(x));
+                if (validos.length) filtrosAtivos[chave] = new Set(validos);
+            });
+            const busca = q.get('busca');
+            if (busca) { buscaTexto = norm(busca); document.getElementById('buscaGlobal').value = busca; }
+        } catch (e) { /* parâmetros inválidos são ignorados */ }
+    })();
+
     // ---- Init ----
     document.getElementById('dataAtualizacao').textContent = 'Atualizado ' + DATA_ATUALIZACAO;
     render();
