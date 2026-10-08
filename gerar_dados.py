@@ -529,25 +529,25 @@ def comparar_com_anterior(dados_novos, caminho_anterior):
 # ----------------------------------------------------------------------------
 # BLOCO COMPARATIVO (alimenta os painéis "Evolução" e "Destaques" no HTML)
 # ----------------------------------------------------------------------------
-def montar_comparativo(dados_novos, caminho_anterior):
+def montar_comparativo(dados_novos, caminho_baseline):
     """
-    Compara a extração atual com a anterior (dados.json existente) e devolve
-    um bloco pronto para o painel, com:
+    Compara a extracao atual com o SNAPSHOT DE REFERENCIA FIXO (baseline) e
+    devolve o bloco que alimenta os paineis "Evolucao" e "Destaques do Periodo".
+    Os dois paineis usam SEMPRE a mesma data de referencia (a do baseline).
       - metricas: linhas da tabela comparativa (Consolidado)
-      - destaques: observações em linguagem natural, geradas por regras
-    Devolve None se não houver snapshot anterior (ex.: primeira execução).
+      - destaques: observacoes em linguagem natural, geradas por regras
+    Devolve None se o baseline nao existir ou for invalido.
     """
-    if not os.path.exists(caminho_anterior):
+    if not os.path.exists(caminho_baseline):
         return None
     try:
-        with open(caminho_anterior, encoding="utf-8") as f:
-            ant = json.load(f)
+        with open(caminho_baseline, encoding="utf-8") as f:
+            base = json.load(f)
+        base["data"], base["propostasContratadas"]["consolidado"]
     except Exception:
         return None
-    if not all(k in ant for k in ("consolidado", "publico", "privado")):
-        return None
 
-    nc, ac = dados_novos["consolidado"], ant["consolidado"]
+    nc = dados_novos["consolidado"]
 
     def veic(cen):
         v = cen["veiculos"]
@@ -559,47 +559,47 @@ def montar_comparativo(dados_novos, caminho_anterior):
 
     metricas = [
         {"rotulo": "Propostas contratadas", "formato": "int",
-         "anterior": ac["projetos"]["contratados"]["propostas"],
+         "anterior": base["propostasContratadas"]["consolidado"],
          "atual": nc["projetos"]["contratados"]["propostas"]},
         {"rotulo": "Veículos contratados", "formato": "int",
-         "anterior": veic(ac), "atual": veic(nc)},
+         "anterior": base["veiculosContratados"], "atual": veic(nc)},
         {"rotulo": "Investimento contratado", "formato": "moeda",
-         "anterior": ac["projetos"]["contratados"]["investimento"],
+         "anterior": base["investimentoContratado"],
          "atual": nc["projetos"]["contratados"]["investimento"]},
         {"rotulo": "Propostas selecionadas", "formato": "int",
-         "anterior": ac["projetos"]["selecionados"]["propostas"],
+         "anterior": base["propostasSelecionadas"],
          "atual": nc["projetos"]["selecionados"]["propostas"]},
         {"rotulo": "Veículos selecionados", "formato": "int",
-         "anterior": veic_sel(ac), "atual": veic_sel(nc)},
+         "anterior": base["veiculosSelecionados"], "atual": veic_sel(nc)},
         {"rotulo": "Investimento selecionado", "formato": "moeda",
-         "anterior": ac["projetos"]["selecionados"]["investimento"],
+         "anterior": base["investimentoSelecionado"],
          "atual": nc["projetos"]["selecionados"]["investimento"]},
         {"rotulo": "Meta 2026 (veículos)", "formato": "int",
-         "anterior": ac["meta2026"]["realizado"],
+         "anterior": base["metaRealizado"],
          "atual": nc["meta2026"]["realizado"]},
     ]
 
-    # ---------------- Destaques gerados por regras ----------------
+    # ---------------- Destaques gerados por regras (vs. baseline) ----------------
     def br(v, casas=0):
         return f"{v:,.{casas}f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
     destaques = []
 
-    # 1) Novas contratações e de qual frente vieram
-    d_contr = nc["projetos"]["contratados"]["propostas"] - ac["projetos"]["contratados"]["propostas"]
+    # 1) Novas contratacoes e de qual frente vieram
+    d_contr = nc["projetos"]["contratados"]["propostas"] - base["propostasContratadas"]["consolidado"]
     if d_contr > 0:
         d_pub = (dados_novos["publico"]["projetos"]["contratados"]["propostas"]
-                 - ant["publico"]["projetos"]["contratados"]["propostas"])
+                 - base["propostasContratadas"]["publico"])
         d_priv = (dados_novos["privado"]["projetos"]["contratados"]["propostas"]
-                  - ant["privado"]["projetos"]["contratados"]["propostas"])
+                  - base["propostasContratadas"]["privado"])
         partes = []
         if d_priv:
             partes.append(f"{br(d_priv)} na Refrota Privado")
         if d_pub:
             partes.append(f"{br(d_pub)} na Refrota Público")
         detalhe = (" — " + " e ".join(partes)) if partes else ""
-        d_veic = veic(nc) - veic(ac)
-        d_inv = nc["projetos"]["contratados"]["investimento"] - ac["projetos"]["contratados"]["investimento"]
+        d_veic = veic(nc) - base["veiculosContratados"]
+        d_inv = nc["projetos"]["contratados"]["investimento"] - base["investimentoContratado"]
         destaques.append(
             f"Foram registradas {br(d_contr)} novas contratações{detalhe}, "
             f"somando {br(d_veic)} veículos e R$ {br(d_inv/1e6,1)} milhões em investimento."
@@ -610,28 +610,29 @@ def montar_comparativo(dados_novos, caminho_anterior):
             f"vale conferir na base se houve cancelamento ou ajuste."
         )
 
-    # 2) Migração entre status (Em preparação -> Contratados)
-    d_prep = nc["projetos"]["status"]["emPreparacao"]["qtd"] - ac["projetos"]["status"]["emPreparacao"]["qtd"]
-    if d_contr > 0 and d_prep < 0:
+    # 2) Migracao entre status (Em preparacao -> Contratados)
+    prep_ant = base["carteiraEmPreparacao"]
+    prep_atual = nc["projetos"]["status"]["emPreparacao"]["qtd"]
+    if d_contr > 0 and prep_atual < prep_ant:
         destaques.append(
-            f"A carteira em preparação caiu de {br(ac['projetos']['status']['emPreparacao']['qtd'])} "
-            f"para {br(nc['projetos']['status']['emPreparacao']['qtd'])} propostas, confirmando o avanço "
+            f"A carteira em preparação caiu de {br(prep_ant)} "
+            f"para {br(prep_atual)} propostas, confirmando o avanço "
             f"de propostas já selecionadas para a fase de contratação."
         )
 
-    # 3) Novos projetos selecionados
-    d_sel = nc["projetos"]["selecionados"]["propostas"] - ac["projetos"]["selecionados"]["propostas"]
+    # 3) Novas propostas selecionadas
+    d_sel = nc["projetos"]["selecionados"]["propostas"] - base["propostasSelecionadas"]
     if d_sel > 0:
-        d_inv_sel = nc["projetos"]["selecionados"]["investimento"] - ac["projetos"]["selecionados"]["investimento"]
+        d_inv_sel = nc["projetos"]["selecionados"]["investimento"] - base["investimentoSelecionado"]
         destaques.append(
             f"Entraram {br(d_sel)} novas propostas selecionadas, elevando o investimento "
             f"selecionado em R$ {br(d_inv_sel/1e6,1)} milhões."
         )
 
-    # 4) Mudança no ranking regional (top 3 por veículos contratados)
+    # 4) Mudanca no ranking regional (top 3 por veiculos contratados)
     top_novo = [r["nome"] for r in sorted(nc["regioes"], key=lambda r: r["veiculos"], reverse=True)[:3]]
-    top_ant = [r["nome"] for r in sorted(ac["regioes"], key=lambda r: r["veiculos"], reverse=True)[:3]]
-    if top_novo != top_ant:
+    top_ant = base.get("rankingRegioesTop3") or []
+    if top_ant and top_novo != top_ant:
         entrou = [r for r in top_novo if r not in top_ant]
         saiu = [r for r in top_ant if r not in top_novo]
         if entrou and saiu:
@@ -645,11 +646,11 @@ def montar_comparativo(dados_novos, caminho_anterior):
                 f"agora {top_novo[0]}, {top_novo[1]} e {top_novo[2]}."
             )
 
-    # 5) Participação de elétricos na frota contratada
-    tv_n, tv_a = veic(nc), veic(ac)
-    if tv_n > 0 and tv_a > 0:
+    # 5) Participacao de eletricos na frota contratada
+    tv_n = veic(nc)
+    if tv_n > 0:
         pe_n = nc["veiculos"]["eletricos"] / tv_n * 100
-        pe_a = ac["veiculos"]["eletricos"] / tv_a * 100
+        pe_a = base["pctEletricosContratados"]
         if abs(pe_n - pe_a) >= 0.1:
             direcao = "subiu" if pe_n > pe_a else "recuou"
             destaques.append(
@@ -658,10 +659,10 @@ def montar_comparativo(dados_novos, caminho_anterior):
             )
 
     if not destaques:
-        destaques.append("Não houve variação relevante nos indicadores em relação à atualização anterior.")
+        destaques.append("Não houve variação relevante nos indicadores em relação à data de referência.")
 
     return {
-        "dataAnterior": (ant.get("_meta") or {}).get("gerado_em"),
+        "dataAnterior": base["data"],
         "dataAtual": dados_novos.get("_gerado_em"),
         "metricas": metricas,
         "destaques": destaques,
@@ -693,6 +694,12 @@ def main():
         help="Gera o dados.json MESMO com erros de consistência. Use apenas para "
              "inspeção/homologação — NUNCA para publicar. Os erros continuam sendo "
              "exibidos e o arquivo recebe a marca _dados_inconsistentes."
+    )
+    parser.add_argument(
+        "--baseline",
+        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "baseline_2026-07-31.json"),
+        help="Snapshot de referência FIXO usado nos painéis Evolução e Destaques "
+             "(padrão: baseline_2026-07-31.json, ao lado do script)."
     )
     args = parser.parse_args()
 
@@ -760,11 +767,12 @@ def main():
         log("ok", "Todas as validações passaram sem avisos.")
 
     # -------- Metadados + gravação --------
-    # O comparativo precisa ser montado ANTES de sobrescrever o dados.json,
-    # pois usa o arquivo anterior como referência.
+    # O comparativo (Evolução + Destaques) usa o baseline FIXO como referência.
     ts_atual = agora_brasilia().isoformat(timespec="seconds")
     dados["_gerado_em"] = ts_atual
-    comparativo = montar_comparativo(dados, args.saida)
+    comparativo = montar_comparativo(dados, args.baseline)
+    if comparativo is None:
+        log("warn", f"Baseline não encontrado/inválido ({args.baseline}) — painéis Evolução/Destaques ficarão sem dados.")
     dados.pop("_gerado_em", None)
 
     saida = {
