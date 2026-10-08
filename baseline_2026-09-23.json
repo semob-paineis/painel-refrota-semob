@@ -1,0 +1,22 @@
+{
+  "_descricao": "Snapshot de referencia FIXO (23/09/2026) usado pelos paineis 'Evolucao' e 'Destaques do Periodo'. Os dois paineis comparam SEMPRE contra esta data. Para trocar a data de referencia (rebase), substitua este arquivo ou use --baseline.",
+  "data": "2026-09-23T12:06:43-03:00",
+  "propostasContratadas": {
+    "consolidado": 222,
+    "publico": 17,
+    "privado": 205
+  },
+  "veiculosContratados": 6705,
+  "investimentoContratado": 8497250312.12,
+  "propostasSelecionadas": 350,
+  "veiculosSelecionados": 14547,
+  "investimentoSelecionado": 19939100711.49,
+  "metaRealizado": 2366,
+  "carteiraEmPreparacao": 70,
+  "pctEletricosContratados": 15.7,
+  "rankingRegioesTop3": [
+    "Sudeste",
+    "Nordeste",
+    "Sul"
+  ]
+}

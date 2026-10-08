@@ -583,6 +583,11 @@ def montar_comparativo(dados_novos, caminho_baseline):
     def br(v, casas=0):
         return f"{v:,.{casas}f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
+    def bi(v):
+        """R$ em bilhões com 2 casas; singular abaixo de 2 ("R$ 0,25 bilhão", "R$ 1,96 bilhão")."""
+        b = round(abs(v) / 1e9, 2)
+        return f"R$ {br(v/1e9, 2)} " + ("bilhão" if b < 2 else "bilhões")
+
     destaques = []
 
     # 1) Novas contratacoes e de qual frente vieram
@@ -602,7 +607,7 @@ def montar_comparativo(dados_novos, caminho_baseline):
         d_inv = nc["projetos"]["contratados"]["investimento"] - base["investimentoContratado"]
         destaques.append(
             f"Foram registradas {br(d_contr)} novas contratações{detalhe}, "
-            f"somando {br(d_veic)} veículos e R$ {br(d_inv/1e9,2)} {"bilhão" if round(d_inv/1e9,2)==1 else "bilhões"} em investimento."
+            f"somando {br(d_veic)} veículos e {bi(d_inv)} em investimento."
         )
     elif d_contr < 0:
         destaques.append(
@@ -626,7 +631,7 @@ def montar_comparativo(dados_novos, caminho_baseline):
         d_inv_sel = nc["projetos"]["selecionados"]["investimento"] - base["investimentoSelecionado"]
         destaques.append(
             f"Entraram {br(d_sel)} novas propostas selecionadas, elevando o investimento "
-            f"selecionado em R$ {br(d_inv_sel/1e9,2)} {"bilhão" if round(d_inv_sel/1e9,2)==1 else "bilhões"}."
+            f"selecionado em {bi(d_inv_sel)}."
         )
 
     # 4) Mudanca no ranking regional (top 3 por veiculos contratados)
@@ -697,9 +702,9 @@ def main():
     )
     parser.add_argument(
         "--baseline",
-        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "baseline_2026-07-31.json"),
+        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "baseline_2026-09-23.json"),
         help="Snapshot de referência FIXO usado nos painéis Evolução e Destaques "
-             "(padrão: baseline_2026-07-31.json, ao lado do script)."
+             "(padrão: baseline_2026-09-23.json, ao lado do script)."
     )
     args = parser.parse_args()
 

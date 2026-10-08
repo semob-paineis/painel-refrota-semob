@@ -505,9 +505,9 @@
     { chaves: ['ano da portaria', 'portaria', 'ano portaria'],
       titulo: 'Ano da portaria',
       texto: 'Ano da portaria que selecionou a proposta. É o critério usado nas visões “por ano” e na Meta 2026.' },
-    { chaves: ['referencia', '31 07', 'data de referencia', 'evolucao', 'baseline'],
-      titulo: 'Data de referência (31/07/2026)',
-      texto: 'Os cards “Evolução desde a Data de Referência” e “Destaques do Período” comparam sempre com a mesma data de referência: <b>31/07/2026</b>.' },
+    { chaves: ['referencia', '31 07', '23 09', 'data de referencia', 'evolucao', 'baseline'],
+      titulo: 'Data de referência ({REF})',
+      texto: 'Os cards “Evolução desde a Data de Referência” e “Destaques do Período” comparam sempre com a mesma data de referência: <b>{REF}</b>.' },
     { chaves: ['propostas ou projetos', 'projetos', 'termo proposta'],
       titulo: 'Propostas x projetos',
       texto: 'No painel, o termo usado é <b>propostas</b>. Cada linha da base é uma proposta/contrato.' },
@@ -534,7 +534,7 @@
     'Quais as 5 cidades com mais veículos contratados?',
     'Quanto foi investido no Nordeste?',
     'Qual a participação de São Paulo nos elétricos?',
-    'O que mudou desde 31/07?',
+    'O que mudou desde a data de referência?',
     'Como está a Meta 2026?'
   ];
 
@@ -791,7 +791,7 @@
     var C = window.COMPARATIVO;
     if (!C && typeof COMPARATIVO !== 'undefined') C = COMPARATIVO;
     if (!C || !C.metricas) return null;
-    var h = '<p>Comparação com a data de referência (<b>31/07/2026</b>):</p><table class="agente__tab"><thead><tr><th>Indicador</th><th class="n">31/07</th><th class="n">Atual</th><th class="n">Var.</th></tr></thead><tbody>';
+    var h = '<p>Comparação com a data de referência (<b>' + dataRef() + '</b>):</p><table class="agente__tab"><thead><tr><th>Indicador</th><th class="n">' + dataRef().slice(0, 5) + '</th><th class="n">Atual</th><th class="n">Var.</th></tr></thead><tbody>';
     C.metricas.forEach(function (m) {
       var f = m.formato === 'moeda' ? moeda : int, d = m.atual - m.anterior;
       h += '<tr><td>' + esc(m.rotulo) + '</td><td class="n">' + f(m.anterior) + '</td><td class="n">' + f(m.atual) + '</td><td class="n">' + (d > 0 ? '+' : '') + f(d) + '</td></tr>';
@@ -812,8 +812,16 @@
     return { html: h, fatos: { propostas: t.propostas, veiculos: t.veiculos, el: t.el, e6: t.e6, tr: t.tr, investimento: t.investimento }, acoes: [], sugestoes: SUGESTOES_BASE };
   }
 
+  /* Data de referência da Evolução/Destaques: vem do próprio dados.json (_comparativo.dataAnterior). */
+  function dataRef() {
+    var C = window.COMPARATIVO; if (!C && typeof COMPARATIVO !== 'undefined') C = COMPARATIVO;
+    var m = C && /^(\d{4})-(\d{2})-(\d{2})/.exec(C.dataAnterior || '');
+    return m ? m[3] + '/' + m[2] + '/' + m[1] : '23/09/2026';
+  }
+  function comRef(t) { return String(t).replace(/\{REF\}/g, dataRef()); }
+
   function respostaConceito(c) {
-    return { html: '<p><b>' + esc(c.titulo) + '</b></p><p>' + c.texto + '</p>', fatos: { conceito: c.titulo }, acoes: [], sugestoes: SUGESTOES_BASE };
+    return { html: '<p><b>' + esc(comRef(c.titulo)) + '</b></p><p>' + comRef(c.texto) + '</p>', fatos: { conceito: c.titulo }, acoes: [], sugestoes: SUGESTOES_BASE };
   }
 
   function respostaAjuda(prefixo) {
@@ -824,7 +832,7 @@
       '<li><b>Comparações:</b> “compare SP e MG”, “Norte x Sul”;</li>' +
       '<li><b>Situação:</b> “propostas em preparação em MG”, “o que foi cancelado?”;</li>' +
       '<li><b>Cidade ou empresa:</b> “Salvador”, “Prefeitura de Belo Horizonte”;</li>' +
-      '<li><b>Regras do painel:</b> “o que é proposta selecionada?”, “como está a Meta 2026?”, “o que mudou desde 31/07?”.</li></ul>';
+      '<li><b>Regras do painel:</b> “o que é proposta selecionada?”, “como está a Meta 2026?”, “o que mudou desde a data de referência?”.</li></ul>';
     return { html: h, fatos: { ajuda: true }, acoes: [], sugestoes: SUGESTOES_BASE };
   }
 
@@ -954,12 +962,12 @@
       calculo: 'Valor contratado (ou apoio previsto, nas selecionadas) somado por UF.' },
     { id: 'evolucao', titulo: 'Evolução desde a Data de Referência',
       chaves: ['evolucao desde a data de referencia', 'evolucao desde a ultima atualizacao', 'card de evolucao'],
-      mostra: 'Compara os indicadores de hoje com os de 31/07/2026 (data de referência fixa).',
-      calculo: 'Diferença entre o dados.json atual e o baseline de 31/07/2026.' },
+      mostra: 'Compara os indicadores de hoje com os de {REF} (data de referência fixa).',
+      calculo: 'Diferença entre o dados.json atual e o baseline de {REF}.' },
     { id: 'destaques', titulo: 'Destaques do Período',
       chaves: ['destaques do periodo', 'card de destaques'],
       mostra: 'Frases-resumo do que mudou desde a data de referência (novas contratações, queda da carteira em preparação etc.).',
-      calculo: 'Calculados sobre a mesma data de referência do card de Evolução (31/07/2026).' },
+      calculo: 'Calculados sobre a mesma data de referência do card de Evolução ({REF}).' },
     { id: 'resumo', titulo: 'Resumo Executivo',
       chaves: ['resumo executivo'],
       mostra: 'Texto corrido com os principais números do programa.',
@@ -998,10 +1006,10 @@
   }
 
   function respostaCartao(card, c) {
-    var h = '<p><b>' + esc(card.titulo) + '</b></p><p>' + esc(card.mostra) + '</p>';
+    var h = '<p><b>' + esc(card.titulo) + '</b></p><p>' + esc(comRef(card.mostra)) + '</p>';
     var v = valoresDoCartao(card, c);
     if (v) h += '<p class="agente__mini">Agora, na visão <b>' + NOME_CEN[c] + '</b>:</p>' + v;
-    h += '<div class="agente__fonte"><b>Como é calculado:</b> ' + esc(card.calculo) + '</div>';
+    h += '<div class="agente__fonte"><b>Como é calculado:</b> ' + esc(comRef(card.calculo)) + '</div>';
     return { html: h, fatos: { cartao: card.id, cenario: c }, acoes: [], sugestoes: SUGESTOES_BASE };
   }
 
@@ -1343,7 +1351,7 @@
     if (card && card.id === 'metaSelecionados') return respostaMeta();
 
     // Evolução
-    if (temAlgum(n, ['o que mudou', 'mudou', 'evolucao', 'desde 31 07', 'desde a data de referencia', 'novas contratacoes', 'crescimento', 'variacao', 'destaques'])) {
+    if (temAlgum(n, ['o que mudou', 'mudou', 'evolucao', 'desde 31 07', 'desde 23 09', 'desde a data de referencia', 'novas contratacoes', 'crescimento', 'variacao', 'destaques'])) {
       var ev = respostaEvolucao(); if (ev) return ev;
     }
     // Panorama

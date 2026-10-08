@@ -143,6 +143,26 @@ def conferir(linhas, caminho_dados):
     return erros, True
 
 
+def entregues_por_ano(linhas, colunas):
+    """
+    Veículos ENTREGUES por ano da portaria de seleção, por cenário (consolidado/publico/privado).
+    A planilha não registra a data de cada entrega, então o ano é o da portaria da proposta
+    (o mesmo "Ano" usado nas tabelas de Evolução por Ano do painel).
+    """
+    ix = {c: i for i, c in enumerate(colunas)}
+    out = {"consolidado": {}, "publico": {}, "privado": {}}
+    for r in linhas:
+        ent = r[ix["qtdEntregue"]] or 0
+        ano = r[ix["anoPortaria"]]
+        if not ent or ano is None:
+            continue
+        ano = str(int(ano))
+        frente = "privado" if r[ix["tipo"]] == "Refrota Privado" else "publico"
+        for cen in ("consolidado", frente):
+            out[cen][ano] = out[cen].get(ano, 0) + ent
+    return {cen: dict(sorted(v.items())) for cen, v in out.items()}
+
+
 def main():
     ap = argparse.ArgumentParser(description="Gera base_agente.js (base por contrato do Agente de Dúvidas).")
     ap.add_argument("--planilha", default="Dados_Refrota_Contratações.xlsx")
@@ -174,6 +194,7 @@ def main():
         "planilha": os.path.basename(a.planilha),
         "colunas": [c[0] for c in COLUNAS] + ["cat", "linha"],
         "linhas": linhas,
+        "entreguesPorAno": entregues_por_ano(linhas, [c[0] for c in COLUNAS] + ["cat", "linha"]),
     }
     with open(a.saida, "w", encoding="utf-8") as f:
         f.write("/* Gerado por gerar_agente.py — não editar à mão. */\n")
