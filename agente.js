@@ -575,14 +575,23 @@
     if (!t.propostas) {
       html = '<p>Não encontrei propostas neste recorte.</p>' + rodape(s);
     } else {
-      var geo = nomeDoRecorteGeo(s), ctxTxt = '', base = null, vb = null;
-      if (geo || s.anos.length && !s.assin) {
+      var geo = nomeDoRecorteGeo(s), ctxTxt = '', base = null, vb = null, mini = '';
+      var rotEnt = geo || (s.agentes.length ? 'Agente financeiro ' + s.agentes.join(', ') : '') || (s.frente ? 'Refrota ' + s.frente : '') || (s.proponentes.length ? s.proponentes.join(', ') : '') || (s.cidades.length ? s.cidades.join(', ') : '');
+      if (participacao && !M.ratio && rotEnt && (!geo || s.agentes.length || s.frente)) {
+        var sb = {}; Object.keys(s).forEach(function (k) { sb[k] = s[k]; });
+        sb.frente = null; sb.ufs = []; sb.regioes = []; sb.cidades = []; sb.proponentes = []; sb.agentes = []; if (!s.assin) sb.anos = [];
+        base = totais(sb); vb = M.f(base);
+        if (!/veicul|onibus|eletric|euro|invest|valor|proposta|trilho/.test(n)) {
+          var bI = base.investimento, bP = base.propostas;
+          mini = '<p class="agente__mini">Em investimento: ' + (bI ? pct(t.investimento / bI) : '—') + ' (' + moeda(t.investimento) + ' de ' + moeda(bI) + ') · Em propostas: ' + (bP ? pct(t.propostas / bP) : '—') + ' (' + t.propostas + ' de ' + bP + ').</p>';
+        }
+      } else if (geo || s.anos.length && !s.assin) {
         base = totais(semRecorteGeografico(s)); vb = M.f(base);
         if (vb && !M.ratio) ctxTxt = ' Isso é <b>' + pct(v / vb) + '</b> do total do programa (' + M.fmt(vb) + ').';
         else if (vb && M.ratio) ctxTxt = ' Média do programa: ' + M.fmt(vb) + '.';
       }
       if (participacao && vb && !M.ratio) {
-        html = '<p>' + (geo ? '<b>' + esc(geo) + '</b> representa' : 'Este recorte representa') + ' <b>' + pct(v / vb) + '</b> do total de ' + esc(M.rotulo) + ' do programa: <b>' + M.fmt(v) + '</b> de <b>' + M.fmt(vb) + '</b>, em <b>' + plural(nProp, 'proposta', 'propostas') + '</b>.</p>';
+        html = '<p>' + (rotEnt ? '<b>' + esc(rotEnt.charAt(0).toUpperCase() + rotEnt.slice(1)) + '</b> representa' : 'Este recorte representa') + ' <b>' + pct(v / vb) + '</b> do total de ' + esc(M.rotulo) + ' do programa: <b>' + M.fmt(v) + '</b> de <b>' + M.fmt(vb) + '</b>, em <b>' + plural(nProp, 'proposta', 'propostas') + '</b>.</p>' + mini;
       } else if (M.ratio) {
         html = '<p>' + esc(M.rotulo.split(' (')[0].charAt(0).toUpperCase() + M.rotulo.split(' (')[0].slice(1)) + ': <b>' + M.fmt(v) + '</b>' + (geo ? ' (' + esc(geo) + ')' : '') + '.' + ctxTxt + '</p>';
         if (metrica === 'taxaEntrega') html += '<p class="agente__mini">' + int(t.entregues) + ' veículos entregues de ' + int(t.contr) + ' contratados.</p>';
@@ -805,6 +814,9 @@
     }
     // Participação ("qual a participação de SP nos elétricos")
     if (temAlgum(n, ['participacao', 'percentual', 'porcentagem', 'quanto representa', 'quanto %', 'fatia', 'proporcao', 'share']) || /%/.test(original)) {
+      if (dim && dimensaoCoerente(dim, e) && !e.cidades.length && !e.proponentes.length && !(dim === 'agente' && e.agentes.length) && !(dim === 'frente' && e.frente)) {
+        return respostaRanking(e, n, dim, metrica, !!superlativoMin && !superlativoMax);
+      }
       return respostaValor(e, n, metrica, true);
     }
 
@@ -816,7 +828,7 @@
 
     // Ranking: dimensão + superlativo, ou "qual <dimensão>" ou "por <dimensão>"
     var pedeQual = temAlgum(n, ['qual', 'quais', 'que', 'quem', 'onde']);
-    var porDim = dim && temAlgum(n, ['por', 'ranking', 'distribuicao', 'divisao']);
+    var porDim = dim && temAlgum(n, ['por', 'cada', 'ranking', 'distribuicao', 'divisao']);
     if (dim && (superlativoMax || superlativoMin || porDim || (pedeQual && !e.cidades.length && !e.proponentes.length && dimensaoCoerente(dim, e)))) {
       return respostaRanking(e, n, dim, metrica, !!superlativoMin && !superlativoMax);
     }
