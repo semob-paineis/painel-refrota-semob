@@ -4454,6 +4454,22 @@
             return { x, width };
         }
 
+        // Limites verticais (px do canvas) de cada página do PDF. Ver downloadAsPDF.
+        function blocosDoPdf(scale, alturaCanvas) {
+            const topo = document.body.getBoundingClientRect().top;
+            const y = el => el ? Math.round((el.getBoundingClientRect().top - topo) * scale) : null;
+            const yb = el => el ? Math.round((el.getBoundingClientRect().bottom - topo) * scale) : null;
+            const tipo = y(document.querySelector('.tipo-projeto-bar'));
+            const mapaTopo = y(document.querySelector('.map-section'));
+            const mapaFim = yb(document.querySelector('.map-section'));
+            const pontos = [0, tipo, mapaTopo, mapaFim, alturaCanvas];
+            const validos = pontos.every((p, i) => p !== null && p >= 0 && p <= alturaCanvas && (i === 0 || p > pontos[i - 1]));
+            if (!validos) return [{ yInicio: 0, altura: alturaCanvas }];   // layout inesperado: página única
+            const blocos = [];
+            for (let i = 0; i < pontos.length - 1; i++) blocos.push({ yInicio: pontos[i], altura: pontos[i + 1] - pontos[i] });
+            return blocos;
+        }
+
         function calcularCorteMapa(scale) {
             const mapa = document.querySelector('.map-section');
             if (!mapa) return null;
@@ -4571,26 +4587,21 @@
                 const imgWidth = pdfWidth - margem * 2;
                 const dataStr = new Date().toLocaleDateString('pt-BR');
 
-                const corte = calcularCorteMapa(scale);
-
-                // Fatia o canvas em blocos e distribui em páginas do PDF.
-                // 'blocos' define os limites verticais (px do canvas) de cada seção lógica;
-                // cada bloco sempre inicia em uma nova página, evitando cortar o mapa.
-                let blocos;
-                if (corte === null || corte <= 0 || corte >= canvas.height) {
-                    blocos = [{ yInicio: 0, altura: canvas.height }];
-                } else {
-                    blocos = [
-                        { yInicio: 0, altura: corte },
-                        { yInicio: corte, altura: canvas.height - corte }
-                    ];
-                }
+                // Composição fixa das 4 páginas do PDF (cada bloco = uma página):
+                //  1) cabeçalho, seletor de cenário, cards de propostas, funil, odômetro e metas
+                //  2) seletor "Propostas Selecionadas | Contratadas" + Região + Ano + Agentes Financeiros
+                //  3) "Investimento Total por Estado" (mapa + ranking), sozinho
+                //  4) todo o restante (evolução, destaques, resumo executivo, rodapé)
+                // Se um bloco for mais alto que a folha, ele é reduzido para caber inteiro na página.
+                const blocos = blocosDoPdf(scale, canvas.height);
 
                 blocos.forEach((bloco, indice) => {
                     if (indice > 0) pdf.addPage();
 
-                    // Cada bloco pode ser mais alto que uma página A4; nesse caso,
-                    // subdividimos o bloco em páginas adicionais mantendo a continuidade.
+                    // Fundo da página no mesmo tom do painel (sem bordas brancas)
+                    pdf.setFillColor(245, 247, 250);
+                    pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+
                     const blocoCanvas = document.createElement('canvas');
                     blocoCanvas.width = canvas.width;
                     blocoCanvas.height = bloco.altura;
@@ -4600,22 +4611,15 @@
                     bctx.drawImage(canvas, 0, bloco.yInicio, canvas.width, bloco.altura, 0, 0, canvas.width, bloco.altura);
 
                     const imgData = blocoCanvas.toDataURL('image/jpeg', 0.92); // JPEG: arquivo ~10x menor que PNG, sem perda visível em texto/gráficos
-                    const alias = 'bloco' + indice; // mesma imagem reutilizada nas páginas seguintes sem duplicar bytes
-                    const imgHeight = (blocoCanvas.height * imgWidth) / blocoCanvas.width;
-
                     const alturaUtil = pdfHeight - margem * 2;
-                    let heightLeft = imgHeight;
-                    let position = margem;
-
-                    pdf.addImage(imgData, 'JPEG', margem, position, imgWidth, imgHeight, alias, 'FAST');
-                    heightLeft -= alturaUtil;
-
-                    while (heightLeft > 0) {
-                        position = heightLeft - imgHeight + margem;
-                        pdf.addPage();
-                        pdf.addImage(imgData, 'JPEG', margem, position, imgWidth, imgHeight, alias, 'FAST');
-                        heightLeft -= alturaUtil;
+                    let w = imgWidth;
+                    let h = (blocoCanvas.height * w) / blocoCanvas.width;
+                    if (h > alturaUtil) {            // não cabe: reduz proporcionalmente e centraliza
+                        w = w * alturaUtil / h;
+                        h = alturaUtil;
                     }
+                    const x = (pdfWidth - w) / 2;
+                    pdf.addImage(imgData, 'JPEG', x, margem, w, h, 'bloco' + indice, 'FAST');
                 });
 
                 pdf.save(`Painel_Refrota_${dataStr}.pdf`);
