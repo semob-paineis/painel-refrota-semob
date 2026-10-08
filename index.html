@@ -397,6 +397,31 @@
             position: relative;
         }
 
+
+        /* Odômetro de veículos (selecionados -> contratados -> entregues) */
+        .odo-wrap { position: relative; max-width: 440px; margin: 0 auto 8px; }
+        .odo-wrap svg { width: 100%; height: auto; display: block; overflow: visible; }
+        .odo-resto { fill: #e5e7eb; cursor: pointer; transition: opacity .2s; }
+        .odo-contr { fill: #0052cc; cursor: pointer; transition: opacity .2s; }
+        .odo-trilho-ent { fill: #e5e7eb; opacity: .75; }
+        .odo-ent { fill: #0d9488; cursor: pointer; }
+        .odo-agulha { transform-origin: 210px 210px; transition: transform .9s cubic-bezier(.2,.8,.2,1); fill: #1f2937; }
+        .odo-hub { fill: #1f2937; stroke: #ffffff; stroke-width: 3; }
+        .odo-pct { font-size: 22px; font-weight: 800; fill: #0052cc; }
+        .odo-sub, .odo-eixo { font-size: 10.5px; fill: #666666; }
+        .odo-eixo { font-size: 10px; fill: #999999; }
+        [data-seg]:hover { opacity: .8; }
+        .odo-tooltip { position: absolute; pointer-events: none; opacity: 0; transition: opacity .15s; z-index: 5; background: rgba(0,0,0,.88); color: #fff; padding: 10px 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.5; min-width: 190px; max-width: 280px; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+        .odo-tooltip.show { opacity: 1; }
+        .odo-tooltip b { font-weight: 700; }
+        .odo-tooltip .odo-ti { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+        .odo-resumo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 6px; }
+        .odo-chip { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; }
+        .odo-chip small { display: block; font-size: 11px; color: #666666; }
+        .odo-chip b { font-size: 15px; color: #1f2937; }
+        .odo-chip-cor { width: 6px; align-self: stretch; border-radius: 3px; flex: none; }
+        @media (max-width: 520px) { .odo-resumo { grid-template-columns: 1fr; } .odo-chip { justify-content: flex-start; } }
+
         /* Legend */
         .chart-legend {
             display: grid;
@@ -1698,13 +1723,31 @@
 
         <!-- Donut Charts Row - Veículos Contratados -->
         <div class="charts-row">
-            <!-- Main Donut Chart - Distribuição de Veículos -->
+            <!-- Odômetro - Distribuição de Veículos Contratados (selecionados -> contratados -> entregues) -->
             <div class="chart-item">
                 <h3 class="chart-title">Distribuição de Veículos Contratados</h3>
-                <div class="donut-wrapper">
-                    <div class="donut-chart">
-                        <canvas id="mainDonutChart"></canvas>
-                    </div>
+                <div class="odo-wrap" id="odometroVeiculos">
+                    <svg id="odoSvg" viewBox="0 0 420 262" role="img" aria-label="Odômetro de veículos: selecionados, contratados e entregues." preserveAspectRatio="xMidYMid meet">
+                        <path id="odoResto" class="odo-resto" data-seg="resto" d=""/>
+                        <path id="odoContr" class="odo-contr" data-seg="contratados" d=""/>
+                        <path id="odoEntTrilho" class="odo-trilho-ent" d=""/>
+                        <path id="odoEnt" class="odo-ent" data-seg="entregues" d=""/>
+                        <path id="odoTipoEl" data-seg="eletricos" fill="none" stroke="#10b981" stroke-width="9" d=""/>
+                        <path id="odoTipoE6" data-seg="euro6" fill="none" stroke="#f59e0b" stroke-width="9" d=""/>
+                        <path id="odoTipoTr" data-seg="trilhos" fill="none" stroke="#8b5cf6" stroke-width="9" d=""/>
+                        <g id="odoAgulha" class="odo-agulha"><polygon points="206,210 214,210 210,92"/></g>
+                        <circle cx="210" cy="210" r="11" class="odo-hub"/>
+                        <text x="210" y="243" text-anchor="middle" class="odo-pct" id="odoPct">—</text>
+                        <text x="210" y="259" text-anchor="middle" class="odo-sub">contratados dentro dos selecionados</text>
+                        <text x="46" y="226" text-anchor="middle" class="odo-eixo">0</text>
+                        <text x="374" y="226" text-anchor="middle" class="odo-eixo" id="odoTotal">—</text>
+                    </svg>
+                    <div id="odoTooltip" class="odo-tooltip"></div>
+                </div>
+                <div class="odo-resumo">
+                    <div class="odo-chip"><span class="odo-chip-cor" style="background:#e5e7eb"></span><div><small>Selecionados</small><b id="odoSel">—</b></div></div>
+                    <div class="odo-chip"><span class="odo-chip-cor" style="background:#0052cc"></span><div><small>Contratados</small><b id="odoCon">—</b></div></div>
+                    <div class="odo-chip"><span class="odo-chip-cor" style="background:#0d9488"></span><div><small>Entregues</small><b id="odoEntTxt">—</b></div></div>
                 </div>
                 <div class="chart-legend">
                     <div class="legend-item">
@@ -2938,7 +2981,6 @@
                     const graficos = [
                         {id: 'resourcesDonutChart', label: `Gráfico de distribuição de propostas selecionadas. Total de ${fmtInt(sel.propostas)} propostas, ${fmtInt(sel.veiculos)} veículos, com ${fmtBi(sel.investimento)} de investimento.`},
                         {id: 'contractedProjectsChart', label: `Gráfico de distribuição de propostas contratadas. Total de ${fmtInt(con.propostas)} propostas, ${fmtInt(con.veiculos)} veículos, com ${fmtBi(con.investimento)} de investimento.`},
-                        {id: 'mainDonutChart', label: 'Gráfico de distribuição de veículos contratados.'},
                         {id: 'entregasProgressChart', label: `Indicador de progresso da meta de veículos entregues. Meta de ${fmtInt(META_ENTREGA)} unidades, ${fmtInt(totalVeiculosEntregues(e))} entregues.`},
                         {id: 'yearChart', label: 'Gráfico combinado da evolução de contratações por ano: barras azuis com os veículos contratados em cada ano e linha verde com o total acumulado.'},
                         {id: 'metasProgressChart', label: `Indicador de progresso de metas 2026. Meta total ${fmtInt(m.meta)} unidades, concluído ${fmtInt(m.realizado)} unidades.`}
@@ -3271,49 +3313,6 @@
                                 const labels = ['Concluído', 'Restante'];
                                 const valores = [m.realizado, m.meta - m.realizado];
                                 return labels[context.dataIndex] + ': ' + fmtInt(valores[context.dataIndex]) + ' unidades';
-                            }
-                        },
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleFont: { size: 14, weight: 'bold' },
-                        bodyFont: { size: 13 },
-                        padding: 12,
-                        displayColors: true,
-                        borderRadius: 8
-                    }
-                }
-            }
-        });
-
-        // Main Donut Chart - Distribuição de Veículos
-        const mainDonutCtx = document.getElementById('mainDonutChart').getContext('2d');
-        const chartVeiculos = new Chart(mainDonutCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Ônibus Elétricos', 'Ônibus Euro 6', 'Veículos sobre Trilhos'],
-                datasets: [{
-                    data: [460, 4725, 47],
-                    backgroundColor: ['#10b981', '#f59e0b', '#8b5cf6'],
-                    borderColor: ['#ffffff', '#ffffff', '#ffffff'],
-                    borderWidth: 3,
-                    borderRadius: 10,
-                    hoverOffset: 8
-                }]
-            },
-            plugins: [centerTextPlugin],
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '78%',
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
                             }
                         },
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -3673,19 +3672,100 @@
 
         const CORES_DONUT_PROJETOS = ['#0052cc', '#0d9488']; // [Refrota Público, Refrota Privado]
 
-        // --- Donut de veículos: fatias, legenda e total central ---
+        // --- Odômetro de veículos: selecionados (100%) -> contratados -> entregues ---
+        // Mesmos dados do funil de conversão (funilComposicao): semicírculo = selecionados;
+        // faixa azul = contratados; arco externo = composição dos contratados por tipo;
+        // arco interno = entregues sobre contratados; ponteiro = % contratados/selecionados.
+        const ODO = { cx: 210, cy: 210 };
+        function odoPonto(r, f) { const a = Math.PI * f; return [ODO.cx - r * Math.cos(a), ODO.cy - r * Math.sin(a)]; }
+        function odoFaixa(rIn, rOut, f0, f1) {            // setor entre duas frações do semicírculo (0..1)
+            if (f1 - f0 < 0.0005) f1 = f0 + 0.0005;
+            const p = (r, f) => odoPonto(r, f).map(n => n.toFixed(2)).join(' ');
+            const lg = 0; // cada faixa cobre no máximo 180°
+            return `M ${p(rOut, f0)} A ${rOut} ${rOut} 0 ${lg} 1 ${p(rOut, f1)} L ${p(rIn, f1)} A ${rIn} ${rIn} 0 ${lg} 0 ${p(rIn, f0)} Z`;
+        }
+        function odoLinha(r, f0, f1) {
+            if (f1 - f0 < 0.0008) f1 = f0 + 0.0008;
+            const p = f => odoPonto(r, f).map(n => n.toFixed(2)).join(' ');
+            return `M ${p(f0)} A ${r} ${r} 0 0 1 ${p(f1)}`;
+        }
+        let odoDados = null;
         function renderDonutVeiculos() {
             const e = estado();
-            const total = totalVeiculos(e) || 1;
-            const v = [e.veiculos.eletricos, e.veiculos.euro6, e.veiculos.trilhos];
+            const fc = funilComposicao(e);
+            const sum = o => (o.eletricos || 0) + (o.euro6 || 0) + (o.trilhos || 0);
+            const tSel = sum(fc.selecionados), tCon = sum(fc.contratados), tEnt = sum(fc.entregues);
+            const st = e.projetos.status;
+            const aContratar = st.emPreparacao.veiculos || 0;
+            const desist = (st.aCancelar.veiculos || 0) + (st.cancelados.veiculos || 0);
+            const fCon = tSel ? Math.min(tCon / tSel, 1) : 0;
+            const fEnt = tCon ? Math.min(tEnt / tCon, 1) : 0;
+            odoDados = { fc, tSel, tCon, tEnt, fCon, fEnt, aContratar, desist };
 
-            chartVeiculos.data.datasets[0].data = v;
-            chartVeiculos.update();
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.setAttribute('d', v); };
+            set('odoResto', odoFaixa(104, 150, fCon, 1));
+            set('odoContr', odoFaixa(104, 150, 0, fCon));
+            // arco interno de entregues (trilho cinza = faixa dos contratados; verde = % entregue)
+            set('odoEntTrilho', odoFaixa(92, 99, 0, fCon));
+            set('odoEnt', odoFaixa(92, 99, 0, fCon * fEnt));
+            // arco externo: composição dos contratados por tipo, dentro da faixa dos contratados
+            let acum = 0;
+            [['odoTipoEl', 'eletricos'], ['odoTipoE6', 'euro6'], ['odoTipoTr', 'trilhos']].forEach(([id, k]) => {
+                const w = tCon ? (fc.contratados[k] || 0) / tCon * fCon : 0;
+                set(id, w > 0 ? odoLinha(158, acum, acum + w) : '');
+                acum += w;
+            });
+            const ag = document.getElementById('odoAgulha');
+            if (ag) ag.style.transform = 'rotate(' + (fCon * 180 - 90) + 'deg)';
+            const txt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            txt('odoPct', fmtPct(fCon * 100) + '%');
+            txt('odoTotal', fmtInt(tSel));
+            txt('odoSel', fmtInt(tSel));
+            txt('odoCon', fmtInt(tCon) + ' (' + fmtPct(fCon * 100) + '%)');
+            txt('odoEntTxt', fmtInt(tEnt) + ' (' + fmtPct(fEnt * 100) + '% dos contratados)');
+            const svg = document.getElementById('odoSvg');
+            if (svg) svg.setAttribute('aria-label', `Odômetro de veículos: ${fmtInt(tSel)} selecionados, ${fmtInt(tCon)} contratados (${fmtPct(fCon * 100)}%) e ${fmtInt(tEnt)} entregues (${fmtPct(fEnt * 100)}% dos contratados).`);
 
-            const rotulo = qtd => fmtInt(qtd) + ' (' + fmtPct(qtd / total * 100) + '%)';
-            document.getElementById('legEletricos').textContent = rotulo(v[0]);
-            document.getElementById('legEuro6').textContent = rotulo(v[1]);
-            document.getElementById('legTrilhos').textContent = rotulo(v[2]);
+            const v = [fc.contratados.eletricos, fc.contratados.euro6, fc.contratados.trilhos];
+            const rotulo = qtd => fmtInt(qtd) + ' (' + fmtPct(tCon ? qtd / tCon * 100 : 0) + '%)';
+            txt('legEletricos', rotulo(v[0]));
+            txt('legEuro6', rotulo(v[1]));
+            txt('legTrilhos', rotulo(v[2]));
+            odoLigarTooltip();
+        }
+
+        let odoTooltipLigado = false;
+        function odoLigarTooltip() {
+            if (odoTooltipLigado) return;
+            const wrap = document.getElementById('odometroVeiculos'), tip = document.getElementById('odoTooltip');
+            if (!wrap || !tip) return;
+            odoTooltipLigado = true;
+            const cor = c => `<span class="odo-ti" style="background:${c}"></span>`;
+            const tipos = (obj, base) => [['Elétricos', 'eletricos', '#10b981'], ['Euro 6', 'euro6', '#f59e0b'], ['Trilhos', 'trilhos', '#8b5cf6']]
+                .map(([n, k, c]) => `${cor(c)}${n}: <b>${fmtInt(obj[k] || 0)}</b> (${fmtPct(base ? (obj[k] || 0) / base * 100 : 0)}%)`).join('<br>');
+            function conteudo(seg) {
+                const d = odoDados; if (!d) return '';
+                const L = { eletricos: ['Ônibus elétricos', '#10b981'], euro6: ['Ônibus Euro 6', '#f59e0b'], trilhos: ['Veículos sobre trilhos', '#8b5cf6'] };
+                if (L[seg]) { const q = d.fc.contratados[seg] || 0; return `${cor(L[seg][1])}<b>${L[seg][0]}</b><br>${fmtInt(q)} contratados (${fmtPct(d.tCon ? q / d.tCon * 100 : 0)}% dos contratados)<br>Entregues: ${fmtInt(d.fc.entregues[seg] || 0)}`; }
+                if (seg === 'contratados') return `<b>Contratados</b>: ${fmtInt(d.tCon)}<br>${fmtPct(d.fCon * 100)}% dos ${fmtInt(d.tSel)} selecionados<br>${tipos(d.fc.contratados, d.tCon)}`;
+                if (seg === 'entregues') return `<b>Entregues</b>: ${fmtInt(d.tEnt)}<br>${fmtPct(d.fEnt * 100)}% dos ${fmtInt(d.tCon)} contratados<br>${tipos(d.fc.entregues, d.tEnt)}`;
+                if (seg === 'resto') { const r = d.tSel - d.tCon; return `<b>Selecionados ainda não contratados</b>: ${fmtInt(r)}<br>${fmtPct((1 - d.fCon) * 100)}% dos selecionados<br>A contratar: <b>${fmtInt(d.aContratar)}</b><br>Desistências: <b>${fmtInt(d.desist)}</b>`; }
+                return '';
+            }
+            const mover = ev => {
+                const el = ev.target.closest && ev.target.closest('[data-seg]');
+                if (!el) { tip.classList.remove('show'); return; }
+                tip.innerHTML = conteudo(el.getAttribute('data-seg'));
+                const r = wrap.getBoundingClientRect();
+                const x = ev.clientX - r.left, y = ev.clientY - r.top;
+                tip.classList.add('show');
+                const w = tip.offsetWidth, h = tip.offsetHeight;
+                tip.style.left = Math.max(0, Math.min(x + 14, r.width - w)) + 'px';
+                tip.style.top = Math.max(0, y - h - 12 < 0 ? y + 16 : y - h - 12) + 'px';
+            };
+            wrap.addEventListener('mousemove', mover);
+            wrap.addEventListener('mouseleave', () => tip.classList.remove('show'));
+            wrap.addEventListener('click', mover);
         }
 
         // Indicador de meta de veículos ENTREGUES (cenário ativo / META_ENTREGA).
