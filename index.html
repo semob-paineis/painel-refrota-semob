@@ -4620,28 +4620,45 @@
                 if (telaPequena) ctxExp = await abrirPainelDesktopParaExportacao();
 
                 const element = ctxExp.doc.body;
-                // Limite de área do canvas (Safari/iOS recusa canvas acima de ~16 milhões de pixels)
                 const limites = limitesConteudoExportacao(ctxExp.doc, ctxExp.win);
                 const larguraCss = limites.width || ctxExp.doc.documentElement.scrollWidth;
                 const alturaCss = Math.max(element.scrollHeight, ctxExp.doc.documentElement.scrollHeight);
-                const areaMax = ehIOS() ? 14e6 : (telaPequena ? 30e6 : 120e6);
-                const scale = Math.max(0.8, Math.min(2, Math.sqrt(areaMax / (larguraCss * alturaCss))));
+                // iOS/telas pequenas: uma página por vez (canvas pequenos). Um canvas único de
+                // ~14 milhões de pixels esgota a memória do Safari e deixa áreas sem desenhar
+                // (faixas cinza/"sombreadas" no PDF).
+                const porBloco = telaPequena || ehIOS();
+                // Itens que não fazem parte do conteúdo (botão/janela do Agente, avisos, tooltips,
+                // qualquer elemento fixo) não entram na fotografia.
+                const ignorar = el => {
+                    if (!el || el.nodeType !== 1) return false;
+                    if (el.matches && el.matches('.skip-link, .agente__fab, .agente__painel, .notification, .canvas-tooltip, .odo-tooltip, [id$="Tooltip"], #entregasTooltipHtml, #funilTooltip')) return true;
+                    try { return ctxExp.win.getComputedStyle(el).position === 'fixed'; } catch (e) { return false; }
+                };
+                const opcoes = { backgroundColor: '#f5f7fa', allowTaint: true, useCORS: true, scrollX: 0, scrollY: 0, ignoreElements: ignorar };
                 // Desliga animações/transições antes da captura (ver comentário
                 // da classe .exportando-captura no CSS) e restaura no finally.
                 ctxExp.doc.body.classList.add('exportando-captura');
-                let canvas, blocosCalculados;
+                let canvas = null, blocosCalculados, canvasBlocos = null;
                 try {
-                    canvas = await html2canvas(element, {
-                        backgroundColor: '#f5f7fa',
-                        scale: scale,
-                        allowTaint: true,
-                        useCORS: true,
-                        scrollX: 0,
-                        scrollY: 0,
-                        ...limites
-                    });
-                    // posições das seções precisam ser lidas enquanto o documento fotografado ainda existe
-                    blocosCalculados = blocosDoPdf(scale, canvas.height, ctxExp.doc);
+                    if (porBloco) {
+                        // posições das seções (em px CSS) lidas enquanto o documento ainda existe
+                        blocosCalculados = blocosDoPdf(1, Math.round(alturaCss), ctxExp.doc);
+                        canvasBlocos = [];
+                        for (const bl of blocosCalculados) {
+                            const areaBloco = ehIOS() ? 5e6 : 12e6;
+                            const escalaBloco = Math.max(0.8, Math.min(2, Math.sqrt(areaBloco / (larguraCss * bl.altura))));
+                            canvasBlocos.push(await html2canvas(element, {
+                                ...opcoes, scale: escalaBloco,
+                                x: limites.x || 0, width: larguraCss, y: bl.yInicio, height: bl.altura
+                            }));
+                            await new Promise(r => setTimeout(r, 60));   // alivia a memória entre as páginas
+                        }
+                    } else {
+                        const scale = Math.max(0.8, Math.min(2, Math.sqrt(120e6 / (larguraCss * alturaCss))));
+                        canvas = await html2canvas(element, { ...opcoes, scale, ...limites });
+                        // posições das seções precisam ser lidas enquanto o documento fotografado ainda existe
+                        blocosCalculados = blocosDoPdf(scale, canvas.height, ctxExp.doc);
+                    }
                 } finally {
                     ctxExp.doc.body.classList.remove('exportando-captura');
                     ctxExp.limpar();
@@ -4675,13 +4692,18 @@
                     pdf.setFillColor(245, 247, 250);
                     pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
 
-                    const blocoCanvas = document.createElement('canvas');
-                    blocoCanvas.width = canvas.width;
-                    blocoCanvas.height = bloco.altura;
-                    const bctx = blocoCanvas.getContext('2d');
-                    bctx.fillStyle = '#f5f7fa';
-                    bctx.fillRect(0, 0, blocoCanvas.width, blocoCanvas.height);
-                    bctx.drawImage(canvas, 0, bloco.yInicio, canvas.width, bloco.altura, 0, 0, canvas.width, bloco.altura);
+                    let blocoCanvas;
+                    if (canvasBlocos) {
+                        blocoCanvas = canvasBlocos[indice];
+                    } else {
+                        blocoCanvas = document.createElement('canvas');
+                        blocoCanvas.width = canvas.width;
+                        blocoCanvas.height = bloco.altura;
+                        const bctx = blocoCanvas.getContext('2d');
+                        bctx.fillStyle = '#f5f7fa';
+                        bctx.fillRect(0, 0, blocoCanvas.width, blocoCanvas.height);
+                        bctx.drawImage(canvas, 0, bloco.yInicio, canvas.width, bloco.altura, 0, 0, canvas.width, bloco.altura);
+                    }
 
                     const imgData = blocoCanvas.toDataURL('image/jpeg', 0.92); // JPEG: arquivo ~10x menor que PNG, sem perda visível em texto/gráficos
                     const alturaUtil = pdfHeight - margem * 2;
