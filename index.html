@@ -1722,28 +1722,16 @@
                 </div>
             </div>
 
-            <!-- Donut Chart - Distribuição de Veículos Entregues -->
+            <!-- Indicador de Meta - Veículos Entregues (mesmo modelo do card de Meta Selecionados) -->
             <div class="chart-item">
-                <h3 class="chart-title">Distribuição de Veículos Entregues</h3>
+                <h3 class="chart-title">📦 Meta Quantidade de Veículos Entregues</h3>
                 <div class="donut-wrapper">
-                    <div class="donut-chart">
-                        <canvas id="deliveredDonutChart"></canvas>
+                    <div class="donut-chart" id="entregasChart">
+                        <canvas id="entregasProgressChart"></canvas>
+                        <div id="entregasProgressTooltip" class="canvas-tooltip">Meta: <span id="entregaTooltipValor">5.000</span> veículos</div>
                     </div>
                 </div>
-                <div class="chart-legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #10b981;"></div>
-                        <span><strong>Ônibus Elétricos:</strong> <span id="legEntEletricos">371 (9,2%)</span></span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #f59e0b;"></div>
-                        <span><strong>Ônibus Euro 6:</strong> <span id="legEntEuro6">3.662 (90,8%)</span></span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #8b5cf6;"></div>
-                        <span><strong>Veículos sobre Trilhos:</strong> <span id="legEntTrilhos">2 (0,0%)</span></span>
-                    </div>
-                </div>
+                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">Meta: <span id="entregaRodapeValor">5.000</span> unidades de veículos entregues · passe o mouse sobre o gráfico para ver a divisão por tipo de veículo</p>
             </div>
 
             <!-- Nova coluna: Indicador de Metas de Veículos Selecionados 2026 -->
@@ -2951,7 +2939,7 @@
                         {id: 'resourcesDonutChart', label: `Gráfico de distribuição de propostas selecionadas. Total de ${fmtInt(sel.propostas)} propostas, ${fmtInt(sel.veiculos)} veículos, com ${fmtBi(sel.investimento)} de investimento.`},
                         {id: 'contractedProjectsChart', label: `Gráfico de distribuição de propostas contratadas. Total de ${fmtInt(con.propostas)} propostas, ${fmtInt(con.veiculos)} veículos, com ${fmtBi(con.investimento)} de investimento.`},
                         {id: 'mainDonutChart', label: 'Gráfico de distribuição de veículos contratados.'},
-                        {id: 'deliveredDonutChart', label: 'Gráfico de distribuição de veículos entregues, por tipo: elétricos, Euro 6 e sobre trilhos.'},
+                        {id: 'entregasProgressChart', label: `Indicador de progresso da meta de veículos entregues. Meta de ${fmtInt(META_ENTREGA)} unidades, ${fmtInt(totalVeiculosEntregues(e))} entregues.`},
                         {id: 'yearChart', label: 'Gráfico combinado da evolução de contratações por ano: barras azuis com os veículos contratados em cada ano e linha verde com o total acumulado.'},
                         {id: 'metasProgressChart', label: `Indicador de progresso de metas 2026. Meta total ${fmtInt(m.meta)} unidades, concluído ${fmtInt(m.realizado)} unidades.`}
                     ];
@@ -3032,10 +3020,14 @@
             }
         };
 
-        // Plugin de texto central do donut de Veículos ENTREGUES
-        // Mesmo padrão visual do donut de contratados (centerTextPlugin).
-        const deliveredCenterTextPlugin = {
-            id: 'deliveredCenterText',
+        // Meta de veículos ENTREGUES (unidades). Ajustar aqui se a meta mudar.
+        const META_ENTREGA = 5000;
+        function percentualEntrega(e) { return Math.min(totalVeiculosEntregues(e) / META_ENTREGA, 1); }
+
+        // Plugin de texto central do indicador de meta de veículos ENTREGUES
+        // (mesmo layout do indicador de meta de selecionados).
+        const entregasProgressCenterTextPlugin = {
+            id: 'entregasProgressCenterText',
             afterDatasetsDraw(chart) {
                 const {ctx, chartArea: {left, top, width, height}} = chart;
                 ctx.save();
@@ -3043,19 +3035,51 @@
                 const centerX = left + width / 2;
                 const centerY = top + height / 2;
 
-                // Número (total do cenário ativo: Consolidado / Público / Privado)
+                // Primeira linha: número de unidades (grande)
                 ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#0052cc';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(fmtInt(totalVeiculosEntregues(estado())), centerX, centerY - 12);
+                const realizadoTxt = fmtInt(totalVeiculosEntregues(estado()));
+                ctx.fillText(realizadoTxt, centerX, centerY - 25);
 
-                // Rótulo "unidades" — mesmo padrão do gráfico de Meta 2026
+                // Segunda linha: rótulo "unidades" (pequeno)
                 ctx.font = '12px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
                 ctx.fillStyle = '#999';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('unidades', centerX, centerY + 22);
+                ctx.fillText('unidades', centerX, centerY);
+
+                // Terceira linha: Percentual em destaque (grande, em badge)
+                // Desenhar fundo azul arredondado para o percentual
+                const badgeHeight = 36;
+                const badgeWidth = 90;
+                const badgeRadius = 8;
+                const badgeY = centerY + 30;
+                const badgeX = centerX - badgeWidth / 2;
+                
+                // Desenhar retângulo arredondado
+                ctx.fillStyle = '#0052cc';
+                ctx.beginPath();
+                ctx.moveTo(badgeX + badgeRadius, badgeY - badgeHeight / 2);
+                ctx.lineTo(badgeX + badgeWidth - badgeRadius, badgeY - badgeHeight / 2);
+                ctx.quadraticCurveTo(badgeX + badgeWidth, badgeY - badgeHeight / 2, badgeX + badgeWidth, badgeY - badgeHeight / 2 + badgeRadius);
+                ctx.lineTo(badgeX + badgeWidth, badgeY + badgeHeight / 2 - badgeRadius);
+                ctx.quadraticCurveTo(badgeX + badgeWidth, badgeY + badgeHeight / 2, badgeX + badgeWidth - badgeRadius, badgeY + badgeHeight / 2);
+                ctx.lineTo(badgeX + badgeRadius, badgeY + badgeHeight / 2);
+                ctx.quadraticCurveTo(badgeX, badgeY + badgeHeight / 2, badgeX, badgeY + badgeHeight / 2 - badgeRadius);
+                ctx.lineTo(badgeX, badgeY - badgeHeight / 2 + badgeRadius);
+                ctx.quadraticCurveTo(badgeX, badgeY - badgeHeight / 2, badgeX + badgeRadius, badgeY - badgeHeight / 2);
+                ctx.closePath();
+                ctx.fill();
+
+                // Texto do percentual (branco)
+                ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const pctTxt = fmtPct(percentualEntrega(estado()) * 100) + '%';
+                ctx.fillText(pctTxt, centerX, badgeY);
 
                 ctx.restore();
             }
@@ -3303,44 +3327,59 @@
             }
         });
 
-        // Donut Chart - Distribuição de Veículos Entregues
-        // Mesma configuração visual do donut de contratados.
-        const deliveredDonutCtx = document.getElementById('deliveredDonutChart').getContext('2d');
-        const chartVeiculosEntregues = new Chart(deliveredDonutCtx, {
+        // Indicador de Meta - Veículos ENTREGUES (mesmo modelo do indicador de Meta de selecionados).
+        // O tooltip das fatias traz a divisão por tipo de veículo.
+        const entregasProgressCtx = document.getElementById('entregasProgressChart').getContext('2d');
+        const chartVeiculosEntregues = new Chart(entregasProgressCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Ônibus Elétricos', 'Ônibus Euro 6', 'Veículos sobre Trilhos'],
+                labels: ['Entregues', 'Restante'],
                 datasets: [{
-                    data: [371, 3662, 2],
-                    backgroundColor: ['#10b981', '#f59e0b', '#8b5cf6'],
-                    borderColor: ['#ffffff', '#ffffff', '#ffffff'],
-                    borderWidth: 3,
+                    data: [0, 100],
+                    backgroundColor: ['#0052cc', '#e5e7eb'],
+                    borderColor: ['#ffffff', '#ffffff'],
+                    borderWidth: 2,
                     borderRadius: 10,
                     hoverOffset: 8
                 }]
             },
-            plugins: [deliveredCenterTextPlugin],
+            plugins: [entregasProgressCenterTextPlugin],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 cutout: '78%',
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
                         callbacks: {
+                            title: function(items) {
+                                const e = estado();
+                                const ent = totalVeiculosEntregues(e);
+                                if (items[0].dataIndex === 0) {
+                                    return 'Entregues: ' + fmtInt(ent) + ' de ' + fmtInt(META_ENTREGA) + ' (' + fmtPct(percentualEntrega(e) * 100) + '%)';
+                                }
+                                return 'Restante para a meta: ' + fmtInt(Math.max(META_ENTREGA - ent, 0)) + ' unidades';
+                            },
                             label: function(context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : '0.0';
-                                return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                const e = estado();
+                                const v = veiculosEntregues(e);
+                                const total = totalVeiculosEntregues(e);
+                                if (context.dataIndex !== 0) {
+                                    return 'Meta: ' + fmtInt(META_ENTREGA) + ' unidades';
+                                }
+                                const linha = (nome, q) => nome + ': ' + fmtInt(q) + ' (' + fmtPct(total > 0 ? q / total * 100 : 0) + '%)';
+                                return [
+                                    linha('Ônibus Elétricos', v.eletricos),
+                                    linha('Ônibus Euro 6', v.euro6),
+                                    linha('Veículos sobre Trilhos', v.trilhos)
+                                ];
                             }
                         },
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
                         titleFont: { size: 14, weight: 'bold' },
                         bodyFont: { size: 13 },
                         padding: 12,
-                        displayColors: true,
+                        displayColors: false,
                         borderRadius: 8
                     }
                 }
@@ -3647,24 +3686,15 @@
             document.getElementById('legTrilhos').textContent = rotulo(v[2]);
         }
 
-        // Mesma lógica do donut de contratados, aplicada aos ENTREGUES.
+        // Indicador de meta de veículos ENTREGUES (cenário ativo / META_ENTREGA).
         function renderDonutVeiculosEntregues() {
             const e = estado();
-            const ent = veiculosEntregues(e);
-            const total = totalVeiculosEntregues(e) || 1;
-            const v = [ent.eletricos, ent.euro6, ent.trilhos];
-
-            chartVeiculosEntregues.data.datasets[0].data = v;
+            const pct = percentualEntrega(e) * 100;
+            chartVeiculosEntregues.data.datasets[0].data = [pct, 100 - pct];
             chartVeiculosEntregues.update();
-
-            const rotulo = qtd => fmtInt(qtd) + ' (' + fmtPct(qtd / total * 100) + '%)';
-            const set = (id, txt) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = txt;
-            };
-            set('legEntEletricos', rotulo(v[0]));
-            set('legEntEuro6', rotulo(v[1]));
-            set('legEntTrilhos', rotulo(v[2]));
+            const set = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+            set('entregaTooltipValor', fmtInt(META_ENTREGA));
+            set('entregaRodapeValor', fmtInt(META_ENTREGA));
         }
 
         // --- Funil de Conversão: Selecionados -> Contratados -> Entregues ---
@@ -4959,6 +4989,24 @@
                     console.log('✅ Tooltip do gráfico de Metas inicializado');
                 }
                 
+                // 5. Tooltip do badge do indicador de meta de entregas
+                (function () {
+                    const box = document.getElementById('entregasChart');
+                    const cv = document.getElementById('entregasProgressChart');
+                    const tt = document.getElementById('entregasProgressTooltip');
+                    if (!(box && cv && tt)) return;
+                    cv.addEventListener('mousemove', function (ev) {
+                        const r = cv.getBoundingClientRect(), c = box.getBoundingClientRect();
+                        const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+                        if (Math.hypot(ev.clientX - cx, ev.clientY - cy) < 50) {
+                            tt.style.left = (cx - c.left) + 'px';
+                            tt.style.top = (cy - c.top - 60) + 'px';
+                            tt.classList.add('show');
+                        } else tt.classList.remove('show');
+                    });
+                    cv.addEventListener('mouseleave', function () { tt.classList.remove('show'); });
+                })();
+
                 mostrarNotificacao('✅ Painel carregado com sucesso (v2.0)', 'success');
                 console.log('✅ Painel REFROTA v2.0 inicializado com sucesso');
                 
