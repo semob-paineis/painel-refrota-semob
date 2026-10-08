@@ -1797,9 +1797,9 @@
              (abaixo) e o mapa de Investimento por Estado. -->
         <div class="tipo-projeto-bar">
             <div class="segmented-control segmented-2" role="group" aria-label="Tipo de proposta exibido nos painéis de região, ano e no mapa">
-                <input type="radio" name="map-tipo-group" id="map-tipo-selecionados">
+                <input type="radio" name="map-tipo-group" id="map-tipo-selecionados" checked>
                 <label for="map-tipo-selecionados">Propostas Selecionadas</label>
-                <input type="radio" name="map-tipo-group" id="map-tipo-contratados" checked>
+                <input type="radio" name="map-tipo-group" id="map-tipo-contratados">
                 <label for="map-tipo-contratados">Propostas Contratadas</label>
                 <div class="selection-slider"></div>
             </div>
@@ -2713,7 +2713,7 @@
 
         // Tipo de projeto exibido no mapa/ranking de investimento por estado.
         // 'contratados' (padrão, comportamento original) | 'selecionados'
-        let tipoProjetoMapa = 'contratados';
+        let tipoProjetoMapa = 'selecionados';   // estado inicial: Propostas Selecionadas
 
         // ---------- Helpers de formatação (padrão brasileiro) ----------
         const fmtInt = v => Math.round(v).toLocaleString('pt-BR');
