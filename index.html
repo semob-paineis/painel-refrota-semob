@@ -4443,30 +4443,74 @@
         // A página é centralizada em um container de até 1400px; capturar o <body> inteiro
         // inclui as laterais vazias de telas largas e deixa o PDF/imagem com bordas em branco.
         // Recortar a captura nessa faixa faz o conteúdo ocupar toda a largura útil.
-        function limitesConteudoExportacao() {
-            const alvos = document.querySelectorAll('.gov-bar-inner, .top-header-inner, .container');
+        function limitesConteudoExportacao(doc = document, win = window) {
+            const alvos = doc.querySelectorAll('.gov-bar-inner, .top-header-inner, .container');
             let esq = Infinity, dir = -Infinity;
             alvos.forEach(el => {
                 const r = el.getBoundingClientRect();
                 if (r.width > 0) { esq = Math.min(esq, r.left); dir = Math.max(dir, r.right); }
             });
             if (!isFinite(esq) || dir <= esq) return {};
-            const x = Math.max(0, Math.floor(esq + window.scrollX));
-            const width = Math.min(Math.ceil(dir - esq), Math.ceil(document.documentElement.scrollWidth - x));
+            const x = Math.max(0, Math.floor(esq + win.scrollX));
+            const width = Math.min(Math.ceil(dir - esq), Math.ceil(doc.documentElement.scrollWidth - x));
             return { x, width };
         }
 
+        // ---------- Exportação em telas pequenas (celular/tablet) ----------
+        // No celular o layout é de uma coluna só; capturar essa tela gera um PDF
+        // alongado e distorcido. Para sair igual ao da versão web, o painel é
+        // carregado em um iframe invisível de 1400px de largura (as media queries
+        // do iframe respondem à largura DELE, não à do aparelho), com o mesmo
+        // cenário e o mesmo seletor da tela atual, e é esse iframe que é fotografado.
+        function ehIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+        async function abrirPainelDesktopParaExportacao() {
+            const LARGURA = 1400;
+            const iframe = document.createElement('iframe');
+            iframe.setAttribute('aria-hidden', 'true');
+            iframe.tabIndex = -1;
+            iframe.style.cssText = `position:fixed;left:-${LARGURA + 400}px;top:0;width:${LARGURA}px;height:1000px;border:0;opacity:0;pointer-events:none;`;
+            const u = new URL(window.location.href); u.hash = '';
+            iframe.src = u.toString();
+            document.body.appendChild(iframe);
+            const limpar = () => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); };
+            try {
+                await new Promise((ok, erro) => {
+                    iframe.onload = ok; iframe.onerror = erro;
+                    setTimeout(() => erro(new Error('timeout ao carregar o painel para exportação')), 30000);
+                });
+                const win = iframe.contentWindow, doc = iframe.contentDocument;
+                // Aguarda o painel renderizar (dados + odômetro)
+                const t0 = Date.now();
+                while (Date.now() - t0 < 20000) {
+                    const el = doc.getElementById('odoPct');
+                    if (el && el.textContent && el.textContent.trim() !== '—' && doc.querySelector('#brazilMap svg')) break;
+                    await new Promise(r => setTimeout(r, 150));
+                }
+                // Replica o estado da tela atual: cenário e seletor Selecionadas/Contratadas
+                const radioCenario = document.querySelector('input[name="refrota-group"]:checked');
+                const clicar = id => { const r = doc.getElementById(id); if (r && !r.checked) r.click(); };
+                if (radioCenario && radioCenario.id) clicar(radioCenario.id);
+                const tipoAtual = document.querySelector('input[name="map-tipo-group"]:checked');
+                if (tipoAtual && tipoAtual.id) clicar(tipoAtual.id);
+                await new Promise(r => setTimeout(r, 1800));   // animações dos gráficos terminam
+                doc.body.classList.add('exportando-captura');
+                return { doc, win, limpar };
+            } catch (e) { limpar(); throw e; }
+        }
+
         // Limites verticais (px do canvas) de cada página do PDF. Ver downloadAsPDF.
-        function blocosDoPdf(scale, alturaCanvas) {
-            const topo = document.body.getBoundingClientRect().top;
+        function blocosDoPdf(scale, alturaCanvas, doc = document) {
+            const topo = doc.body.getBoundingClientRect().top;
             const y = el => el ? Math.round((el.getBoundingClientRect().top - topo) * scale) : null;
             const yb = el => el ? Math.round((el.getBoundingClientRect().bottom - topo) * scale) : null;
-            const tipo = y(document.querySelector('.tipo-projeto-bar'));
-            const mapaTopo = y(document.querySelector('.map-section'));
-            const mapaFim = yb(document.querySelector('.map-section'));
+            const tipo = y(doc.querySelector('.tipo-projeto-bar'));
+            const mapaTopo = y(doc.querySelector('.map-section'));
+            const mapaFim = yb(doc.querySelector('.map-section'));
             const pontos = [0, tipo, mapaTopo, mapaFim, alturaCanvas];
             const validos = pontos.every((p, i) => p !== null && p >= 0 && p <= alturaCanvas && (i === 0 || p > pontos[i - 1]));
-            if (!validos) return [{ yInicio: 0, altura: alturaCanvas }];   // layout inesperado: página única
+            if (!validos) { console.warn('blocosDoPdf: layout inesperado', pontos); return [{ yInicio: 0, altura: alturaCanvas }]; }   // layout inesperado: página única
             const blocos = [];
             for (let i = 0; i < pontos.length - 1; i++) blocos.push({ yInicio: pontos[i], altura: pontos[i + 1] - pontos[i] });
             return blocos;
@@ -4558,22 +4602,37 @@
                 button.textContent = '⏳ Gerando...';
                 button.disabled = true;
 
-                const scale = 2;
-                const element = document.body;
+                // Telas pequenas: fotografa uma versão de 1400px do painel (ver acima).
+                const telaPequena = window.innerWidth < 1100;
+                let ctxExp = { doc: document, win: window, limpar: () => {} };
+                if (telaPequena) ctxExp = await abrirPainelDesktopParaExportacao();
+
+                const element = ctxExp.doc.body;
+                // Limite de área do canvas (Safari/iOS recusa canvas acima de ~16 milhões de pixels)
+                const limites = limitesConteudoExportacao(ctxExp.doc, ctxExp.win);
+                const larguraCss = limites.width || ctxExp.doc.documentElement.scrollWidth;
+                const alturaCss = Math.max(element.scrollHeight, ctxExp.doc.documentElement.scrollHeight);
+                const areaMax = ehIOS() ? 14e6 : (telaPequena ? 30e6 : 120e6);
+                const scale = Math.max(0.8, Math.min(2, Math.sqrt(areaMax / (larguraCss * alturaCss))));
                 // Desliga animações/transições antes da captura (ver comentário
                 // da classe .exportando-captura no CSS) e restaura no finally.
-                document.body.classList.add('exportando-captura');
-                let canvas;
+                ctxExp.doc.body.classList.add('exportando-captura');
+                let canvas, blocosCalculados;
                 try {
                     canvas = await html2canvas(element, {
                         backgroundColor: '#f5f7fa',
                         scale: scale,
                         allowTaint: true,
                         useCORS: true,
-                        ...limitesConteudoExportacao()
+                        scrollX: 0,
+                        scrollY: 0,
+                        ...limites
                     });
+                    // posições das seções precisam ser lidas enquanto o documento fotografado ainda existe
+                    blocosCalculados = blocosDoPdf(scale, canvas.height, ctxExp.doc);
                 } finally {
-                    document.body.classList.remove('exportando-captura');
+                    ctxExp.doc.body.classList.remove('exportando-captura');
+                    ctxExp.limpar();
                 }
 
                 const { jsPDF } = window.jspdf;
@@ -4595,7 +4654,7 @@
                 //  3) "Investimento Total por Estado" (mapa + ranking), sozinho
                 //  4) todo o restante (evolução, destaques, resumo executivo, rodapé)
                 // Se um bloco for mais alto que a folha, ele é reduzido para caber inteiro na página.
-                const blocos = blocosDoPdf(scale, canvas.height);
+                const blocos = blocosCalculados;
 
                 blocos.forEach((bloco, indice) => {
                     if (indice > 0) pdf.addPage();
