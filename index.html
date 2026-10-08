@@ -401,13 +401,13 @@
         /* Odômetro de veículos (selecionados -> contratados -> entregues) */
         .odo-wrap { position: relative; max-width: 440px; margin: 0 auto 8px; }
         .odo-wrap svg { width: 100%; height: auto; display: block; overflow: visible; }
-        .odo-resto { fill: #e5e7eb; cursor: pointer; transition: opacity .2s; }
-        .odo-contr { fill: #0052cc; cursor: pointer; transition: opacity .2s; }
+        .odo-resto { fill: #1a4bd6; stroke: #fff; stroke-width: 2; cursor: pointer; transition: opacity .2s; }
+        .odo-contr { fill: #4a7ff5; stroke: #fff; stroke-width: 2; cursor: pointer; transition: opacity .2s; }
         .odo-trilho-ent { fill: #e5e7eb; opacity: .75; }
-        .odo-ent { fill: #0d9488; cursor: pointer; }
+        .odo-ent { fill: #9adcbb; cursor: pointer; }
         .odo-agulha { transform-origin: 210px 210px; transition: transform .9s cubic-bezier(.2,.8,.2,1); fill: #1f2937; }
         .odo-hub { fill: #1f2937; stroke: #ffffff; stroke-width: 3; }
-        .odo-pct { font-size: 22px; font-weight: 800; fill: #0052cc; }
+        .odo-pct { font-size: 22px; font-weight: 800; fill: #1a4bd6; }
         .odo-sub, .odo-eixo { font-size: 10.5px; fill: #666666; }
         .odo-eixo { font-size: 10px; fill: #999999; }
         [data-seg]:hover { opacity: .8; }
@@ -1745,9 +1745,9 @@
                     <div id="odoTooltip" class="odo-tooltip"></div>
                 </div>
                 <div class="odo-resumo">
-                    <div class="odo-chip"><span class="odo-chip-cor" style="background:#e5e7eb"></span><div><small>Selecionados</small><b id="odoSel">—</b></div></div>
-                    <div class="odo-chip"><span class="odo-chip-cor" style="background:#0052cc"></span><div><small>Contratados</small><b id="odoCon">—</b></div></div>
-                    <div class="odo-chip"><span class="odo-chip-cor" style="background:#0d9488"></span><div><small>Entregues</small><b id="odoEntTxt">—</b></div></div>
+                    <div class="odo-chip"><span class="odo-chip-cor" style="background:#1a4bd6"></span><div><small>Selecionados</small><b id="odoSel">—</b></div></div>
+                    <div class="odo-chip"><span class="odo-chip-cor" style="background:#4a7ff5"></span><div><small>Contratados</small><b id="odoCon">—</b></div></div>
+                    <div class="odo-chip"><span class="odo-chip-cor" style="background:#9adcbb"></span><div><small>Entregues</small><b id="odoEntTxt">—</b></div></div>
                 </div>
                 <div class="chart-legend">
                     <div class="legend-item">
@@ -3699,15 +3699,16 @@
             const aContratar = st.emPreparacao.veiculos || 0;
             const desist = (st.aCancelar.veiculos || 0) + (st.cancelados.veiculos || 0);
             const fCon = tSel ? Math.min(tCon / tSel, 1) : 0;
-            const fEnt = tCon ? Math.min(tEnt / tCon, 1) : 0;
-            odoDados = { fc, tSel, tCon, tEnt, fCon, fEnt, aContratar, desist };
+            const fEnt = tCon ? Math.min(tEnt / tCon, 1) : 0;          // entregues ÷ contratados (tooltip)
+            const fEntSel = tSel ? Math.min(tEnt / tSel, 1) : 0;       // entregues ÷ selecionados (mesma taxa do funil)
+            odoDados = { fc, tSel, tCon, tEnt, fCon, fEnt, fEntSel, aContratar, desist };
 
             const set = (id, v) => { const el = document.getElementById(id); if (el) el.setAttribute('d', v); };
             set('odoResto', odoFaixa(104, 150, fCon, 1));
             set('odoContr', odoFaixa(104, 150, 0, fCon));
             // arco interno de entregues (trilho cinza = faixa dos contratados; verde = % entregue)
             set('odoEntTrilho', odoFaixa(92, 99, 0, fCon));
-            set('odoEnt', odoFaixa(92, 99, 0, fCon * fEnt));
+            set('odoEnt', fEntSel > 0 ? odoFaixa(92, 99, 0, fEntSel) : '');
             // arco externo: composição dos contratados por tipo, dentro da faixa dos contratados
             let acum = 0;
             [['odoTipoEl', 'eletricos'], ['odoTipoE6', 'euro6'], ['odoTipoTr', 'trilhos']].forEach(([id, k]) => {
@@ -3722,9 +3723,9 @@
             txt('odoTotal', fmtInt(tSel));
             txt('odoSel', fmtInt(tSel));
             txt('odoCon', fmtInt(tCon) + ' (' + fmtPct(fCon * 100) + '%)');
-            txt('odoEntTxt', fmtInt(tEnt) + ' (' + fmtPct(fEnt * 100) + '% dos contratados)');
+            txt('odoEntTxt', fmtInt(tEnt) + ' (' + fmtPct(fEntSel * 100) + '%)');
             const svg = document.getElementById('odoSvg');
-            if (svg) svg.setAttribute('aria-label', `Odômetro de veículos: ${fmtInt(tSel)} selecionados, ${fmtInt(tCon)} contratados (${fmtPct(fCon * 100)}%) e ${fmtInt(tEnt)} entregues (${fmtPct(fEnt * 100)}% dos contratados).`);
+            if (svg) svg.setAttribute('aria-label', `Odômetro de veículos: ${fmtInt(tSel)} selecionados, ${fmtInt(tCon)} contratados (${fmtPct(fCon * 100)}%) e ${fmtInt(tEnt)} entregues (${fmtPct(fEntSel * 100)}% dos selecionados e ${fmtPct(fEnt * 100)}% dos contratados).`);
 
             const v = [fc.contratados.eletricos, fc.contratados.euro6, fc.contratados.trilhos];
             const rotulo = qtd => fmtInt(qtd) + ' (' + fmtPct(tCon ? qtd / tCon * 100 : 0) + '%)';
@@ -3748,7 +3749,7 @@
                 const L = { eletricos: ['Ônibus elétricos', '#10b981'], euro6: ['Ônibus Euro 6', '#f59e0b'], trilhos: ['Veículos sobre trilhos', '#8b5cf6'] };
                 if (L[seg]) { const q = d.fc.contratados[seg] || 0; return `${cor(L[seg][1])}<b>${L[seg][0]}</b><br>${fmtInt(q)} contratados (${fmtPct(d.tCon ? q / d.tCon * 100 : 0)}% dos contratados)<br>Entregues: ${fmtInt(d.fc.entregues[seg] || 0)}`; }
                 if (seg === 'contratados') return `<b>Contratados</b>: ${fmtInt(d.tCon)}<br>${fmtPct(d.fCon * 100)}% dos ${fmtInt(d.tSel)} selecionados<br>${tipos(d.fc.contratados, d.tCon)}`;
-                if (seg === 'entregues') return `<b>Entregues</b>: ${fmtInt(d.tEnt)}<br>${fmtPct(d.fEnt * 100)}% dos ${fmtInt(d.tCon)} contratados<br>${tipos(d.fc.entregues, d.tEnt)}`;
+                if (seg === 'entregues') return `<b>Entregues</b>: ${fmtInt(d.tEnt)}<br>${fmtPct(d.fEntSel * 100)}% dos ${fmtInt(d.tSel)} selecionados<br>${fmtPct(d.fEnt * 100)}% dos ${fmtInt(d.tCon)} contratados<br>${tipos(d.fc.entregues, d.tEnt)}`;
                 if (seg === 'resto') { const r = d.tSel - d.tCon; return `<b>Selecionados ainda não contratados</b>: ${fmtInt(r)}<br>${fmtPct((1 - d.fCon) * 100)}% dos selecionados<br>A contratar: <b>${fmtInt(d.aContratar)}</b><br>Desistências: <b>${fmtInt(d.desist)}</b>`; }
                 return '';
             }
