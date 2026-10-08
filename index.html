@@ -1437,6 +1437,11 @@
            resultando num efeito "esfumaçado". Esta classe é aplicada só
            durante a captura (ver downloadAsImage/downloadAsPDF) e remove
            qualquer animação ou transição em andamento no instante do print. */
+        /* O html2canvas pinta o "slider" azul por cima do rótulo selecionado dos seletores
+           (o texto some no PDF). Forçar o contexto de empilhamento do rótulo resolve. */
+        body.exportando-captura .segmented-control .selection-slider { z-index: 1; }
+        body.exportando-captura .segmented-control label { position: relative; z-index: 3; }
+
         /* Avisos flutuantes (ex.: "Painel atualizado") não entram no PDF/imagem */
         body.exportando-captura .notification { display: none !important; }
 
@@ -4472,6 +4477,7 @@
             iframe.tabIndex = -1;
             iframe.style.cssText = `position:fixed;left:-${LARGURA + 400}px;top:0;width:${LARGURA}px;height:1000px;border:0;opacity:0;pointer-events:none;`;
             const u = new URL(window.location.href); u.hash = '';
+            u.searchParams.set('cenario', cenarioAtual);   // já abre no mesmo cenário (sem animação de troca)
             iframe.src = u.toString();
             document.body.appendChild(iframe);
             const limpar = () => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); };
@@ -4488,13 +4494,19 @@
                     if (el && el.textContent && el.textContent.trim() !== '—' && doc.querySelector('#brazilMap svg')) break;
                     await new Promise(r => setTimeout(r, 150));
                 }
-                // Replica o estado da tela atual: cenário e seletor Selecionadas/Contratadas
-                const radioCenario = document.querySelector('input[name="refrota-group"]:checked');
-                const clicar = id => { const r = doc.getElementById(id); if (r && !r.checked) r.click(); };
-                if (radioCenario && radioCenario.id) clicar(radioCenario.id);
+                // Replica o seletor Selecionadas/Contratadas da tela atual (o cenário já vem pela URL)
                 const tipoAtual = document.querySelector('input[name="map-tipo-group"]:checked');
-                if (tipoAtual && tipoAtual.id) clicar(tipoAtual.id);
-                await new Promise(r => setTimeout(r, 1800));   // animações dos gráficos terminam
+                const alvoTipo = tipoAtual && doc.getElementById(tipoAtual.id);
+                if (alvoTipo && !alvoTipo.checked) alvoTipo.click();
+                // Espera as animações (contagem do funil e gráficos) terminarem: os números do
+                // painel invisível precisam ficar iguais aos da tela atual, já estabilizada.
+                const ids = ['funilValor0', 'funilCompContratados', 'funilValor2', 'funilInvValor0', 'odoPct', 'odoEntTxt'];
+                const t1 = Date.now();
+                while (Date.now() - t1 < 15000) {
+                    if (ids.every(id => (doc.getElementById(id) || {}).textContent === (document.getElementById(id) || {}).textContent)) break;
+                    await new Promise(r => setTimeout(r, 200));
+                }
+                await new Promise(r => setTimeout(r, 2500));   // gráficos (Chart.js) terminam de desenhar
                 doc.body.classList.add('exportando-captura');
                 return { doc, win, limpar };
             } catch (e) { limpar(); throw e; }
