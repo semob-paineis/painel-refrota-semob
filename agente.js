@@ -922,7 +922,7 @@
       calculo: 'Soma dos veículos selecionados do Refrota Privado com portaria em 2026, exceto habilitadas — mesma conta nos três cenários.' },
     { id: 'veiculosContratados', titulo: 'Veículos Selecionados, Contratados e Entregues',
       chaves: ['veiculos selecionados contratados e entregues', 'distribuicao de veiculos contratados', 'grafico de veiculos contratados', 'card de veiculos contratados', 'odometro'],
-      mostra: 'Um odômetro com o semicírculo inteiro = veículos selecionados; a faixa azul e o ponteiro = veículos contratados (% dos selecionados); o arco externo = divisão dos contratados em elétricos, Euro 6 e trilhos; o arco interno = veículos entregues (% dos contratados).',
+      mostra: 'Um odômetro com o semicírculo inteiro = veículos selecionados; a faixa azul-claro = veículos contratados (% dos selecionados); o arco externo = divisão dos contratados em elétricos, Euro 6 e trilhos; o arco verde e o ponteiro = veículos entregues (% dos selecionados, a mesma taxa do funil; o tooltip traz também a taxa sobre os contratados).',
       calculo: 'Os mesmos números do funil: selecionados e contratados por tipo do cenário escolhido; entregues vêm do bloco de veículos entregues.' },
     { id: 'selecionadas', titulo: 'Distribuição das Propostas Selecionadas',
       chaves: ['distribuicao das propostas selecionadas', 'propostas selecionadas card', 'card de propostas selecionadas', 'card das propostas selecionadas'],

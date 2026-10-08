@@ -407,7 +407,7 @@
         .odo-ent { fill: #9adcbb; cursor: pointer; }
         .odo-agulha { transform-origin: 210px 210px; transition: transform .9s cubic-bezier(.2,.8,.2,1); fill: #1f2937; }
         .odo-hub { fill: #1f2937; stroke: #ffffff; stroke-width: 3; }
-        .odo-pct { font-size: 22px; font-weight: 800; fill: #1a4bd6; }
+        .odo-pct { font-size: 22px; font-weight: 800; fill: #2f9e73; }
         .odo-sub, .odo-eixo { font-size: 10.5px; fill: #666666; }
         .odo-eixo { font-size: 10px; fill: #999999; }
         [data-seg]:hover { opacity: .8; }
@@ -1738,7 +1738,7 @@
                         <g id="odoAgulha" class="odo-agulha"><polygon points="206,210 214,210 210,92"/></g>
                         <circle cx="210" cy="210" r="11" class="odo-hub"/>
                         <text x="210" y="243" text-anchor="middle" class="odo-pct" id="odoPct">—</text>
-                        <text x="210" y="259" text-anchor="middle" class="odo-sub">contratados dentro dos selecionados</text>
+                        <text x="210" y="259" text-anchor="middle" class="odo-sub">entregues dentro dos selecionados</text>
                         <text x="46" y="226" text-anchor="middle" class="odo-eixo">0</text>
                         <text x="374" y="226" text-anchor="middle" class="odo-eixo" id="odoTotal">—</text>
                     </svg>
@@ -3675,7 +3675,7 @@
         // --- Odômetro de veículos: selecionados (100%) -> contratados -> entregues ---
         // Mesmos dados do funil de conversão (funilComposicao): semicírculo = selecionados;
         // faixa azul = contratados; arco externo = composição dos contratados por tipo;
-        // arco interno = entregues sobre contratados; ponteiro = % contratados/selecionados.
+        // arco interno = entregues sobre selecionados; ponteiro = % entregues/selecionados.
         const ODO = { cx: 210, cy: 210 };
         function odoPonto(r, f) { const a = Math.PI * f; return [ODO.cx - r * Math.cos(a), ODO.cy - r * Math.sin(a)]; }
         function odoFaixa(rIn, rOut, f0, f1) {            // setor entre duas frações do semicírculo (0..1)
@@ -3717,9 +3717,9 @@
                 acum += w;
             });
             const ag = document.getElementById('odoAgulha');
-            if (ag) ag.style.transform = 'rotate(' + (fCon * 180 - 90) + 'deg)';
+            if (ag) ag.style.transform = 'rotate(' + (fEntSel * 180 - 90) + 'deg)';   // ponteiro = entregues ÷ selecionados
             const txt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-            txt('odoPct', fmtPct(fCon * 100) + '%');
+            txt('odoPct', fmtPct(fEntSel * 100) + '%');
             txt('odoTotal', fmtInt(tSel));
             txt('odoSel', fmtInt(tSel));
             txt('odoCon', fmtInt(tCon) + ' (' + fmtPct(fCon * 100) + '%)');
