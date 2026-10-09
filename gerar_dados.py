@@ -222,6 +222,18 @@ def extrair_cenario(caminho_xlsx, chave_cenario):
     def cel(r, c):
         return num(ws.cell(r, c).value)
 
+    # Colunas de Elétricos / Euro VI / Trilhos do bloco ENTREGUES: localizadas pelo
+    # cabeçalho (linha 7, à direita da coluna K), pois a planilha já mudou de layout.
+    col_ent = {}
+    for c in range(11, ws.max_column + 1):
+        h = str(ws.cell(LINHA_VEIC_ENTREGUES - 6, c).value or "").lower()
+        if "elétr" in h or "eletr" in h: col_ent.setdefault("el", c)
+        elif "euro" in h: col_ent.setdefault("e6", c)
+        elif "trilho" in h: col_ent.setdefault("tr", c)
+    c_el = col_ent.get("el", COL_ENT_ELETRICOS)
+    c_e6 = col_ent.get("e6", COL_ENT_EURO6)
+    c_tr = col_ent.get("tr", COL_ENT_TRILHOS)
+
     dados = {
         "rotulo": cfg["rotulo"],
         "destaque": cfg["destaque"],
@@ -236,9 +248,9 @@ def extrair_cenario(caminho_xlsx, chave_cenario):
             "trilhos": cel(LINHA_VEIC_SELECIONADOS, COL_TRILHOS),
         },
         "veiculosEntregues": {
-            "eletricos": cel(LINHA_VEIC_ENTREGUES, COL_ENT_ELETRICOS),
-            "euro6": cel(LINHA_VEIC_ENTREGUES, COL_ENT_EURO6),
-            "trilhos": cel(LINHA_VEIC_ENTREGUES, COL_ENT_TRILHOS),
+            "eletricos": cel(LINHA_VEIC_ENTREGUES, c_el),
+            "euro6": cel(LINHA_VEIC_ENTREGUES, c_e6),
+            "trilhos": cel(LINHA_VEIC_ENTREGUES, c_tr),
         },
         "regioes": [],
         "anos": [],
@@ -445,13 +457,14 @@ def validar(dados):
             "total de selecionados do cenário 'privado' — confira a planilha."
         )
 
-    # 8) Meta 2026: Público + Privado = Consolidado (realizado)
+    # 8) Meta 2026: regra intencional — o Consolidado usa somente a frente Privado
+    #    (célula J39 com filtro Privado). Portanto Consolidado deve ser = Privado.
     meta_cons = c["meta2026"]["realizado"]
-    meta_soma = p["meta2026"]["realizado"] + v["meta2026"]["realizado"]
-    if meta_cons != meta_soma:
+    meta_priv = v["meta2026"]["realizado"]
+    if meta_cons != meta_priv:
         erros.append(
-            f"Reconciliação meta2026.realizado: Consolidado ({meta_cons}) "
-            f"≠ Público+Privado ({meta_soma})"
+            f"Meta 2026 (realizado): Consolidado ({meta_cons}) ≠ Privado ({meta_priv}) "
+            f"— pela regra vigente o Consolidado deve usar apenas a frente Privado"
         )
 
     # 9) Veículos entregues: Público + Privado = Consolidado

@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "gerado_em": "2026-10-08T17:17:42-03:00",
-    "planilha_origem": "trabalho.xlsx",
+    "gerado_em": "2026-10-09T15:25:22-03:00",
+    "planilha_origem": "trab.xlsx",
     "gerado_por": "gerar_dados.py",
     "versao_estrutura": 2
   },
@@ -10,7 +10,7 @@
     "destaque": null,
     "veiculos": {
       "eletricos": 1050,
-      "euro6": 6005,
+      "euro6": 6007,
       "trilhos": 47
     },
     "veiculosSelecionados": {
@@ -45,7 +45,7 @@
       {
         "nome": "Sudeste",
         "propostas": 131,
-        "veiculos": 3841,
+        "veiculos": 3843,
         "investimento": 4640436014.91
       },
       {
@@ -71,7 +71,7 @@
       {
         "ano": 2025,
         "propostas": 119,
-        "veiculos": 2669,
+        "veiculos": 2671,
         "investimento": 2177785217.89
       },
       {
@@ -205,7 +205,7 @@
       },
       "contratados": {
         "propostas": 231,
-        "veiculos": 7102,
+        "veiculos": 7104,
         "investimento": 8750490345.82
       },
       "status": {
@@ -490,7 +490,7 @@
     "destaque": 1,
     "veiculos": {
       "eletricos": 596,
-      "euro6": 4832,
+      "euro6": 4834,
       "trilhos": 0
     },
     "veiculosSelecionados": {
@@ -499,8 +499,8 @@
       "trilhos": 0
     },
     "veiculosEntregues": {
-      "eletricos": 134,
-      "euro6": 3352,
+      "eletricos": 174,
+      "euro6": 3577,
       "trilhos": 0
     },
     "regioes": [
@@ -525,7 +525,7 @@
       {
         "nome": "Sudeste",
         "propostas": 123,
-        "veiculos": 3254,
+        "veiculos": 3256,
         "investimento": 3247476197.91
       },
       {
@@ -551,7 +551,7 @@
       {
         "ano": 2025,
         "propostas": 119,
-        "veiculos": 2669,
+        "veiculos": 2671,
         "investimento": 2177785217.89
       },
       {
@@ -685,7 +685,7 @@
       },
       "contratados": {
         "propostas": 213,
-        "veiculos": 5428,
+        "veiculos": 5430,
         "investimento": 5032129396.61
       },
       "status": {
@@ -727,7 +727,7 @@
   },
   "_comparativo": {
     "dataAnterior": "2026-09-23T12:06:43-03:00",
-    "dataAtual": "2026-10-08T17:17:42-03:00",
+    "dataAtual": "2026-10-09T15:25:22-03:00",
     "metricas": [
       {
         "rotulo": "Propostas contratadas",
@@ -739,7 +739,7 @@
         "rotulo": "Veículos contratados",
         "formato": "int",
         "anterior": 6705,
-        "atual": 7102
+        "atual": 7104
       },
       {
         "rotulo": "Investimento contratado",
@@ -773,14 +773,9 @@
       }
     ],
     "destaques": [
-      "Foram registradas 9 novas contratações — 8 na Refrota Privado e 1 na Refrota Público, somando 397 veículos e R$ 0,25 bilhão em investimento.",
+      "Foram registradas 9 novas contratações — 8 na Refrota Privado e 1 na Refrota Público, somando 399 veículos e R$ 0,25 bilhão em investimento.",
       "Entraram 10 novas propostas selecionadas, elevando o investimento selecionado em R$ 0,39 bilhão.",
       "A participação de ônibus elétricos na frota contratada recuou de 15,7% para 14,8%."
     ]
-  },
-  "_dados_inconsistentes": [
-    "Reconciliação meta2026.realizado: Consolidado (2647) ≠ Público+Privado (3227)",
-    "Reconciliação veiculosEntregues.eletricos: Consolidado (399) ≠ Público+Privado (359)",
-    "Reconciliação veiculosEntregues.euro6: Consolidado (4149) ≠ Público+Privado (3924)"
-  ]
+  }
 }
