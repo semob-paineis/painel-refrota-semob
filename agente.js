@@ -73,6 +73,13 @@
     if (a >= 1e3) return 'R$ ' + dec(v / 1e3, 1) + ' mil';
     return 'R$ ' + dec(v, 2);
   }
+  /* Valor UNITÁRIO (por veículo / por contrato): "R$ 2,59 mi", pois em bilhões ficaria "R$ 0,00 bi". */
+  function moedaUnit(v) {
+    var a = Math.abs(v);
+    if (a >= 1e9) return moeda(v);
+    if (a >= 1e6) return 'R$ ' + dec(v / 1e6, 2) + ' mi';
+    return moeda(v);
+  }
   function plural(n, um, varios) { return int(n) + ' ' + (n === 1 ? um : varios); }
   function lista(itens) {
     if (itens.length <= 1) return itens.join('');
@@ -384,7 +391,7 @@
     liberado:    { rotulo: 'valor desembolsado', f: function (t) { return t.liberadoTipo; }, fmt: moeda },
     taxaEntrega: { rotulo: 'taxa de entrega (veículos entregues ÷ contratados)', f: function (t) { return t.contrTipo ? t.entreguesTipo / t.contrTipo : 0; }, fmt: pct, ratio: true, den: function (t) { return t.contrTipo; }, contratada: true },
     taxaDesembolso: { rotulo: 'taxa de desembolso (valor liberado ÷ valor contratado)', f: function (t) { return t.valorContrTipo ? t.liberadoTipo / t.valorContrTipo : 0; }, fmt: pct, ratio: true, den: function (t) { return t.valorContrTipo; }, contratada: true },
-    medio:       { rotulo: 'valor contratado médio por veículo', f: function (t) { return t.contrTipo ? t.valorContrTipo / t.contrTipo : 0; }, fmt: moeda, ratio: true, den: function (t) { return t.contrTipo; }, contratada: true }
+    medio:       { rotulo: 'valor contratado médio por veículo', f: function (t) { return t.contrTipo ? t.valorContrTipo / t.contrTipo : 0; }, fmt: moedaUnit, ratio: true, den: function (t) { return t.contrTipo; }, contratada: true }
   };
 
   function dimensaoDaPergunta(n) {
@@ -657,7 +664,7 @@
         html = '<p>' + (metrica === 'investimento' ? 'O investimento' + (s.veic ? ' em ' + rotuloTipo(s.veic) : '') + ' é de ' : 'São ') + '<b>' + M.fmt(v) + '</b>' +
           (metrica === 'investimento' ? '' : ' ' + esc(M.rotulo)) + (geo ? ' — ' + esc(geo) : '') + ', em <b>' + plural(nProp, 'proposta', 'propostas') + '</b>.' + ctxTxt + '</p>';
         if (metrica === 'investimento' && s.veic) {
-          html += '<p class="agente__mini">' + (usaContratado(s) ? 'Valor contratado' : 'Apoio previsto') + ' dos contratos com ' + esc(rotuloTipo(s.veic)) + ', rateado pela fatia desse tipo de veículo' + (t.mistos ? ' (' + plural(t.mistos, 'contrato misto', 'contratos mistos') + ')' : '; nenhum contrato misto neste recorte') + '. Isso dá ' + moeda(t.veiculos ? v / t.veiculos : 0) + ' por veículo.</p>';
+          html += '<p class="agente__mini">' + (usaContratado(s) ? 'Valor contratado' : 'Apoio previsto') + ' dos contratos com ' + esc(rotuloTipo(s.veic)) + ', rateado pela fatia desse tipo de veículo' + (t.mistos ? ' (' + plural(t.mistos, 'contrato misto', 'contratos mistos') + ')' : '; nenhum contrato misto neste recorte') + '. Isso dá ' + moedaUnit(t.veiculos ? v / t.veiculos : 0) + ' por veículo.</p>';
         }
         if (!s.veic && metrica === 'veiculos') {
           html += '<p class="agente__mini">Composição: ' + int(t.el) + ' elétricos · ' + int(t.e6) + ' Euro 6 · ' + int(t.tr) + ' sobre trilhos.</p>';
@@ -699,16 +706,26 @@
     var L = filtra(s);
     var el = L.filter(function (r) { return r.elContr > 0 && r.e6Contr === 0 && r.trContr === 0; });
     var e6 = L.filter(function (r) { return r.e6Contr > 0 && r.elContr === 0 && r.trContr === 0; });
+    var mistos = L.filter(function (r) { return r.elContr > 0 && r.e6Contr > 0; });
     var cel = soma(el, function (r) { return r.elContr; }), ce6 = soma(e6, function (r) { return r.e6Contr; });
     var vel = soma(el, function (r) { return r.valorContr; }), ve6 = soma(e6, function (r) { return r.valorContr; });
-    if (!cel || !ce6) return null;
-    var mel = vel / cel, me6 = ve6 / ce6;
-    var h = '<p>Valor contratado médio por veículo (apenas contratos de um único tipo de veículo):</p>' +
+    if (!cel && !ce6) return null;
+    var mel = cel ? vel / cel : null, me6 = ce6 ? ve6 / ce6 : null;
+    var nome = { eletrico: 'ônibus elétrico', euro6: 'ônibus Euro 6' };
+    var lead = '';
+    if ((e.veic === 'el' || e.veic === 'e6') && (e.veic === 'el' ? mel : me6) != null) {
+      lead = '<p>O valor médio de um <b>' + nome[e.veic === 'el' ? 'eletrico' : 'euro6'] + '</b> contratado é <b>' + moedaUnit(e.veic === 'el' ? mel : me6) + '</b>.</p>';
+    } else if (mel != null && me6 != null) {
+      lead = '<p>Valor médio por veículo contratado: <b>' + moedaUnit(mel) + '</b> (ônibus elétrico) e <b>' + moedaUnit(me6) + '</b> (ônibus Euro 6).</p>';
+    }
+    var lin = function (rot, n, q, m) { return '<tr><td>' + rot + '</td><td class="n">' + (m == null ? '—' : int(n)) + '</td><td class="n">' + (m == null ? '—' : int(q)) + '</td><td class="n">' + (m == null ? 'sem contratos neste recorte' : moedaUnit(m)) + '</td></tr>'; };
+    var h = lead +
       '<table class="agente__tab"><thead><tr><th>Tipo</th><th class="n">Contratos</th><th class="n">Veículos</th><th class="n">Médio por veículo</th></tr></thead><tbody>' +
-      '<tr><td>Elétrico</td><td class="n">' + int(el.length) + '</td><td class="n">' + int(cel) + '</td><td class="n">' + moeda(mel) + '</td></tr>' +
-      '<tr><td>Euro 6</td><td class="n">' + int(e6.length) + '</td><td class="n">' + int(ce6) + '</td><td class="n">' + moeda(me6) + '</td></tr></tbody></table>' +
-      '<p>Em média, o ônibus elétrico custa <b>' + dec(mel / me6, 2) + '×</b> o Euro 6 nos contratos considerados.</p>' +
-      '<div class="agente__fonte"><b>Recorte:</b> ' + esc(descreveRecorte(s)) + '. Contratos que misturam elétricos e Euro 6 ficam de fora, pois a base não separa o valor por tipo.</div>';
+      lin('Elétrico', el.length, cel, mel) + lin('Euro 6', e6.length, ce6, me6) + '</tbody></table>' +
+      (mel != null && me6 != null ? '<p>Em média, o ônibus elétrico custa <b>' + dec(mel / me6, 2) + '×</b> o Euro 6 nos contratos considerados.</p>' : '') +
+      '<div class="agente__fonte"><b>Como é calculado:</b> valor contratado ÷ veículos contratados, somando só os contratos de um único tipo de veículo. ' +
+      (mistos.length ? plural(mistos.length, 'contrato misto', 'contratos mistos') + ' (' + int(soma(mistos, function (r) { return r.elContr + r.e6Contr; })) + ' veículos) ficam de fora, pois a base não separa o valor por tipo.' : 'Nenhum contrato misto neste recorte.') +
+      '<br><b>Recorte:</b> ' + esc(descreveRecorte(s)) + '.</div>';
     return { html: h, fatos: { medioEl: mel, medioE6: me6, contratosEl: el.length, contratosE6: e6.length }, acoes: [], sugestoes: SUGESTOES_BASE };
   }
 
@@ -1195,7 +1212,7 @@
       if (e.desembolso) {
         h += '<p>Nos contratos que já têm veículos entregues' + lugar + ' (' + plural(t.entContratos, 'contrato', 'contratos') + ', <b>' + int(EN) + '</b> ' + esc(rot) + ' entregues) já foram desembolsados <b>' + moeda(lib) + '</b>' + (contratos ? ' — ' + pct(lib / contratos) + ' dos ' + moeda(contratos) + ' contratados nesses contratos' : '') + '.</p>';
       } else {
-        h += '<p>Os <b>' + int(EN) + '</b> ' + esc(rot) + ' entregues' + lugar + ' representam, em valor contratado, aproximadamente <b>' + moeda(prop) + '</b>' + (totContr ? ' (' + pct(prop / totContr) + ' dos ' + moeda(totContr) + ' contratados no recorte)' : '') + ', ou cerca de <b>' + moeda(prop / EN) + '</b> por veículo.</p>';
+        h += '<p>Os <b>' + int(EN) + '</b> ' + esc(rot) + ' entregues' + lugar + ' representam, em valor contratado, aproximadamente <b>' + moeda(prop) + '</b>' + (totContr ? ' (' + pct(prop / totContr) + ' dos ' + moeda(totContr) + ' contratados no recorte)' : '') + ', ou cerca de <b>' + moedaUnit(prop / EN) + '</b> por veículo.</p>';
       }
       h += '<table class="agente__tab"><thead><tr><th>Medida</th><th class="n">Valor</th></tr></thead><tbody>' +
         '<tr><td><b>Proporcional aos veículos entregues</b><br><span class="agente__mini">valor de cada contrato × (veículos entregues ÷ contratados)</span></td><td class="n"><b>' + moeda(prop) + '</b></td></tr>' +
@@ -1366,7 +1383,7 @@
       var dist = respostaDistintos(e, n); if (dist) return dist;
     }
     // Custo médio por tipo de veículo
-    if (/\b(custo|preco|valor|ticket) medio\b|\bmais caro|\bmais barato|\bcusta mais\b|\bquanto custa\b/.test(n) && (e.veic === 'ambos' || /eletric/.test(n) && /euro/.test(n) || /\bcompar|\bversus|\bx\b|\bvs\b|\bdiferenca\b/.test(n))) {
+    if (/\b(custo|preco|valor|ticket) medio\b|\bmais caro|\bmais barato|\bcusta mais\b|\bquanto custa\b/.test(n) && (e.veic === 'ambos' || e.veic === 'el' || e.veic === 'e6' || /eletric/.test(n) && /euro/.test(n) || /\bcompar|\bversus|\bx\b|\bvs\b|\bdiferenca\b/.test(n)) && !rankingIntent) {
       var cx = respostaCustoPorTipo(e); if (cx) return cx;
     }
     // Participação ("qual a participação de SP nos elétricos")
