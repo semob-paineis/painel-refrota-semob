@@ -1431,6 +1431,9 @@
       return respostaValor(e, n, metrica);
     }
 
+    // "Valor médio por veículo" (sem tipo, sem dimensão): média geral do recorte
+    if (metrica === 'medio') return respostaValor(e, n, metrica);
+
     // Conceito sem "o que é"
     var c2 = melhorConceito(n); if (c2 && n.split(' ').length <= 5) return respostaConceito(c2);
 

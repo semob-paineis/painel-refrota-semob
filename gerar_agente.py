@@ -203,6 +203,17 @@ def main():
         f.write(";\n")
     print(f"  [OK]    Arquivo gerado: {a.saida} ({os.path.getsize(a.saida)/1024:.0f} KB)")
 
+    # Cache-busting: atualiza o ?v= dos scripts no index.html (evita navegador com base_agente.js antigo).
+    idx = os.path.join(os.path.dirname(os.path.abspath(a.saida)), "index.html")
+    if os.path.exists(idx):
+        import re
+        carimbo = datetime.now().strftime("%Y%m%d%H%M")
+        h = open(idx, encoding="utf-8").read()
+        h2 = re.sub(r'(base_agente\.js|agente\.js)\?v=\d+', lambda m: f"{m.group(1)}?v={carimbo}", h)
+        if h2 != h:
+            open(idx, "w", encoding="utf-8").write(h2)
+            print(f"  [OK]    index.html: versão dos scripts do agente = {carimbo}")
+
 
 if __name__ == "__main__":
     main()
