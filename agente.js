@@ -69,7 +69,7 @@
   function moeda(v) {
     var a = Math.abs(v);
     if (a >= 1e9) return 'R$ ' + dec(v / 1e9, 2) + ' bi';
-    if (a >= 1e6) return 'R$ ' + dec(v / 1e9, 2) + ' bi';   // padrão do painel: sempre em bilhões, 2 casas
+    if (a >= 1e6) return 'R$ ' + dec(v / 1e6, 2) + ' mi';   // no Agente: milhões quando o valor é menor que R$ 1 bi (o restante do painel usa sempre bilhões)
     if (a >= 1e3) return 'R$ ' + dec(v / 1e3, 1) + ' mil';
     return 'R$ ' + dec(v, 2);
   }
