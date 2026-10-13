@@ -570,12 +570,20 @@ def montar_comparativo(dados_novos, caminho_baseline):
         v = cen["veiculosSelecionados"]
         return v["eletricos"] + v["euro6"] + v["trilhos"]
 
+    def veic_ent(cen):
+        return sum(cen["veiculosEntregues"].values())
+
+    # "veiculosEntregues" pode faltar em baselines antigos: nesse caso a linha/destaque são omitidos.
+    ent_ant = base.get("veiculosEntregues")
+
     metricas = [
         {"rotulo": "Propostas contratadas", "formato": "int",
          "anterior": base["propostasContratadas"]["consolidado"],
          "atual": nc["projetos"]["contratados"]["propostas"]},
         {"rotulo": "Veículos contratados", "formato": "int",
          "anterior": base["veiculosContratados"], "atual": veic(nc)},
+        *([{"rotulo": "Veículos entregues", "formato": "int",
+            "anterior": ent_ant, "atual": veic_ent(nc)}] if ent_ant is not None else []),
         {"rotulo": "Investimento contratado", "formato": "moeda",
          "anterior": base["investimentoContratado"],
          "atual": nc["projetos"]["contratados"]["investimento"]},
@@ -627,6 +635,22 @@ def montar_comparativo(dados_novos, caminho_baseline):
             f"O total de propostas contratadas recuou em {br(abs(d_contr))} — "
             f"vale conferir na base se houve cancelamento ou ajuste."
         )
+
+    # 1b) Veiculos entregues no periodo (Consolidado)
+    if ent_ant is not None:
+        d_ent = veic_ent(nc) - ent_ant
+        if d_ent > 0:
+            destaques.append(
+                f"Foram entregues {br(d_ent)} veículos no período, elevando o total de entregas "
+                f"de {br(ent_ant)} para {br(veic_ent(nc))}."
+            )
+        elif d_ent < 0:
+            destaques.append(
+                f"O total de veículos entregues recuou em {br(abs(d_ent))} no período "
+                f"(de {br(ent_ant)} para {br(veic_ent(nc))}) — vale conferir na base se houve ajuste."
+            )
+        else:
+            destaques.append("Não houve novas entregas de veículos no período.")
 
     # 2) Migracao entre status (Em preparacao -> Contratados)
     prep_ant = base["carteiraEmPreparacao"]
