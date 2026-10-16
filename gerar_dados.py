@@ -260,6 +260,19 @@ def extrair_cenario(caminho_xlsx, chave_cenario):
         "ufsSelecionados": {},
     }
 
+    # Entregas por região (bloco K5:Q13 da aba "Dados para Painel"): coluna "Região"
+    # localizada pelo cabeçalho (linha 6); o total fica na coluna seguinte.
+    c_reg = next((c for c in range(9, ws.max_column + 1)
+                  if str(ws.cell(LINHA_VEIC_ENTREGUES - 7, c).value or "").strip().lower() == "região"
+                  or str(ws.cell(LINHA_VEIC_ENTREGUES - 7, c).value or "").strip().lower() == "regiao"), 11)
+    dados["entreguesRegioes"] = [{
+        "nome": ws.cell(r, c_reg).value,
+        "total": cel(r, c_reg + 1),
+        "eletricos": cel(r, c_el),
+        "euro6": cel(r, c_e6),
+        "trilhos": cel(r, c_tr),
+    } for r in REGIOES_LINHAS]
+
     for r in REGIOES_LINHAS:
         dados["regioes"].append({
             "nome": ws.cell(r, COL_NOME).value,
@@ -456,6 +469,16 @@ def validar(dados):
             "Frente Privado: propostas da 'frentePrivado' não coincide com o "
             "total de selecionados do cenário 'privado' — confira a planilha."
         )
+
+    # 8b) Entregas por região: soma das regiões = total de veículos entregues do cenário
+    for chave, cen in (("consolidado", c), ("publico", p), ("privado", v)):
+        soma_reg = sum(r["total"] for r in cen.get("entreguesRegioes", []))
+        tot_ent = sum(cen["veiculosEntregues"].values())
+        if soma_reg != tot_ent:
+            erros.append(
+                f"[{chave}] Entregas por região somam {soma_reg}, mas o total de veículos "
+                f"entregues é {tot_ent} — confira o bloco K5:Q13 da aba 'Dados para Painel'."
+            )
 
     # 8) Meta 2026: desde 16/10/2026 o Consolidado reúne Refrota Público + Privado
     #    (antes usava só a frente Privado). Portanto Consolidado deve ser = Público + Privado.

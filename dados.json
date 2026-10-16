@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "gerado_em": "2026-10-16T12:03:35-03:00",
-    "planilha_origem": "trab.xlsx",
+    "gerado_em": "2026-10-16T14:36:48-03:00",
+    "planilha_origem": "brief.xlsx",
     "gerado_por": "gerar_dados.py",
     "versao_estrutura": 2
   },
@@ -197,6 +197,43 @@
       "SE": 341961107.31,
       "TO": 191108000
     },
+    "entreguesRegioes": [
+      {
+        "nome": "Norte",
+        "total": 388,
+        "eletricos": 225,
+        "euro6": 163,
+        "trilhos": 0
+      },
+      {
+        "nome": "Nordeste",
+        "total": 669,
+        "eletricos": 0,
+        "euro6": 667,
+        "trilhos": 2
+      },
+      {
+        "nome": "Centro-Oeste",
+        "total": 470,
+        "eletricos": 0,
+        "euro6": 470,
+        "trilhos": 0
+      },
+      {
+        "nome": "Sudeste",
+        "total": 2730,
+        "eletricos": 174,
+        "euro6": 2556,
+        "trilhos": 0
+      },
+      {
+        "nome": "Sul",
+        "total": 456,
+        "eletricos": 0,
+        "euro6": 456,
+        "trilhos": 0
+      }
+    ],
     "projetos": {
       "selecionados": {
         "propostas": 365,
@@ -437,6 +474,43 @@
       "SE": 131340000,
       "TO": 191108000
     },
+    "entreguesRegioes": [
+      {
+        "nome": "Norte",
+        "total": 265,
+        "eletricos": 225,
+        "euro6": 40,
+        "trilhos": 0
+      },
+      {
+        "nome": "Nordeste",
+        "total": 151,
+        "eletricos": 0,
+        "euro6": 149,
+        "trilhos": 2
+      },
+      {
+        "nome": "Centro-Oeste",
+        "total": 0,
+        "eletricos": 0,
+        "euro6": 0,
+        "trilhos": 0
+      },
+      {
+        "nome": "Sudeste",
+        "total": 383,
+        "eletricos": 0,
+        "euro6": 383,
+        "trilhos": 0
+      },
+      {
+        "nome": "Sul",
+        "total": 0,
+        "eletricos": 0,
+        "euro6": 0,
+        "trilhos": 0
+      }
+    ],
     "projetos": {
       "selecionados": {
         "propostas": 84,
@@ -677,6 +751,43 @@
       "SE": 210621107.31,
       "TO": 0
     },
+    "entreguesRegioes": [
+      {
+        "nome": "Norte",
+        "total": 123,
+        "eletricos": 0,
+        "euro6": 123,
+        "trilhos": 0
+      },
+      {
+        "nome": "Nordeste",
+        "total": 518,
+        "eletricos": 0,
+        "euro6": 518,
+        "trilhos": 0
+      },
+      {
+        "nome": "Centro-Oeste",
+        "total": 470,
+        "eletricos": 0,
+        "euro6": 470,
+        "trilhos": 0
+      },
+      {
+        "nome": "Sudeste",
+        "total": 2347,
+        "eletricos": 174,
+        "euro6": 2173,
+        "trilhos": 0
+      },
+      {
+        "nome": "Sul",
+        "total": 456,
+        "eletricos": 0,
+        "euro6": 456,
+        "trilhos": 0
+      }
+    ],
     "projetos": {
       "selecionados": {
         "propostas": 281,
@@ -727,7 +838,7 @@
   },
   "_comparativo": {
     "dataAnterior": "2026-10-09T15:25:22-03:00",
-    "dataAtual": "2026-10-16T12:03:35-03:00",
+    "dataAtual": "2026-10-16T14:36:48-03:00",
     "metricas": [
       {
         "rotulo": "Propostas contratadas",
