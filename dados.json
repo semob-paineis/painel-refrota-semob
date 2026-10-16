@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "gerado_em": "2026-10-16T11:49:13-03:00",
+    "gerado_em": "2026-10-16T12:03:35-03:00",
     "planilha_origem": "trab.xlsx",
     "gerado_por": "gerar_dados.py",
     "versao_estrutura": 2
@@ -241,8 +241,8 @@
     },
     "meta2026": {
       "meta": 5000,
-      "realizado": 2753,
-      "percentual": 0.5506
+      "realizado": 3333,
+      "percentual": 0.6666
     }
   },
   "publico": {
@@ -727,7 +727,7 @@
   },
   "_comparativo": {
     "dataAnterior": "2026-10-09T15:25:22-03:00",
-    "dataAtual": "2026-10-16T11:49:13-03:00",
+    "dataAtual": "2026-10-16T12:03:35-03:00",
     "metricas": [
       {
         "rotulo": "Propostas contratadas",
@@ -774,8 +774,8 @@
       {
         "rotulo": "Meta 2026 (veículos)",
         "formato": "int",
-        "anterior": 2647,
-        "atual": 2753
+        "anterior": 3227,
+        "atual": 3333
       }
     ],
     "destaques": [

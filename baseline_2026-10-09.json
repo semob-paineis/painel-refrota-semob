@@ -11,7 +11,7 @@
   "propostasSelecionadas": 360,
   "veiculosSelecionados": 15128,
   "investimentoSelecionado": 20330071928.49,
-  "metaRealizado": 2647,
+  "metaRealizado": 3227,
   "carteiraEmPreparacao": 71,
   "pctEletricosContratados": 14.8,
   "rankingRegioesTop3": [
@@ -19,5 +19,6 @@
     "Nordeste",
     "Sul"
   ],
-  "veiculosEntregues": 4550
+  "veiculosEntregues": 4550,
+  "_nota_meta": "Meta 2026 reescrita pela regra vigente desde 16/10/2026 (Consolidado = Refrota Público + Privado): 2.647 (Privado) + 580 (Público) = 3.227."
 }

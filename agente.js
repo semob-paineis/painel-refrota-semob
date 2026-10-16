@@ -490,7 +490,7 @@
       texto: 'Propostas <b>habilitadas</b> ainda não foram selecionadas; por isso não entram nos totais de propostas selecionadas nem de contratadas.' },
     { chaves: ['meta 2026', 'meta', 'meta de 5000', '5000 veiculos'],
       titulo: 'Meta 2026',
-      texto: 'A meta é de <b>5.000 unidades de veículos selecionados para o Refrota Privado</b> em 2026. Por regra do painel, o “realizado” conta apenas veículos selecionados do <b>Refrota Privado</b> com portaria de 2026 — mesmo quando o painel está em “Consolidado”.' },
+      texto: 'A meta é de <b>5.000 unidades de veículos selecionados</b> em 2026 (Refrota Público e Privado). O “realizado” conta os veículos selecionados com portaria de 2026, exceto habilitadas: no <b>Consolidado</b> soma Refrota Público + Privado; nos filtros Público ou Privado, só a frente escolhida. Até 09/10/2026 o painel contava apenas o Refrota Privado.' },
     { chaves: ['euro 6', 'euro vi', 'o que e euro'],
       titulo: 'Euro 6 (Euro VI)',
       texto: 'Ônibus a diesel/combustão com a fase de emissões P8 / Euro VI, a norma mais restritiva em vigor. No painel aparece como “Euro VI”.' },
@@ -793,14 +793,16 @@
     return { html: h, fatos: { itens: rk.linhas.map(function (x) { return [x.chave, x.valor]; }), dim: dim, metrica: metrica }, acoes: acoesRadar(s), sugestoes: SUGESTOES_BASE };
   }
 
-  function respostaMeta() {
-    var L = R.filter(function (r) { return r.frente === 'Privado' && r.cat !== 'habilitada' && r.ano === 2026; });
+  function respostaMeta(e) {
+    var fr = e && e.frente ? e.frente : null;
+    var L = R.filter(function (r) { return (!fr || r.frente === fr) && r.cat !== 'habilitada' && r.ano === 2026; });
     var real = soma(L, function (r) { return r.qtdSel; });
     var meta = 5000;
     var faltam = Math.max(meta - real, 0);
-    var h = '<p>A <b>Meta 2026</b> é de <b>' + int(meta) + '</b> unidades de veículos selecionados para o Refrota Privado. Já foram selecionados <b>' + int(real) + '</b> (' + pct(real / meta) + ' da meta) em <b>' + plural(L.length, 'proposta', 'propostas') + '</b>; ' +
+    var quem = fr ? 'Refrota ' + fr : 'Refrota Público e Privado';
+    var h = '<p>A <b>Meta 2026</b> é de <b>' + int(meta) + '</b> unidades de veículos selecionados (' + esc(quem) + '). Já foram selecionados <b>' + int(real) + '</b> (' + pct(real / meta) + ' da meta) em <b>' + plural(L.length, 'proposta', 'propostas') + '</b>; ' +
       (faltam ? 'faltam <b>' + int(faltam) + '</b> veículos.' : 'a meta foi <b>superada</b>.') + '</p>' +
-      '<div class="agente__fonte"><b>Regra do painel:</b> o realizado conta veículos selecionados do Refrota Privado com portaria em 2026, exceto habilitadas — mesmo na visão “Consolidado”.</div>';
+      '<div class="agente__fonte"><b>Regra do painel:</b> o realizado conta veículos selecionados com portaria em 2026, exceto habilitadas. No Consolidado soma Refrota Público + Privado (até 09/10/2026 contava só o Privado).' + (fr ? ' Recorte: ' + esc(quem) + '.' : '') + '</div>';
     return { html: h, fatos: { realizado: real, meta: meta, propostas: L.length }, acoes: [], sugestoes: SUGESTOES_BASE };
   }
 
@@ -907,7 +909,7 @@
       add(somaTipos(P.vs), 'veículos selecionados', 'funil', { cat: 'selecionada' });
       add(P.proj.contratados.propostas, 'propostas contratadas', 'contratadas', { cat: 'contratada', tipo: 'propostas' });
       add(P.proj.selecionados.propostas, 'propostas selecionadas', 'selecionadas', { cat: 'selecionada', tipo: 'propostas' });
-      add(P.meta && P.meta.realizado, 'veículos selecionados no ano de 2026 (Refrota Privado)', 'metaSelecionados', { meta: 'selecionados' });
+      add(P.meta && P.meta.realizado, 'veículos selecionados no ano de 2026 (Refrota Público e Privado)', 'metaSelecionados', { meta: 'selecionados' });
     });
     _numCache = lista; return lista;
   }
@@ -941,10 +943,10 @@
       chaves: ['meta quantidade de veiculos entregues', 'meta de veiculos entregues', 'meta de entregas', 'meta de entrega', 'meta das entregas', 'card de entregas', 'indicador de entregas'],
       mostra: 'Quantos veículos já foram entregues em relação à meta de 5.000 unidades. O percentual no centro é “entregues ÷ meta”; ao passar o mouse sobre o anel azul aparece a divisão por tipo de veículo (elétricos, Euro 6 e sobre trilhos).',
       calculo: 'Soma de veículos entregues (“Qtd. entregue” de cada contrato) no cenário escolhido (Consolidado, Público ou Privado), dividida pela meta de 5.000 unidades. A divisão por tipo usa os ajustes manuais do painel (Norte).' },
-    { id: 'metaSelecionados', titulo: 'Meta Quantidade de Veículos Selecionados - Refrota Privado - Ano 2026',
+    { id: 'metaSelecionados', titulo: 'Meta Quantidade de Veículos Selecionados - Ano 2026',
       chaves: ['meta quantidade de veiculos selecionados', 'meta de veiculos selecionados', 'meta 2026', 'meta de 2026', 'meta do ano'],
-      mostra: 'Quantos veículos do Refrota Privado foram selecionados em 2026 em relação à meta de 5.000 unidades.',
-      calculo: 'Soma dos veículos selecionados do Refrota Privado com portaria em 2026, exceto habilitadas — mesma conta nos três cenários.' },
+      mostra: 'Quantos veículos do Refrota (Público e Privado) foram selecionados em 2026 em relação à meta de 5.000 unidades.',
+      calculo: 'Soma dos veículos selecionados com portaria em 2026, exceto habilitadas. No Consolidado soma Refrota Público + Privado; nos cenários Público ou Privado, só a frente escolhida.' },
     { id: 'veiculosContratados', titulo: 'Veículos Selecionados, Contratados e Entregues',
       chaves: ['veiculos selecionados contratados e entregues', 'distribuicao de veiculos contratados', 'grafico de veiculos contratados', 'card de veiculos contratados', 'odometro'],
       mostra: 'Um odômetro com o semicírculo inteiro = veículos selecionados; a faixa azul-claro = veículos contratados (% dos selecionados); o arco externo = divisão dos contratados em elétricos, Euro 6 e trilhos; o arco verde e o ponteiro = veículos entregues (% dos selecionados, a mesma taxa do funil; o tooltip traz também a taxa sobre os contratados).',
@@ -1248,8 +1250,8 @@
     var qEnt = /\bentreg\w*|\brecebid\w*/.test(n);
     var qSel = /\bselecion\w*|\b2026\b|\bprivad\w*|\bportaria\b|\bano\b/.test(n);
     if (qEnt && !qSel) return respostaMetaEntregas(e, citou);
-    if (qSel && !qEnt) return respostaMeta();
-    var a = respostaMetaEntregas(e, citou), b = respostaMeta();
+    if (qSel && !qEnt) return respostaMeta(e);
+    var a = respostaMetaEntregas(e, citou), b = respostaMeta(e);
     return { html: '<p>O painel tem <b>duas metas de 5.000 unidades</b>, uma para cada card:</p>' + a.html + '<hr class="agente__sep">' + b.html,
              fatos: { entregas: a.fatos, selecionados: b.fatos }, acoes: [], sugestoes: SUGESTOES_BASE };
   }
@@ -1365,7 +1367,7 @@
       return respostaEntregas(e, n, original, citou, card);
     }
     if (pedeMeta && (!dim || (card && /^meta/.test(card.id)))) return respostaMetas(e, n, citou);
-    if (card && card.id === 'metaSelecionados') return respostaMeta();
+    if (card && card.id === 'metaSelecionados') return respostaMeta(e);
 
     // Evolução
     if (temAlgum(n, ['o que mudou', 'mudou', 'evolucao', 'desde 31 07', 'desde 23 09', 'desde a data de referencia', 'novas contratacoes', 'crescimento', 'variacao', 'destaques'])) {

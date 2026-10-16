@@ -1805,14 +1805,14 @@
 
             <!-- Nova coluna: Indicador de Metas de Veículos Selecionados 2026 -->
             <div class="chart-item">
-                <h3 class="chart-title">📈 Meta Quantidade de Veículos Selecionados - Refrota Privado - Ano 2026</h3>
+                <h3 class="chart-title">📈 Meta Quantidade de Veículos Selecionados - Ano 2026</h3>
                 <div class="donut-wrapper">
                     <div class="donut-chart" id="metasChart">
                         <canvas id="metasProgressChart"></canvas>
                         <div id="metasProgressTooltip" class="canvas-tooltip">Meta: <span id="metaTooltipValor">5.000</span> veículos</div>
                     </div>
                 </div>
-                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">Meta: <span id="metaRodapeValor">5.000</span> unidades de veículos selecionados para o Refrota Privado</p>
+                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">Meta: <span id="metaRodapeValor">5.000</span> unidades de veículos selecionados</p>
             </div>
         </div>
         <!-- Seletor: Projetos Selecionados | Projetos Contratados
@@ -1984,7 +1984,7 @@
     </div>
 
     <!-- Chart.js Scripts -->
-    <script src="base_agente.js?v=202610161150"></script>
+    <script src="base_agente.js?v=202610161203"></script>
     <script>
         /* =========================================================================
            ESTADO DINÂMICO DO PAINEL — Consolidado | Refrota Público | Refrota Privado
@@ -2234,8 +2234,8 @@
                 },
                 "meta2026": {
                     "meta": 5000,
-                    "realizado": 2753,
-                    "percentual": 0.5506
+                    "realizado": 3333,
+                    "percentual": 0.6666
                 }
             },
             "publico": {
@@ -2868,7 +2868,7 @@
         // dados.json indisponível), as duas seções permanecem ocultas.
         let COMPARATIVO = {
             "dataAnterior": "2026-10-09T15:25:22-03:00",
-            "dataAtual": "2026-10-16T11:49:13-03:00",
+            "dataAtual": "2026-10-16T12:03:35-03:00",
             "metricas": [
                 {
                     "rotulo": "Propostas contratadas",
@@ -2915,8 +2915,8 @@
                 {
                     "rotulo": "Meta 2026 (veículos)",
                     "formato": "int",
-                    "anterior": 2647,
-                    "atual": 2753
+                    "anterior": 3227,
+                    "atual": 3333
                 }
             ],
             "destaques": [
@@ -4999,7 +4999,7 @@
         // Ela é sobrescrita automaticamente pela data real do "dados.json"
         // (campo _meta.gerado_em) quando o arquivo é carregado com sucesso;
         // esta constante só aparece caso o dados.json não seja encontrado.
-        const DATA_ATUALIZACAO_ARQUIVO = '16/10/2026 às 11:49';
+        const DATA_ATUALIZACAO_ARQUIVO = '16/10/2026 às 12:03';
 
         function atualizarDataHora() {
             const elemento = document.getElementById('dataHoraAtualizacao');
@@ -5268,7 +5268,7 @@
         });
     </script>
 
-<script src="base_agente.js?v=202610161150"></script>
-<script src="agente.js?v=202610161150"></script>
+<script src="base_agente.js?v=202610161203"></script>
+<script src="agente.js?v=202610161203"></script>
 </body>
 </html>

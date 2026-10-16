@@ -457,14 +457,14 @@ def validar(dados):
             "total de selecionados do cenário 'privado' — confira a planilha."
         )
 
-    # 8) Meta 2026: regra intencional — o Consolidado usa somente a frente Privado
-    #    (célula J39 com filtro Privado). Portanto Consolidado deve ser = Privado.
+    # 8) Meta 2026: desde 16/10/2026 o Consolidado reúne Refrota Público + Privado
+    #    (antes usava só a frente Privado). Portanto Consolidado deve ser = Público + Privado.
     meta_cons = c["meta2026"]["realizado"]
-    meta_priv = v["meta2026"]["realizado"]
-    if meta_cons != meta_priv:
+    meta_soma = p["meta2026"]["realizado"] + v["meta2026"]["realizado"]
+    if meta_cons != meta_soma:
         erros.append(
-            f"Meta 2026 (realizado): Consolidado ({meta_cons}) ≠ Privado ({meta_priv}) "
-            f"— pela regra vigente o Consolidado deve usar apenas a frente Privado"
+            f"Reconciliação meta2026.realizado: Consolidado ({meta_cons}) "
+            f"≠ Público+Privado ({meta_soma})"
         )
 
     # 9) Veículos entregues: Público + Privado = Consolidado
