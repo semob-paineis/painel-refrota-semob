@@ -40,7 +40,7 @@ MET = {
   'prop':('propostas',        lambda r: 1,       lambda r: 1),
 }
 FRASE_Q = {'el':'ônibus elétricos','e6':'ônibus Euro 6','tr':'veículos sobre trilhos','veic':'veículos','inv':'investimento','prop':'propostas'}
-DIM = {'uf': lambda r: r[6], 'regiao': lambda r: r[7], 'ano': lambda r: str(int(r[30])) if r[30] else 'sem ano'}
+DIM = {'uf': lambda r: r[6], 'regiao': lambda r: r[7], 'ano': lambda r: (str(int(r[30])) if not isinstance(r[30], str) else (r[30].strip()[-4:] if r[30].strip()[-4:].isdigit() else 'sem ano')) if r[30] else 'sem ano'}
 
 def agrega(filtro, mkey, stage, dim=None):
     f = MET[mkey][1 if stage == 'c' else 2]
@@ -96,7 +96,7 @@ for fr, nome in (('Público','Refrota Público'),('Privado','Refrota Privado')):
 # estado x ano da portaria
 for uf in ('SP','MG','BA','RS','PE'):
     for ano in (2024, 2025, 2026):
-        exp = agrega(lambda r, uf=uf, ano=ano: r[6] == uf and r[30] == ano, 'veic', 'c')
+        exp = agrega(lambda r, uf=uf, ano=ano: r[6] == uf and DIM['ano'](r) == str(ano), 'veic', 'c')
         casos.append((f"Quantos veículos foram contratados em {NOME[uf]} com portaria de {ano}?", 'total', exp, 'veic'))
 # cidades
 cid = collections.defaultdict(float)

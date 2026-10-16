@@ -22,6 +22,7 @@ planilha, nunca contra uma cópia salva pelo openpyxl (que apaga o cache das
 fórmulas). BASEDEDADOS é lida com data_only=True.
 """
 import argparse
+import re
 import json
 import os
 import sys
@@ -106,6 +107,12 @@ def ler_linhas(planilha):
             continue
         row = list(row) + [None] * 45
         reg = [limpar(row[i]) for _, i, _ in COLUNAS]
+        # "Ano portaria" pode vir composto ("2025/2026"): vale o ano MAIS RECENTE, igual à coluna
+        # "Ano Portaria (Mais Recente)" (AP) que o painel usa nas tabelas por ano.
+        iano = [c[0] for c in COLUNAS].index("anoPortaria")
+        if isinstance(reg[iano], str):
+            m = re.search(r"(\d{4})\s*$", reg[iano])
+            reg[iano] = int(m.group(1)) if m else None
         reg.append(categoria(row[18]))
         reg.append(numero)   # linha na planilha (rastreabilidade)
         linhas.append(reg)
