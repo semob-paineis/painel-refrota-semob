@@ -3914,10 +3914,10 @@
             // arco interno de entregues (trilho cinza = faixa dos contratados; verde = % entregue)
             set('odoEntTrilho', odoFaixa(92, 99, 0, fCon));
             set('odoEnt', fEntSel > 0 ? odoFaixa(92, 99, 0, fEntSel) : '');
-            // arco externo: composição dos contratados por tipo, dentro da faixa dos contratados
+            // arco externo: composição dos entregues por tipo (mesmo trecho do arco verde de entregues)
             let acum = 0;
             [['odoTipoEl', 'eletricos'], ['odoTipoE6', 'euro6'], ['odoTipoTr', 'trilhos']].forEach(([id, k]) => {
-                const w = tCon ? (fc.contratados[k] || 0) / tCon * fCon : 0;
+                const w = tEnt ? (fc.entregues[k] || 0) / tEnt * fEntSel : 0;   // arco externo = composição dos ENTREGUES, sobre o trecho dos entregues
                 set(id, w > 0 ? odoLinha(158, acum, acum + w) : '');
                 acum += w;
             });
