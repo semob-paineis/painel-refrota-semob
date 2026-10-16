@@ -1555,7 +1555,7 @@
                     <div class="export-menu" id="exportMenu">
                         <button onclick="closeExportMenu(); downloadAsImage()">🖼️ Baixar Imagem</button>
                         <button onclick="closeExportMenu(); downloadAsPDF()">📄 Gerar PDF</button>
-                        <button onclick="closeExportMenu(); downloadBriefingMinistro()">🧾 Briefing Ministro</button>
+                        <button onclick="closeExportMenu(); downloadBriefingMinistro()"><svg width="18" height="13" viewBox="0 0 20 14" aria-hidden="true" style="vertical-align:-2px;margin-right:2px;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.15)"><rect width="20" height="14" fill="#009c3b"/><polygon points="10,1.6 18.2,7 10,12.4 1.8,7" fill="#ffdf00"/><circle cx="10" cy="7" r="3.2" fill="#002776"/><path d="M6.9 6.2c2-.5 4.4-.2 6.3 1" stroke="#fff" stroke-width=".6" fill="none"/></svg> Briefing Ministro</button>
                     </div>
                 </div>
                 <button id="theme-toggle" class="theme-toggle" aria-label="Alternar tema escuro/claro" title="Alternar tema"></button>
@@ -4932,8 +4932,8 @@
         }
 
         async function downloadBriefingMinistro() {
-            const button = event.target;
-            const originalText = button.textContent;
+            const button = event.currentTarget || event.target.closest("button");
+            const originalText = button.innerHTML;
             let ctxExp = null, orig = null;
             try {
                 button.textContent = '⏳ Gerando...';
@@ -4994,7 +4994,7 @@
             } finally {
                 try { if (orig) restaurarBriefing(ctxExp.doc, orig); } catch (e) {}
                 try { ctxExp.doc.body.classList.remove('exportando-captura'); ctxExp.limpar(); } catch (e) {}
-                button.textContent = originalText;
+                button.innerHTML = originalText;
                 button.disabled = false;
             }
         }
