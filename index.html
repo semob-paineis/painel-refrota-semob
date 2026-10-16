@@ -1456,14 +1456,12 @@
 
         /* ===== Briefing Ministro (ficha de 1 página) =====
            Classe aplicada só durante a captura (ver downloadBriefingMinistro). */
-        .briefing-only { display: none; }
-        body.modo-briefing .briefing-only { display: block; }
         body.modo-briefing .esconder-briefing { display: none !important; }
         body.modo-briefing #cardMetaEntregues { order: 1; }
         body.modo-briefing #cardMetaSelecionados { order: 2; }
         body.modo-briefing #cardOdometro { order: 3; }
-        body.modo-briefing .table-section.briefing-nivel2 { grid-template-columns: 1fr 1fr; }
         body.modo-briefing .map-section { margin-bottom: 0; }
+        #table-regioes.sem-entregues .col-entregues { display: none; }
 
         /* Avisos flutuantes (ex.: "Painel atualizado") não entram no PDF/imagem */
         body.exportando-captura .notification { display: none !important; }
@@ -1770,7 +1768,7 @@
                         <g id="odoAgulha" class="odo-agulha"><polygon points="206,210 214,210 210,92"/></g>
                         <circle cx="210" cy="210" r="11" class="odo-hub"/>
                         <text x="210" y="243" text-anchor="middle" class="odo-pct" id="odoPct">—</text>
-                        <text x="210" y="259" text-anchor="middle" class="odo-sub">entregues dentro dos selecionados</text>
+                        <text x="210" y="259" text-anchor="middle" class="odo-sub">entregues em relação aos contratados</text>
                         <text x="46" y="226" text-anchor="middle" class="odo-eixo">0</text>
                         <text x="374" y="226" text-anchor="middle" class="odo-eixo" id="odoTotal">—</text>
                     </svg>
@@ -1840,7 +1838,7 @@
             </div>
         </div>
 
-        <div class="table-section briefing-nivel2">
+        <div class="table-section">
             <!-- Regional Table -->
             <div class="table-container">
                 <div class="table-header">
@@ -1853,6 +1851,7 @@
                             <th>Região</th>
                             <th>Propostas</th>
                             <th>Veículos</th>
+                            <th class="col-entregues">Veículos entregues</th>
                             <th>Investimento</th>
                         </tr>
                     </thead>
@@ -1863,31 +1862,8 @@
                 </div>
             </div>
 
-            <!-- Entregas por Região — aparece somente no Briefing Ministro -->
-            <div class="table-container briefing-only" id="cardEntregasRegiao">
-                <div class="table-header">
-                    <h3 class="table-title">🚚 Entregas por Região</h3>
-                    <span class="tipo-badge" id="badgeEntregasRegiao">Entregues</span>
-                </div>
-                <table id="table-entregas-regioes">
-                    <thead>
-                        <tr>
-                            <th>Região</th>
-                            <th>Elétricos</th>
-                            <th>Euro VI</th>
-                            <th>Trilhos</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="entregasRegionalBody"></tbody>
-                </table>
-                <div class="mini-chart-container">
-                    <canvas id="entregasRegionalChart"></canvas>
-                </div>
-            </div>
-
             <!-- Evolution by Year Table -->
-            <div class="table-container esconder-briefing">
+            <div class="table-container">
                 <div class="table-header">
                     <h3 class="table-title" id="tituloAno">📈 Evolução de Contratações por Ano</h3>
                     <span class="tipo-badge" id="badgeAno">Contratados</span>
@@ -1960,7 +1936,7 @@
             </div>
             
             <!-- State Investment Table -->
-            <table id="table-estados" class="esconder-briefing" style="margin-top: 25px;">
+            <table id="table-estados" style="margin-top: 25px;">
                 <thead>
                     <tr>
                         <th style="width: 40px;">Rank</th>
@@ -3899,11 +3875,11 @@
             const ag = document.getElementById('odoAgulha');
             if (ag) ag.style.transform = 'rotate(' + (fEntSel * 180 - 90) + 'deg)';   // ponteiro = entregues ÷ selecionados
             const txt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-            txt('odoPct', fmtPct(fEntSel * 100) + '%');
+            txt('odoPct', fmtPct(fEnt * 100) + '%');   // indicador central: entregues ÷ contratados
             txt('odoTotal', fmtInt(tSel));
             txt('odoSel', fmtInt(tSel));
             txt('odoCon', fmtInt(tCon) + ' (' + fmtPct(fCon * 100) + '%)');
-            txt('odoEntTxt', fmtInt(tEnt) + ' (' + fmtPct(fEntSel * 100) + '%)');
+            txt('odoEntTxt', fmtInt(tEnt));
             const svg = document.getElementById('odoSvg');
             if (svg) svg.setAttribute('aria-label', `Odômetro de veículos: ${fmtInt(tSel)} selecionados, ${fmtInt(tCon)} contratados (${fmtPct(fCon * 100)}%) e ${fmtInt(tEnt)} entregues (${fmtPct(fEntSel * 100)}% dos selecionados e ${fmtPct(fEnt * 100)}% dos contratados).`);
 
@@ -4338,54 +4314,8 @@
             });
         }
 
-        // --- Tabela + gráfico: Entregas por Região (exibido só no Briefing Ministro) ---
-        let chartEntregasRegional = null;
-        function renderEntregasRegioes() {
-            const e = estado();
-            const regs = e.entreguesRegioes || [];
-            const soma = k => regs.reduce((a, r) => a + (r[k] || 0), 0);
-            const corTotal = '#1f8a5f';
-            document.getElementById('entregasRegionalBody').innerHTML = regs.map(r => `
-                        <tr>
-                            <td><strong>${r.nome}</strong></td>
-                            <td class="value-secondary">${fmtInt(r.eletricos)}</td>
-                            <td class="value-secondary">${fmtInt(r.euro6)}</td>
-                            <td class="value-secondary">${fmtInt(r.trilhos)}</td>
-                            <td class="value-secondary">${fmtInt(r.total)}</td>
-                        </tr>`).join('') + `
-                        <tr style="background: #f0f4f8; font-weight: 600;">
-                            <td><strong>Total</strong></td>
-                            <td style="font-weight:600; color:${corTotal};">${fmtInt(soma('eletricos'))}</td>
-                            <td style="font-weight:600; color:${corTotal};">${fmtInt(soma('euro6'))}</td>
-                            <td style="font-weight:600; color:${corTotal};">${fmtInt(soma('trilhos'))}</td>
-                            <td style="font-weight:600; color:${corTotal};">${fmtInt(soma('total'))}</td>
-                        </tr>`;
-            if (!chartEntregasRegional) {
-                chartEntregasRegional = new Chart(document.getElementById('entregasRegionalChart'), {
-                    type: 'bar',
-                    data: { labels: [], datasets: [{
-                        label: 'Quantidade de Veículos Entregues', data: [],
-                        backgroundColor: corTotal, borderRadius: 4, borderSkipped: false, barThickness: 35
-                    }] },
-                    options: {
-                        indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: false,
-                        layout: { padding: { left: 0, right: 20, top: 10, bottom: 10 } },
-                        plugins: { legend: { display: true, labels: { font: { size: 12 }, padding: 15 } } },
-                        scales: {
-                            y: { ticks: { font: { size: 14, weight: 'bold' }, padding: 6, color: '#1a1a1a' } },
-                            x: { beginAtZero: true }
-                        }
-                    }
-                });
-            }
-            chartEntregasRegional.data.labels = regs.map(r => r.nome);
-            chartEntregasRegional.data.datasets[0].data = regs.map(r => r.total);
-            chartEntregasRegional.update();
-        }
-
         // --- Tabela + gráfico: Contratações por Região ---
         function renderRegioes() {
-            renderEntregasRegioes();
             const e = estado();
             const regioes = regioesAtuais(e);
             const totalInv = somaRegioes(e, 'investimento') || 1;
@@ -4396,11 +4326,18 @@
             const ehSelRegiao = tipoProjetoMapa === 'selecionados';
             const corDestaque = ehSelRegiao ? '#6d3fb0' : '#0052cc';
 
+            // Veículos entregues por região (K6:M13 da aba "Dados para Painel"): só faz sentido
+            // para propostas Contratadas; na visão Selecionadas a coluna fica oculta.
+            const entReg = nome => ((e.entreguesRegioes || []).find(x => x.nome === nome) || {}).total || 0;
+            const totalEnt = (e.entreguesRegioes || []).reduce((a, x) => a + (x.total || 0), 0);
+            const tabReg = document.getElementById('table-regioes');
+            if (tabReg) tabReg.classList.toggle('sem-entregues', ehSelRegiao);
             const linhas = regioes.map(r => `
                         <tr>
                             <td><strong>${r.nome}</strong></td>
                             <td class="value-secondary">${fmtInt(r.propostas)}</td>
                             <td class="value-secondary">${fmtInt(r.veiculos)}</td>
+                            <td class="value-secondary col-entregues">${fmtInt(entReg(r.nome))}</td>
                             <td class="value-secondary">${fmtMi(r.investimento)} (${fmtPct(r.investimento / totalInv * 100, 2)}%)</td>
                         </tr>`).join('');
 
@@ -4409,6 +4346,7 @@
                             <td><strong>Total</strong></td>
                             <td style="font-weight:600; color:${corDestaque};">${fmtInt(somaRegioes(e, 'propostas'))}</td>
                             <td style="font-weight:600; color:${corDestaque};">${fmtInt(somaRegioes(e, 'veiculos'))}</td>
+                            <td class="col-entregues" style="font-weight:600; color:${corDestaque};">${fmtInt(totalEnt)}</td>
                             <td style="font-weight:600; color:${corDestaque};">${fmtMi(somaRegioes(e, 'investimento'))} (100%)</td>
                         </tr>`;
 
@@ -4970,34 +4908,24 @@
 
         // ===== BRIEFING MINISTRO =====
         // Ficha de 1 página (A4 retrato) com: [Meta Entregues | Meta Selecionados 2026 | Odômetro],
-        // [Contratações por Região | Entregas por Região] e [mapa de Investimento por Estado —
+        // [Contratações por Região (com veículos entregues) | Evolução por Ano] e, na 2ª página, [mapa de Investimento por Estado —
         // propostas Contratadas]. Mantém cabeçalho, título, seletor de cenário e rodapé do PDF padrão.
-        // No odômetro, o indicador central passa a ser entregues ÷ CONTRATADOS.
+        // (O indicador central do odômetro — entregues ÷ contratados — vale também no painel principal.)
         async function prepararBriefing(doc, win) {
             const estadoOriginal = {
                 tipo: (doc.querySelector('input[name="map-tipo-group"]:checked') || {}).id,
-                pct: doc.getElementById('odoPct').textContent,
-                sub: doc.querySelector('#odoSvg .odo-sub').textContent
+                tipoOk: true
             };
             doc.body.classList.add('modo-briefing');
             const alvo = doc.getElementById('map-tipo-contratados');
             if (alvo && !alvo.checked) alvo.click();
             await new Promise(r => setTimeout(r, 1200));
-            // indicador central: entregues ÷ contratados
-            const ent = doc.getElementById('odoEntTxt').textContent;      // "4.713 (30,9%)"
-            const e = win.eval('estado()');
-            const soma = o => (o.eletricos || 0) + (o.euro6 || 0) + (o.trilhos || 0);
-            const tCon = soma(e.veiculos), tEnt = soma(e.veiculosEntregues);
-            doc.getElementById('odoPct').textContent = (tCon ? win.eval('fmtPct')(tEnt / tCon * 100) : '0') + '%';
-            doc.querySelector('#odoSvg .odo-sub').textContent = 'entregues em relação aos contratados';
             win.dispatchEvent(new Event('resize'));
             await new Promise(r => setTimeout(r, 1200));
             return estadoOriginal;
         }
         function restaurarBriefing(doc, orig) {
             doc.body.classList.remove('modo-briefing');
-            doc.getElementById('odoPct').textContent = orig.pct;
-            doc.querySelector('#odoSvg .odo-sub').textContent = orig.sub;
             const t = orig.tipo && doc.getElementById(orig.tipo);
             if (t && !t.checked) t.click();
         }
@@ -5019,31 +4947,45 @@
                 const limites = limitesConteudoExportacao(ctxExp.doc, ctxExp.win);
                 const larguraCss = limites.width || ctxExp.doc.documentElement.scrollWidth;
                 const alturaCss = Math.ceil(element.getBoundingClientRect().height);
+                const topo = element.getBoundingClientRect().top;
+                const mapa = ctxExp.doc.querySelector('.map-section');
+                const corte = mapa ? Math.round(mapa.getBoundingClientRect().top - topo) : null;
+                // Página 1: cabeçalho + níveis 1 e 2 | Página 2: mapa + ranking + rodapé
+                const blocos = (corte && corte > 0 && corte < alturaCss)
+                    ? [{ y: 0, h: corte }, { y: corte, h: alturaCss - corte }]
+                    : [{ y: 0, h: alturaCss }];
                 const ignorar = el => {
                     if (!el || el.nodeType !== 1) return false;
                     if (el.matches && el.matches('.skip-link, .agente__fab, .agente__painel, .notification, .canvas-tooltip, .odo-tooltip, [id$="Tooltip"], #entregasTooltipHtml, #funilTooltip')) return true;
                     try { return ctxExp.win.getComputedStyle(el).position === 'fixed'; } catch (e) { return false; }
                 };
-                const porBloco = telaPequena || ehIOS();
-                const areaMax = porBloco ? (ehIOS() ? 5e6 : 12e6) : 40e6;
-                const scale = Math.max(0.8, Math.min(2, Math.sqrt(areaMax / (larguraCss * alturaCss))));
-                const canvas = await html2canvas(element, {
-                    backgroundColor: '#f5f7fa', allowTaint: true, useCORS: true, scrollX: 0, scrollY: 0,
-                    ignoreElements: ignorar, scale, ...limites
-                });
+                // Alta qualidade: até 3x no desktop; no iOS o limite de memória do canvas obriga a reduzir.
+                const areaMax = ehIOS() ? 8e6 : 40e6;
+                const canvases = [];
+                for (const bl of blocos) {
+                    const scale = Math.max(1, Math.min(3, Math.sqrt(areaMax / (larguraCss * bl.h))));
+                    canvases.push(await html2canvas(element, {
+                        backgroundColor: '#f5f7fa', allowTaint: true, useCORS: true, scrollX: 0, scrollY: 0,
+                        ignoreElements: ignorar, scale, x: limites.x || 0, width: larguraCss, y: bl.y, height: bl.h
+                    }));
+                    await new Promise(r => setTimeout(r, 60));
+                }
 
                 const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = pdf.internal.pageSize.getHeight();
                 const margem = 4;
-                pdf.setFillColor(245, 247, 250);
-                pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
-                let w = pdfWidth - margem * 2;
-                let h = (canvas.height * w) / canvas.width;
-                const alturaUtil = pdfHeight - margem * 2;
-                if (h > alturaUtil) { w = w * alturaUtil / h; h = alturaUtil; }   // cabe tudo em 1 página
-                pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', (pdfWidth - w) / 2, margem, w, h, 'briefing', 'FAST');
+                canvases.forEach((cv, i) => {
+                    if (i > 0) pdf.addPage();
+                    pdf.setFillColor(245, 247, 250);
+                    pdf.rect(0, 0, pdfWidth, pdfHeight, 'F');
+                    let w = pdfWidth - margem * 2;
+                    let h = (cv.height * w) / cv.width;
+                    const alturaUtil = pdfHeight - margem * 2;
+                    if (h > alturaUtil) { w = w * alturaUtil / h; h = alturaUtil; }
+                    pdf.addImage(cv.toDataURL('image/jpeg', 0.97), 'JPEG', (pdfWidth - w) / 2, margem, w, h, 'briefing' + i, 'SLOW');
+                });
                 pdf.save(`Briefing_Ministro_Refrota_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
             } catch (error) {
                 console.error('Erro ao gerar o Briefing Ministro:', error);
