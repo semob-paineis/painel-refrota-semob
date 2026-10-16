@@ -3878,7 +3878,7 @@
             txt('odoPct', fmtPct(fEnt * 100) + '%');   // indicador central: entregues ÷ contratados
             txt('odoTotal', fmtInt(tSel));
             txt('odoSel', fmtInt(tSel));
-            txt('odoCon', fmtInt(tCon) + ' (' + fmtPct(fCon * 100) + '%)');
+            txt('odoCon', fmtInt(tCon));
             txt('odoEntTxt', fmtInt(tEnt));
             const svg = document.getElementById('odoSvg');
             if (svg) svg.setAttribute('aria-label', `Odômetro de veículos: ${fmtInt(tSel)} selecionados, ${fmtInt(tCon)} contratados (${fmtPct(fCon * 100)}%) e ${fmtInt(tEnt)} entregues (${fmtPct(fEntSel * 100)}% dos selecionados e ${fmtPct(fEnt * 100)}% dos contratados).`);
