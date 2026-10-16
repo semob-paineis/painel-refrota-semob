@@ -1546,6 +1546,14 @@
             .map-section table th, .map-section table td { padding: 7px 2px; font-size: 10.5px; }
             .table-container table th, .map-section table th { font-size: 9px; }
         }
+        /* Cabeçalho no celular: selo de atualização em uma linha; Propostas | Exportar | tema sempre juntos na linha de baixo */
+        @media (max-width: 640px) {
+            .top-header-right { flex-wrap: wrap; gap: 10px 8px; }
+            .top-header-right .pill { flex: 1 0 100%; justify-content: flex-start; }
+            .top-header-right .btn-propostas, .top-header-right .export-dropdown { flex: 1 1 0; min-width: 0; }
+            .top-header-right .btn-propostas, .top-header-right .btn-export { width: 100%; justify-content: center; white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+            .top-header-right .theme-toggle { flex: 0 0 auto; }
+        }
         @media (max-width: 480px) {
             .summary-section { padding-left: 12px; padding-right: 12px; }
             .tabela-comparativa th, .tabela-comparativa td { padding: 8px 4px; font-size: 11px; }
