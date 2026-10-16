@@ -3932,8 +3932,9 @@
             const svg = document.getElementById('odoSvg');
             if (svg) svg.setAttribute('aria-label', `Odômetro de veículos: ${fmtInt(tSel)} selecionados, ${fmtInt(tCon)} contratados (${fmtPct(fCon * 100)}%) e ${fmtInt(tEnt)} entregues (${fmtPct(fEntSel * 100)}% dos selecionados e ${fmtPct(fEnt * 100)}% dos contratados).`);
 
-            const v = [fc.contratados.eletricos, fc.contratados.euro6, fc.contratados.trilhos];
-            const rotulo = qtd => fmtInt(qtd) + ' (' + fmtPct(tCon ? qtd / tCon * 100 : 0) + '%)';
+            // Legenda: composição dos veículos ENTREGUES por tipo (quantidade e % do total entregue)
+            const v = [fc.entregues.eletricos, fc.entregues.euro6, fc.entregues.trilhos];
+            const rotulo = qtd => fmtInt(qtd) + ' (' + fmtPct(tEnt ? qtd / tEnt * 100 : 0) + '%)';
             txt('legEletricos', rotulo(v[0]));
             txt('legEuro6', rotulo(v[1]));
             txt('legTrilhos', rotulo(v[2]));
