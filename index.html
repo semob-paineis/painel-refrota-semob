@@ -1516,6 +1516,46 @@
                 justify-content: flex-start;
             }
         }
+
+        /* ===== Responsividade em telas pequenas (sem overflow horizontal) =====
+           Causa raiz: itens de grid usam "1fr" (= minmax(auto,1fr)), então a largura mínima do
+           conteúdo (tabelas largas) empurrava a coluna além da tela. min-width:0 libera o encolhimento. */
+        .charts-row > *, .table-section > *, .map-section, .summary-section { min-width: 0; }
+        @media (max-width: 1024px) {
+            .table-section { grid-template-columns: minmax(0, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .container { padding-left: 12px; padding-right: 12px; }
+            .table-container, .map-section { padding: 16px 12px; }
+            .table-header { flex-wrap: wrap; gap: 6px 10px; }
+            .table-container table th, .table-container table td,
+            .map-section table th, .map-section table td { padding: 8px 6px; font-size: 12px; }
+            .table-container table th, .map-section table th { font-size: 11px; }
+            .table-container table, .map-section table { width: 100%; }
+            /* rede de segurança: se uma tabela ainda for mais larga que o cartão, rola dentro dele (nunca a página) */
+            .table-container, .map-section, .summary-section { overflow-x: auto; }
+        }
+        @media (max-width: 400px) {
+            .container { padding-left: 8px; padding-right: 8px; }
+            .table-container, .map-section { padding: 14px 8px; }
+            .table-container table th, .table-container table td,
+            .map-section table th, .map-section table td { padding: 7px 3px; font-size: 11px; }
+            .table-container table th, .map-section table th { font-size: 9.5px; letter-spacing: 0; }
+            .table-title, .map-title { font-size: 14px; }
+            .table-container table th, .table-container table td,
+            .map-section table th, .map-section table td { padding: 7px 2px; font-size: 10.5px; }
+            .table-container table th, .map-section table th { font-size: 9px; }
+        }
+        @media (max-width: 480px) {
+            .summary-section { padding-left: 12px; padding-right: 12px; }
+            .tabela-comparativa th, .tabela-comparativa td { padding: 8px 4px; font-size: 11px; }
+            .tabela-comparativa th.num { width: auto !important; }
+        }
+        /* Agentes financeiros: a coluna de barras (Participação) é decorativa; em telas estreitas sai para a tabela caber */
+        @media (max-width: 480px) {
+            #table-agentes th:nth-child(6), #table-agentes td:nth-child(6) { display: none; }
+            #table-agentes th:nth-child(1) { width: 24px !important; }
+        }
     </style>
 </head>
 <body>
