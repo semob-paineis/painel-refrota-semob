@@ -3953,7 +3953,7 @@
             function conteudo(seg) {
                 const d = odoDados; if (!d) return '';
                 const L = { eletricos: ['Ônibus elétricos', '#10b981'], euro6: ['Ônibus Euro 6', '#f59e0b'], trilhos: ['Veículos sobre trilhos', '#8b5cf6'] };
-                if (L[seg]) { const q = d.fc.contratados[seg] || 0; return `${cor(L[seg][1])}<b>${L[seg][0]}</b><br>${fmtInt(q)} contratados (${fmtPct(d.tCon ? q / d.tCon * 100 : 0)}% dos contratados)<br>Entregues: ${fmtInt(d.fc.entregues[seg] || 0)}`; }
+                if (L[seg]) { const q = d.fc.contratados[seg] || 0; const qe = d.fc.entregues[seg] || 0; return `${cor(L[seg][1])}<b>${L[seg][0]}</b><br>${fmtInt(qe)} entregues (${fmtPct(d.tEnt ? qe / d.tEnt * 100 : 0)}% dos entregues)<br>Contratados: ${fmtInt(q)}`; }
                 if (seg === 'contratados') return `<b>Contratados</b>: ${fmtInt(d.tCon)}<br>${fmtPct(d.fCon * 100)}% dos ${fmtInt(d.tSel)} selecionados<br>${tipos(d.fc.contratados, d.tCon)}`;
                 if (seg === 'entregues') return `<b>Entregues</b>: ${fmtInt(d.tEnt)}<br>${fmtPct(d.fEntSel * 100)}% dos ${fmtInt(d.tSel)} selecionados<br>${fmtPct(d.fEnt * 100)}% dos ${fmtInt(d.tCon)} contratados<br>${tipos(d.fc.entregues, d.tEnt)}`;
                 if (seg === 'resto') { const r = d.tSel - d.tCon; return `<b>Selecionados ainda não contratados</b>: ${fmtInt(r)}<br>${fmtPct((1 - d.fCon) * 100)}% dos selecionados<br>A contratar: <b>${fmtInt(d.aContratar)}</b><br>Desistências: <b>${fmtInt(d.desist)}</b>`; }
