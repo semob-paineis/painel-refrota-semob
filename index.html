@@ -1754,6 +1754,37 @@
         <!-- Donut Charts Row - Veículos Contratados -->
         <div class="charts-row">
             <!-- Odômetro - Veículos Selecionados, Contratados e Entregues (selecionados -> contratados -> entregues) -->
+            <!-- Indicador de Meta - Veículos Entregues (mesmo modelo do card de Meta Selecionados) -->
+            <div class="chart-item" id="cardMetaEntregues">
+                <h3 class="chart-title">📦 Meta Quantidade de Veículos Entregues</h3>
+                <div class="donut-wrapper">
+                    <div class="donut-chart" id="entregasChart">
+                        <canvas id="entregasProgressChart"></canvas>
+                        <div id="entregasProgressTooltip" class="canvas-tooltip">Meta: <span id="entregaTooltipValor">5.000</span> veículos</div>
+                    </div>
+                </div>
+                <!-- Veículos entregues por ano (ano da portaria de seleção) -->
+                <div class="entregas-anos" id="entregasPorAno" hidden>
+                    <div class="entregas-anos-titulo">Veículos entregues por ano</div>
+                    <div class="entregas-anos-grade" id="entregasPorAnoGrade"></div>
+                    <div class="entregas-anos-nota" id="entregasPorAnoNota"></div>
+                </div>
+                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">Meta: <span id="entregaRodapeValor">5.000</span> unidades de veículos entregues · passe o mouse sobre o gráfico para ver a divisão por tipo de veículo</p>
+            </div>
+
+            <!-- Nova coluna: Indicador de Metas de Veículos Selecionados 2026 -->
+            <div class="chart-item" id="cardMetaSelecionados">
+                <h3 class="chart-title">📈 Meta Quantidade de Veículos Selecionados - Ano 2026</h3>
+                <div class="donut-wrapper">
+                    <div class="donut-chart" id="metasChart">
+                        <canvas id="metasProgressChart"></canvas>
+                        <div id="metasProgressTooltip" class="canvas-tooltip">Meta: <span id="metaTooltipValor">5.000</span> veículos</div>
+                    </div>
+                </div>
+                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">Meta: <span id="metaRodapeValor">5.000</span> unidades de veículos selecionados</p>
+            </div>
+
+            <!-- Odômetro - Veículos Selecionados, Contratados e Entregues -->
             <div class="chart-item" id="cardOdometro">
                 <h3 class="chart-title">Veículos Selecionados, Contratados e Entregues</h3>
                 <div class="odo-wrap" id="odometroVeiculos">
@@ -1793,36 +1824,6 @@
                         <span><strong>Veículos sobre Trilhos:</strong> <span id="legTrilhos">47 (0,9%)</span></span>
                     </div>
                 </div>
-            </div>
-
-            <!-- Indicador de Meta - Veículos Entregues (mesmo modelo do card de Meta Selecionados) -->
-            <div class="chart-item" id="cardMetaEntregues">
-                <h3 class="chart-title">📦 Meta Quantidade de Veículos Entregues</h3>
-                <div class="donut-wrapper">
-                    <div class="donut-chart" id="entregasChart">
-                        <canvas id="entregasProgressChart"></canvas>
-                        <div id="entregasProgressTooltip" class="canvas-tooltip">Meta: <span id="entregaTooltipValor">5.000</span> veículos</div>
-                    </div>
-                </div>
-                <!-- Veículos entregues por ano (ano da portaria de seleção) -->
-                <div class="entregas-anos" id="entregasPorAno" hidden>
-                    <div class="entregas-anos-titulo">Veículos entregues por ano</div>
-                    <div class="entregas-anos-grade" id="entregasPorAnoGrade"></div>
-                    <div class="entregas-anos-nota" id="entregasPorAnoNota"></div>
-                </div>
-                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">Meta: <span id="entregaRodapeValor">5.000</span> unidades de veículos entregues · passe o mouse sobre o gráfico para ver a divisão por tipo de veículo</p>
-            </div>
-
-            <!-- Nova coluna: Indicador de Metas de Veículos Selecionados 2026 -->
-            <div class="chart-item" id="cardMetaSelecionados">
-                <h3 class="chart-title">📈 Meta Quantidade de Veículos Selecionados - Ano 2026</h3>
-                <div class="donut-wrapper">
-                    <div class="donut-chart" id="metasChart">
-                        <canvas id="metasProgressChart"></canvas>
-                        <div id="metasProgressTooltip" class="canvas-tooltip">Meta: <span id="metaTooltipValor">5.000</span> veículos</div>
-                    </div>
-                </div>
-                <p style="font-size: 11px; color: #999; margin-top: 15px; font-style: italic; text-align: center;">Meta: <span id="metaRodapeValor">5.000</span> unidades de veículos selecionados</p>
             </div>
         </div>
         <!-- Seletor: Projetos Selecionados | Projetos Contratados
