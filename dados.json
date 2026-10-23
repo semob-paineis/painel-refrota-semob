@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "gerado_em": "2026-10-23T15:41:09-03:00",
+    "gerado_em": "2026-10-23T15:44:47-03:00",
     "planilha_origem": "Dados_Refrota_Contratações_2210.xlsx",
     "gerado_por": "gerar_dados.py",
     "versao_estrutura": 2
@@ -837,63 +837,62 @@
     }
   },
   "_comparativo": {
-    "dataAnterior": "2026-10-09T15:25:22-03:00",
-    "dataAtual": "2026-10-23T15:41:09-03:00",
+    "dataAnterior": "2026-10-16T14:36:48-03:00",
+    "dataAtual": "2026-10-23T15:44:47-03:00",
     "metricas": [
       {
         "rotulo": "Propostas contratadas",
         "formato": "int",
-        "anterior": 231,
+        "anterior": 233,
         "atual": 235
       },
       {
         "rotulo": "Veículos contratados",
         "formato": "int",
-        "anterior": 7104,
+        "anterior": 7204,
         "atual": 7236
       },
       {
         "rotulo": "Veículos entregues",
         "formato": "int",
-        "anterior": 4550,
+        "anterior": 4713,
         "atual": 4819
       },
       {
         "rotulo": "Investimento contratado",
         "formato": "moeda",
-        "anterior": 8750490345.82,
+        "anterior": 8853628425.82,
         "atual": 8885408298.82
       },
       {
         "rotulo": "Propostas selecionadas",
         "formato": "int",
-        "anterior": 360,
+        "anterior": 365,
         "atual": 367
       },
       {
         "rotulo": "Veículos selecionados",
         "formato": "int",
-        "anterior": 15128,
+        "anterior": 15234,
         "atual": 15255
       },
       {
         "rotulo": "Investimento selecionado",
         "formato": "moeda",
-        "anterior": 20330071928.49,
+        "anterior": 20421571653.49,
         "atual": 20445042849.49
       },
       {
         "rotulo": "Meta 2026 (veículos)",
         "formato": "int",
-        "anterior": 3227,
+        "anterior": 3333,
         "atual": 3354
       }
     ],
     "destaques": [
-      "Foram registradas 4 novas contratações — 3 na Refrota Privado e 1 na Refrota Público, somando 132 veículos e R$ 0,13 bilhão em investimento.",
-      "Foram entregues 269 veículos no período, elevando o total de entregas de 4.550 para 4.819.",
-      "Entraram 7 novas propostas selecionadas, elevando o investimento selecionado em R$ 0,11 bilhão.",
-      "A participação de ônibus elétricos na frota contratada recuou de 14,8% para 14,5%."
+      "Foram registradas 2 novas contratações — 2 na Refrota Privado, somando 32 veículos e R$ 0,03 bilhão em investimento.",
+      "Foram entregues 106 veículos no período, elevando o total de entregas de 4.713 para 4.819.",
+      "Entraram 2 novas propostas selecionadas, elevando o investimento selecionado em R$ 0,02 bilhão."
     ]
   }
 }
