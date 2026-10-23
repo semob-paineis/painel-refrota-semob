@@ -265,9 +265,14 @@ def extrair_cenario(caminho_xlsx, chave_cenario):
     c_reg = next((c for c in range(9, ws.max_column + 1)
                   if str(ws.cell(LINHA_VEIC_ENTREGUES - 7, c).value or "").strip().lower() == "região"
                   or str(ws.cell(LINHA_VEIC_ENTREGUES - 7, c).value or "").strip().lower() == "regiao"), 11)
+    # Coluna do total entregue: pelo cabeçalho "Total de Veículos Entregues" (a planilha ganhou, em 22/10,
+    # uma coluna "Propostas contratadas" ao lado da Região, deslocando o total).
+    c_tot = next((c for c in range(c_reg + 1, ws.max_column + 1)
+                  if "total" in str(ws.cell(LINHA_VEIC_ENTREGUES - 7, c).value or "").lower()
+                  and "entreg" in str(ws.cell(LINHA_VEIC_ENTREGUES - 7, c).value or "").lower()), c_reg + 1)
     dados["entreguesRegioes"] = [{
         "nome": ws.cell(r, c_reg).value,
-        "total": cel(r, c_reg + 1),
+        "total": cel(r, c_tot),
         "eletricos": cel(r, c_el),
         "euro6": cel(r, c_e6),
         "trilhos": cel(r, c_tr),
