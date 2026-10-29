@@ -767,9 +767,9 @@ def main():
     )
     parser.add_argument(
         "--baseline",
-        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "baseline_2026-10-16.json"),
+        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "baseline_2026-10-23.json"),
         help="Snapshot de referência FIXO usado nos painéis Evolução e Destaques "
-             "(padrão: baseline_2026-10-16.json, ao lado do script)."
+             "(padrão: baseline_2026-10-23.json, ao lado do script)."
     )
     args = parser.parse_args()
 
